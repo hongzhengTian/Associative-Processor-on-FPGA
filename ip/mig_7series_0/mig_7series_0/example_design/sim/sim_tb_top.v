@@ -329,13 +329,13 @@ module sim_tb_top;
     assign Instruction = Instruction_reg;
     assign Data = Data_reg;
 
-    /*initial begin
+    initial begin
         int = 0;
         #57567500
         int = 1;
         #6000
         int = 0;
-    end*/
+    end
 
     // Reset Generation
     initial begin

@@ -45,7 +45,17 @@ reg [2 : 0]                                 stack_tmp_pass      [0 : STACK_DEPTH
 reg [DATA_WIDTH - 1 : 0]                    stack_tmp_mask      [0 : STACK_DEPTH - 1];
 reg [DATA_DEPTH - 1 : 0]                    stack_tmp_C_F       [0 : STACK_DEPTH - 1];
 
+reg                                         temp_int_set;
+wire                                        int_set_pause;
+
 integer i;
+
+always @(posedge clk) 
+begin
+    temp_int_set <= int_set;    
+end
+
+assign int_set_pause = temp_int_set ^ int_set;
 
 always @(negedge rst) 
 begin
@@ -97,7 +107,7 @@ begin
     case (st_cur)
         START:
             begin
-                if(int_set == 1)
+                if(int_set_pause == 1)
                     begin
                         st_next = STORE_CTXT;
                     end

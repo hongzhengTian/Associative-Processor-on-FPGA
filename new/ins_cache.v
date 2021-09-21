@@ -85,7 +85,7 @@ module ins_cache
                 st_cur          <= START;
                 ins_cache_init  <= 0;
                 ins_cache_rdy   <= 0;
-                ins_cache [0]   <= 0;
+                //ins_cache [0]   <= 0;
                 isa_read_len    <= 0;
                 rd_cnt_isa_reg  <= 0;
                 load_times      <= 0;
