@@ -398,21 +398,21 @@ module AP_controller
                         COPY:
                             begin
                                 opt_cur         = op_code;
-                                ins_inp_valid   = 0;
+                                //ins_inp_valid   = 0;
                                 st_next         = COPY_MT;
                             end
 
                         STORERBR:
                             begin
                                 opt_cur         = op_code;
-                                ins_inp_valid   = 0;
+                                //ins_inp_valid   = 0;
                                 st_next         = STORE_RBR;
                             end
 
                         STORECBC:
                             begin
                                 opt_cur         = op_code;
-                                ins_inp_valid   = 0;
+                                //ins_inp_valid   = 0;
                                 st_next         = STORE_CBC;
                             end
 
@@ -494,6 +494,7 @@ module AP_controller
                                 begin
                                     input_B_rbr = data_in_rbr;
                                     st_next     = START;
+                                    ins_inp_valid   = 1;
                                 end
                             else
                                 begin
@@ -509,6 +510,7 @@ module AP_controller
                                 begin
                                     input_R_rbr = data_in_rbr;
                                     st_next     = START;
+                                    ins_inp_valid   = 1;
                                 end
                             else
                                 begin
@@ -538,6 +540,7 @@ module AP_controller
                                     if (ret_valid == 0)
                                         begin
                                             st_next     = START;
+                                            ins_inp_valid   = 1;
                                         end
                                     else begin
                                         st_next = LOAD_CTXT;
@@ -559,6 +562,7 @@ module AP_controller
                                     if (ret_valid == 0)
                                         begin
                                             st_next     = START;
+                                            ins_inp_valid   = 1;
                                         end
                                     else begin
                                         st_next = LOAD_CTXT;
@@ -580,6 +584,7 @@ module AP_controller
                                     if (ret_valid == 0)
                                         begin
                                             st_next     = START;
+                                            ins_inp_valid   = 1;
                                         end
                                     else begin
                                         st_next = LOAD_CTXT;
@@ -597,7 +602,7 @@ module AP_controller
             
             COPY_MT:
                 begin
-                    //ins_inp_valid = 0;
+                    ins_inp_valid = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -607,13 +612,13 @@ module AP_controller
                                 begin
                                     inout_mode  = COPY_B;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 M_R:
                                 begin
                                     inout_mode  = COPY_R;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 default: st_next= COPY_MT;
                             endcase
@@ -627,13 +632,13 @@ module AP_controller
                                 begin
                                     inout_mode  = COPY_A;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 M_R:
                                 begin
                                     inout_mode  = COPY_R;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 default: st_next= COPY_MT;
                             endcase
@@ -647,13 +652,13 @@ module AP_controller
                                 begin
                                     inout_mode  = COPY_A;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 M_B:
                                 begin
                                     inout_mode  = COPY_B;
                                     st_next     = START;
-                                    ins_inp_valid = 1;
+                                    //ins_inp_valid = 1;
                                 end
                                 default: st_next= COPY_MT;
                             endcase
@@ -674,7 +679,7 @@ module AP_controller
                         begin
                             addr_output_rbr_B   = addr_cam;
                             data_out_rbr        = data_B_rbr;
-                            ins_inp_valid       = 1;
+                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -682,7 +687,7 @@ module AP_controller
                         begin
                             addr_output_rbr_R   = addr_cam;
                             data_out_rbr        = data_R_rbr;
-                            ins_inp_valid       = 1;
+                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -702,7 +707,7 @@ module AP_controller
                         begin
                             addr_output_cbc_B   = addr_cam_col;
                             data_out_cbc        = data_B_cbc;
-                            ins_inp_valid       = 1;
+                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -710,7 +715,7 @@ module AP_controller
                         begin
                             addr_output_cbc_R   = addr_cam;
                             data_out_cbc        = data_R_cbc;
-                            ins_inp_valid       = 1;
+                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -1004,6 +1009,7 @@ module AP_controller
                         end
                     else begin
                         st_next = START;
+                        ins_inp_valid = 1;
                         end
                 end
 

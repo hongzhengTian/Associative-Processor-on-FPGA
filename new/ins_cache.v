@@ -119,11 +119,12 @@ module ins_cache
                     else begin
                         ins_valid = 0;
                         ins_cache_rdy = 1;
-                        if (addr_ins != 0)
+                        st_next = SENT_INS;
+                        /*if (addr_ins != 0)
                         begin
                             st_next = SENT_INS;
                         end
-                        else st_next = START;
+                        else st_next = START;*/
                     end
                 end
 

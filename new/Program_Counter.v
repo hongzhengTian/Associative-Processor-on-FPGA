@@ -50,7 +50,7 @@ module program_counter
             if ((ins_inp_valid == 1) 
              && (addr_ins < TOTAL_ISA_DEPTH) 
              && (ins_cache_rdy == 1) 
-             &&(st_cur_ins_cache == START)
+             &&(st_cur_ins_cache == SENT_INS)
              &&(addr_ins != ISA_DEPTH * load_times))
             begin
                 addr_ins <= addr_ins + 1;
