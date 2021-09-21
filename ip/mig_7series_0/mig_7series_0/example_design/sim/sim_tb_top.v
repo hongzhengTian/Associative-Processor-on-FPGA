@@ -162,9 +162,9 @@ module sim_tb_top;
 
     initial 
     begin
-        //$readmemb("C:/FPGA/ddr_controller_3/ddr_controller_2.srcs/sim_1/new/ISA.txt", MEM_ISA);
-        $readmemb("C:/FPGA/AP_5v/AP_5v.srcs/sources_1/new/DATA.txt", MEM_DATA);
-        MEM_ISA[0]      <= 0;
+        $readmemb("C:/Users/42207/OneDrive/UCR/UCI/Project/AP/program/dataGenandCompiler/ISA_Bin.txt", MEM_ISA);
+        $readmemb("C:/Users/42207/OneDrive/UCR/UCI/Project/AP/program/dataGenandCompiler/DATA.txt", MEM_DATA);
+        /*MEM_ISA[0]      <= 0;
         MEM_ISA[1]      <= {RESET, 8'd0, 2'd0, 16'd0};
         MEM_ISA[2]      <= {LOADRBR, 8'd0, M_A, 16'h1000};
         MEM_ISA[3]      <= {LOADRBR, 8'd1, M_A, 16'h1001};
@@ -307,7 +307,7 @@ module sim_tb_top;
         MEM_ISA[124]     <= {STORERBR, 8'd0, M_R, 16'h102C};
         MEM_ISA[125]     <= {STORERBR, 8'd1, M_R, 16'h102D};
         MEM_ISA[126]     <= {STORERBR, 8'd2, M_R, 16'h102E};
-        MEM_ISA[127]     <= {STORERBR, 8'd3, M_R, 16'h102F};
+        MEM_ISA[127]     <= {STORERBR, 8'd3, M_R, 16'h102F};*/
         
     end
 
