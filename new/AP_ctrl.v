@@ -267,8 +267,12 @@ module AP_controller
 
         else if(st_cur == STORE_CTXT_FINISH_CHECK)
             begin
-                addr_cam_auto = addr_cam_auto + 1;
-                if (addr_cam_auto == DATA_WIDTH)
+                if (addr_cam_auto < DATA_WIDTH )
+                    begin
+                        addr_cam_auto = addr_cam_auto + 1;
+                    end
+                
+                else if (addr_cam_auto == DATA_WIDTH && data_cache_rdy == 1)
                     begin
                         matrix_cnt = matrix_cnt + 1;
                         addr_cam_auto = 0;
@@ -314,9 +318,9 @@ module AP_controller
         end
     end
 
-    always @(op_code)
+    always @(op_code or addr_cam_auto)
     begin
-        if (op_code == STORERBR || op_code == STORECBC)
+        if (op_code == STORERBR || op_code == STORECBC || addr_cam_auto == DATA_WIDTH - 1)
         begin
             store_ddr_en_reg = 1;
         end
