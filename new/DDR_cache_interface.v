@@ -61,17 +61,26 @@ localparam MEM_READ_DATA 					= 4'd7;
 localparam MEM_READ_DATA_END 				= 4'd8;
 localparam MEM_WRITE_DATA_STORE 			= 4'd9;
 localparam MEM_WRITE_DATA_STORE_END 		= 4'd10;
+localparam MEM_WRITE_INT_ADDR 				= 4'd11;
+localparam MEM_READ_INT_ADDR 				= 4'd12;
+localparam MEM_WRITE_INT_ADDR_END		 	= 4'd13;
+localparam MEM_READ_INT_ADDR_END 			= 4'd14;
 
 localparam W_ISA 							= 3'd1;
 localparam W_DATA 							= 3'd2;
 localparam R_ISA 							= 3'd3;
 localparam R_DATA 							= 3'd4;
 localparam W_DATA_STORE 					= 3'd5;
+localparam W_INT_ADDR						= 3'd6;
+localparam R_INT_ADDR 						= 3'd7;
 
 assign finish_flag_w_isa				 	= (state == MEM_WRITE_ISA_END);
 assign finish_flag_w_data 					= (state == MEM_WRITE_DATA_END);
+assign finish_flag_w_int_addr				= (state == MEM_WRITE_INT_ADDR_END);
+
 assign finish_flag_r_isa 					= (state == MEM_READ_ISA_END);
 assign finish_flag_r_data 					= (state == MEM_READ_DATA_END);
+assign finish_flag_r_int_addr				= (state == MEM_READ_INT_ADDR_END);
 
 reg [2 : 0] CMD;
 
@@ -113,6 +122,17 @@ begin
 		if(wr_burst_data_req)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{Data}};  
+				wr_cnt          <= wr_cnt + 10'd1;
+			end
+		else if(wr_burst_finish)
+			wr_cnt <= 10'd0;
+	end
+
+	else if(state == MEM_WRITE_INT_ADDR)
+	begin
+		if(wr_burst_data_req)                       
+			begin
+				wr_burst_data   <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h00001a8};  
 				wr_cnt          <= wr_cnt + 10'd1;
 			end
 		else if(wr_burst_finish)
@@ -185,6 +205,14 @@ begin
 
 	else if(finish_flag_w_data)
 	begin
+		CMD <= W_INT_ADDR;
+		wr_burst_len <= 1; /* next we can change this by input the number */
+		wr_burst_req <= 1'b1;
+		rd_burst_req <= 1'b0;
+	end
+
+	else if(finish_flag_w_int_addr)
+	begin
 		ddr_rdy <= 1;
 		CMD <= R_ISA;
 		wr_burst_req <= 1'b0;
@@ -193,27 +221,13 @@ begin
 		rd_burst_len <= isa_read_len;
 	end
 
-	/*else if(finish_flag_w_data)
-	begin
-		ddr_rdy <= 1;
-	end
-
-	else if(ddr_rdy == 1 && ISA_read_req == 1)
-	begin
-		CMD <= R_ISA;
-		wr_burst_req <= 1'b0;
-		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= ISA_read_addr;
-		rd_burst_len <= ISA_DEPTH;
-	end*/
-
 	else if(ddr_rdy == 1 && DATA_read_req == 1)
 	begin
 		CMD <= R_DATA;
 		wr_burst_req <= 1'b0;
 		rd_burst_req <= 1'b1; 
 		rd_burst_addr <= DATA_read_addr;
-		rd_burst_len <= DATA_CACHE_DEPTH + 1;//******************//
+		rd_burst_len <= DATA_CACHE_DEPTH + 1;
 	end
 
 	else if(ddr_rdy == 1 && DATA_store_req == 1)
@@ -283,6 +297,16 @@ begin
 					state <= MEM_READ_DATA;
 				end
 
+				else if(CMD == W_INT_ADDR)
+				begin
+				  	state <= MEM_WRITE_INT_ADDR;
+				end
+
+				else if(CMD == R_INT_ADDR)
+				begin
+				  	state <= MEM_READ_INT_ADDR;
+				end
+
 				else if(CMD == W_DATA_STORE)
 				begin
 					state <= MEM_WRITE_DATA_STORE;
@@ -313,12 +337,26 @@ begin
 				if(wr_burst_finish)
 				begin
 					state <= MEM_WRITE_DATA_END;
+					wr_burst_addr <= 28'h1000000;
 				end
 			end
 
 			MEM_WRITE_DATA_END:
 			begin
 				state <= START;
+			end
+
+			MEM_WRITE_INT_ADDR:
+			begin
+			  	if(wr_burst_finish)
+				begin
+				  	state <= MEM_WRITE_INT_ADDR_END;
+				end
+			end
+
+			MEM_WRITE_INT_ADDR_END:
+			begin
+			  	state <= START;
 			end
 
 			MEM_WRITE_DATA_STORE:
@@ -353,18 +391,34 @@ begin
 
 			MEM_READ_DATA:
 			begin
-			  if(rd_burst_finish)
-				begin
-					state <= MEM_READ_DATA_END;
-					rd_burst_req <= 0;
-					wr_burst_req <= 0;
-					CMD <= 0;
-				end
+			  	if(rd_burst_finish)
+					begin
+						state <= MEM_READ_DATA_END;
+						rd_burst_req <= 0;
+						wr_burst_req <= 0;
+						CMD <= 0;
+					end
 			end
 
 			MEM_READ_DATA_END:
 			begin
 				state <= START;
+			end
+
+			MEM_READ_INT_ADDR:
+			begin
+			  	if(rd_burst_finish)
+					begin
+						state <= MEM_READ_INT_ADDR_END;
+						rd_burst_req <= 0;
+						wr_burst_req <= 0;
+						CMD <= 0;
+					end
+			end
+
+			MEM_READ_INT_ADDR_END:
+			begin
+			  	state <= START;
 			end
 
 			default:
