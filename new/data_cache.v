@@ -125,19 +125,15 @@ begin
                         end
                     ColxCol_store:  
                         begin
-                            st_next     = GET_DATA_CBC;
-                            /*if ((tag_store == 1) && (data_addr <= tag_data))
+                            if (store_ddr_en == 0)
                                 begin
+                                    st_next     = GET_DATA_CBC;
                                     tag_data    = data_addr;
+                                    tag_store   = 1;
                                 end
-                            else if((tag_store == 1) && (data_addr > tag_data))
-                                begin
-                                    tag_data    = tag_data;
-                                end
-                            else begin*/
-                                tag_data    = data_addr;
-                                tag_store   = 1;
-                            //end
+                            else begin
+                                st_next = STORE_DATA;
+                            end
                         end
                     default:st_next     = START;   
                 endcase
@@ -241,6 +237,7 @@ begin
                     st_next     = STORE_DATA;
                 else begin
                     st_next     = START;
+                    data_cache_rdy = 1;
                 end
             end
         default: st_next = START;
