@@ -59,6 +59,7 @@ module AP_top
     wire [ADDR_WIDTH_MEM - 1 : 0]       data_addr;
     wire [2 : 0]                        data_cmd;
     wire                                store_ddr_en;
+    wire                                store_ctxt_finih;
     wire                                ins_inp_valid;
     wire [ADDR_WIDTH_MEM - 1 : 0]       ret_addr_pc;
     wire                                int_set;
@@ -180,6 +181,7 @@ module AP_top
     .data_addr              (data_addr),
     .data_cmd               (data_cmd),
     .store_ddr_en           (store_ddr_en),
+    .store_ctxt_finih       (store_ctxt_finih),
     .addr_cur_ins           (addr_cur_ins),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
@@ -414,6 +416,7 @@ module AP_top
     .data_cmd               (data_cmd),
     .addr_cam_col           (addr_cam_col),
     .store_ddr_en           (store_ddr_en),
+    .store_ctxt_finih       (store_ctxt_finih),
     .data_cache_rdy         (data_cache_rdy),
     .data_in_rbr            (data_in_rbr),
     .data_in_cbc            (data_in_cbc),
