@@ -19,6 +19,7 @@ module data_cache
     input wire [2 : 0]                      data_cmd,
     input wire [ADDR_WIDTH_CAM - 1 : 0]     addr_cam_col,
     input wire                              store_ddr_en,
+    input wire                              store_ctxt_finih,
 
     output reg                              data_cache_rdy,
     output reg [DATA_WIDTH - 1 : 0]         data_in_rbr,
@@ -63,8 +64,21 @@ reg [9 : 0]                                 data_store_cnt;
 reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
 reg                                         tag_store; /* indicate that the current tag is for store data */
+reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
 
 integer j ;
+
+always @(posedge store_ctxt_finih or negedge rst)
+begin
+    if (!rst)
+        begin
+            addr_cur_ctxt  <= addr_init_ctxt;
+        end
+    else if (store_ctxt_finih == 1)
+        begin
+            addr_cur_ctxt <= addr_cur_ctxt + 3 * DATA_DEPTH;
+        end
+end
 
 /* state machine */
 always @(posedge clk or negedge rst)
@@ -75,7 +89,7 @@ begin
             data_cnt        <= 0;
             tag_store       <= 0;
             tag_data        <= 16'hFFFF;
-            addr_cur_ctxt   <= 16'h5000;
+            addr_cur_ctxt  <= addr_init_ctxt;
         end
     else
         begin
