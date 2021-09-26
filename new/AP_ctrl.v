@@ -37,6 +37,7 @@ module AP_controller
     output reg [ADDR_WIDTH_MEM - 1 : 0]     data_addr,
     output reg [2 : 0]                      data_cmd,
     output wire                             store_ddr_en,
+    output reg                              store_ctxt_finih,
 
     /* the interface of Program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
@@ -176,6 +177,8 @@ module AP_controller
     localparam                              STORE_TMP       = 6'd29;
     localparam                              STORE_CTXT      = 6'd30;
     localparam                              STORE_CTXT_FINISH_CHECK = 6'd31;
+    localparam                              GET_JMP_ADDR    = 6'd32;
+    localparam                              JMP_INS         = 6'd33;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -189,6 +192,7 @@ module AP_controller
     localparam                              RowxRow_store   = 3'd2;
     localparam                              ColxCol_load    = 3'd3;
     localparam                              ColxCol_store   = 3'd4;
+    localparam                              Addr_load       = 3'd5;
 
     /* state variables */
     
@@ -363,7 +367,7 @@ module AP_controller
                     addr_mem_col    = 0;
                     data_cmd        = 0;
                     ret_valid       = 0;
-
+                    store_ctxt_finih= 0;
                     tmp_bit_cnt     = 0;
                     tmp_pass        = 0;
                     tmp_mask        = 0;
@@ -753,27 +757,36 @@ module AP_controller
             STORE_CTXT:
                 begin
                     inout_mode = ColxCol;
-                    data_addr  = addr_cur_ctxt;
+                    //data_addr  = addr_cur_ctxt;
                     data_cmd   = ColxCol_store;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
                     if(matrix_cnt == 1)
                         begin
+                            data_addr           = addr_cur_ctxt;
                             addr_output_cbc_A   = addr_cam_col;
                             data_out_cbc        = data_A_cbc;
                             st_next             = STORE_CTXT_FINISH_CHECK;
                         end
                     else if (matrix_cnt == 2)
                         begin
+                            data_addr           = addr_cur_ctxt + DATA_DEPTH;
                             addr_output_cbc_B   = addr_cam_col;
                             data_out_cbc        = data_B_cbc;
                             st_next             = STORE_CTXT_FINISH_CHECK;
                         end
                     else if (matrix_cnt == 3)
                         begin
-                            addr_output_cbc_R   = addr_cam_col;
-                            data_out_cbc        = data_R_cbc;
-                            st_next             = STORE_CTXT_FINISH_CHECK;
+                            if (addr_cam_auto == DATA_WIDTH && data_cache_rdy == 1)
+                                begin
+                                    st_next         = GET_JMP_ADDR;
+                                end
+                            else begin
+                                data_addr           = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
+                                addr_output_cbc_R   = addr_cam_col;
+                                data_out_cbc        = data_R_cbc;
+                                st_next             = STORE_CTXT_FINISH_CHECK;
+                            end
                         end
                     else st_next                = STORE_CTXT;
                 end
@@ -787,10 +800,31 @@ module AP_controller
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
+                            if (matrix_cnt == 3)
+                            begin
+                                store_ctxt_finih = 1;
+                            end
                         end
+                    
                     else begin
                         st_next         = START;
                     end
+                end
+
+            GET_JMP_ADDR:
+                begin
+                    inout_mode      = RowxRow;
+                    data_addr       = 16'he001;
+                    data_cmd        = Addr_load;
+                    if(data_cache_rdy == 1)
+                        begin
+                            st_next = JMP_INS;
+                        end
+                end
+
+            JMP_INS:
+                begin
+                    
                 end
 
             /* pass of ADD */

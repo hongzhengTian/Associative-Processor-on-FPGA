@@ -138,6 +138,7 @@ module AP_top
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_cur_ctxt;
     wire                                DATA_read_req;
     wire                                DATA_store_req;
+    wire                                JMP_ADDR_read_req;
     wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
@@ -303,6 +304,7 @@ module AP_top
     ddr3_interface_top #(
     DDR_DATA_WIDTH, 
     DDR_ADDR_WIDTH, 
+    ADDR_WIDTH_MEM,
     DATA_WIDTH,
     ISA_WIDTH,
     ISA_DEPTH,
@@ -340,8 +342,11 @@ module AP_top
     .ddr_rdy                (ddr_rdy),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
+    .store_ctxt_finih       (store_ctxt_finih),
     .DATA_read_req          (DATA_read_req),
     .DATA_store_req         (DATA_store_req),
+    .JMP_ADDR_read_req      (JMP_ADDR_read_req),
+    .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
@@ -423,6 +428,8 @@ module AP_top
     .addr_cur_ctxt          (addr_cur_ctxt),
     .DATA_read_req          (DATA_read_req),
     .DATA_store_req         (DATA_store_req),
+    .JMP_ADDR_read_req      (JMP_ADDR_read_req),
+    .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
