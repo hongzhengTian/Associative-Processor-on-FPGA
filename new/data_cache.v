@@ -29,6 +29,8 @@ module data_cache
     /* the interface of DDR */
     output reg                              DATA_read_req,
     output reg                              DATA_store_req,
+    output reg                              JMP_ADDR_read_req,
+    input wire [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
@@ -47,12 +49,16 @@ localparam                                  SENT_DATA_RBR   = 4'd4;
 localparam                                  SENT_DATA_CBC   = 4'd5;
 localparam                                  GET_DATA_RBR    = 4'd6;
 localparam                                  GET_DATA_CBC    = 4'd7;
+localparam                                  SENT_ADDR       = 4'd8;
+localparam                                  LOAD_JMP_ADDR   = 4'd9;
 
 /* data_cache command */
 localparam                                  RowxRow_load    = 3'd1;
 localparam                                  RowxRow_store   = 3'd2;
 localparam                                  ColxCol_load    = 3'd3;
 localparam                                  ColxCol_store   = 3'd4;
+localparam                                  Addr_load       = 3'd5;
+
 
 localparam                                  MEM_WRITE_DATA_STORE 	= 4'd9;
 
@@ -65,6 +71,7 @@ reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
 reg                                         tag_store; /* indicate that the current tag is for store data */
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr;
 
 integer j ;
 
@@ -149,8 +156,25 @@ begin
                                 st_next = STORE_DATA;
                             end
                         end
+                    Addr_load:
+                        begin
+                            st_next     = SENT_ADDR;
+                        end
                     default:st_next     = START;   
                 endcase
+            end
+        
+        SENT_ADDR:
+            begin
+                JMP_ADDR_read_req   = 1;
+                tag_data        = data_addr;
+                DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
+                if(rd_burst_data_valid == 1 && rd_cnt_data >= 2)
+                    begin
+                        data_cache_rdy = 1;
+                        jmp_addr = JMP_ADDR_to_cache;
+                    end 
+                st_next             = START;
             end
 
         SENT_DATA_RBR:

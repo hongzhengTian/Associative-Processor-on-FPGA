@@ -2,6 +2,7 @@ module ddr3_interface_top
 #(
     parameter DDR_DATA_WIDTH    = 128,
     parameter DDR_ADDR_WIDTH    = 28,
+    parameter ADDR_WIDTH_MEM	= 16,
     parameter DATA_WIDTH        = 16,
     parameter ISA_WIDTH         = 30,
     parameter ISA_DEPTH         = 72,
@@ -27,10 +28,13 @@ module ddr3_interface_top
     output                              ddr_rdy,
     output [9 : 0]                      rd_cnt_isa,
     output                              rd_burst_data_valid,
+    input                               store_ctxt_finih,
 
     /* interface of DATA_cache */
     input                               DATA_read_req,
     input                               DATA_store_req,
+    input                               JMP_ADDR_read_req,
+    output [DDR_ADDR_WIDTH - 1 : 0]	    JMP_ADDR_to_cache,
     input  [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
@@ -87,6 +91,7 @@ module ddr3_interface_top
     DDR_cache_interface #(
     DDR_DATA_WIDTH, 
     DDR_ADDR_WIDTH, 
+    ADDR_WIDTH_MEM,
     DATA_WIDTH,
     ISA_WIDTH,
     ISA_DEPTH,
@@ -106,6 +111,7 @@ module ddr3_interface_top
         .rd_cnt_isa(rd_cnt_isa),
         .DATA_read_req(DATA_read_req),
         .DATA_store_req(DATA_store_req),
+        .JMP_ADDR_read_req(JMP_ADDR_read_req),
         .DATA_to_ddr(DATA_to_ddr),
         .DATA_read_addr(DATA_read_addr),
         .DATA_write_addr(DATA_write_addr),
@@ -119,6 +125,8 @@ module ddr3_interface_top
         .wr_burst_addr(wr_burst_addr),
         .rd_burst_data_valid(rd_burst_data_valid),
         .wr_burst_data_req(wr_burst_data_req),
+        .JMP_ADDR_to_cache(JMP_ADDR_to_cache),
+        .store_ctxt_finih(store_ctxt_finih),
         .rd_burst_data(rd_burst_data),
         .wr_burst_data(wr_burst_data),
         .rd_burst_finish(rd_burst_finish),
