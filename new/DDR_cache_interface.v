@@ -187,7 +187,7 @@ begin
 
 	else if (state == MEM_READ_INT_ADDR)
 		begin
-			JMP_ADDR_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0] / 8;
+			JMP_ADDR_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0];
 			if(rd_burst_data_valid)
 				begin
 					rd_cnt_data <= rd_cnt_data + 10'd1;

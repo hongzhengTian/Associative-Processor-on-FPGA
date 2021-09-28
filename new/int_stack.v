@@ -19,6 +19,7 @@ module int_stack
     input wire [2 : 0]                      tmp_pass,
     input wire [DATA_WIDTH - 1 : 0]         tmp_mask,
     input wire [DATA_DEPTH - 1 : 0]         tmp_C_F,
+    output reg                              ctxt_rdy,
 
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_ret,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_ret,
@@ -46,18 +47,22 @@ reg [DATA_WIDTH - 1 : 0]                    stack_tmp_mask      [0 : STACK_DEPTH
 reg [DATA_DEPTH - 1 : 0]                    stack_tmp_C_F       [0 : STACK_DEPTH - 1];
 
 reg                                         temp_int_set;
+reg                                         temp_ret_set;
 wire                                        int_set_pause;
+wire                                        ret_set_pause;
 
 integer i;
 
 always @(posedge clk) 
 begin
-    temp_int_set <= int_set;    
+    temp_int_set <= int_set;  
+    temp_ret_set <= ret_valid;  
 end
 
-assign int_set_pause = temp_int_set ^ int_set;
+assign int_set_pause = ~temp_int_set & int_set;
+assign ret_set_pause = ~temp_ret_set & ret_valid;
 
-always @(negedge rst) 
+always @(posedge clk or negedge rst) 
 begin
     if(!rst)
         begin
@@ -78,6 +83,88 @@ begin
             tmp_mask_ret    <= 0;
             tmp_C_F_ret     <= 0;
         end
+    case (st_cur)
+        START:
+        begin
+            ctxt_rdy   <= 0;
+        end
+        STORE_CTXT:
+        begin
+            for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
+                begin
+                    stack_ret_addr[stack_cnt - 1][i]    <= ret_addr[i];
+                end
+
+            for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
+                begin
+                    stack_ctxt_addr[stack_cnt - 1][i]   <= ctxt_addr[i];
+                end
+
+            for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
+                begin
+                    stack_tmp_bit_cnt[stack_cnt - 1][i] <= tmp_bit_cnt[i];
+                end
+
+            for (i = 0; i <= 2; i = i + 1)
+                begin
+                    stack_tmp_pass[stack_cnt - 1][i]    <= tmp_pass[i];
+                end
+
+            for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
+                begin
+                    stack_tmp_mask[stack_cnt - 1][i]    <= tmp_mask[i];
+                end
+
+            for (i = 0; i <= DATA_DEPTH - 1; i = i + 1)
+                begin
+                    stack_tmp_C_F[stack_cnt - 1][i]     <= tmp_C_F[i];
+                end
+        end
+
+    LOAD_CTXT:
+        begin
+            ctxt_rdy = 1;
+            for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
+                begin
+                    ret_addr_ret[i]     <= stack_ret_addr[stack_cnt][i];
+                end
+
+            for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
+                begin
+                    ctxt_addr_ret[i]    <= stack_ctxt_addr[stack_cnt][i];
+                end
+
+            for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
+                begin
+                    tmp_bit_cnt_ret[i]  <= stack_tmp_bit_cnt[stack_cnt][i];
+                end
+
+            for (i = 0; i <= 2; i = i + 1)
+                begin
+                    tmp_pass_ret[i]     <= stack_tmp_pass[stack_cnt][i];
+                end
+
+            for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
+                begin
+                    tmp_mask_ret[i]     <= stack_tmp_mask[stack_cnt][i];
+                end
+
+            for (i = 0; i <= DATA_DEPTH - 1; i = i + 1)
+                begin
+                    tmp_C_F_ret[i]      <= stack_tmp_C_F[stack_cnt][i];
+                end
+        end
+
+    default: 
+        begin
+            ret_addr_ret     <= 0;
+            ctxt_addr_ret    <= 0;
+            tmp_bit_cnt_ret  <= 0;
+            tmp_pass_ret     <= 0;
+            tmp_mask_ret     <= 0;
+            tmp_C_F_ret      <= 0;
+        end
+    endcase
 end
 
 /* state machine */
@@ -111,7 +198,7 @@ begin
                     begin
                         st_next = STORE_CTXT;
                     end
-                else if (ret_valid == 1)
+                else if (ret_set_pause == 1)
                     begin
                         st_next = LOAD_CTXT;
                     end
@@ -120,69 +207,11 @@ begin
 
         STORE_CTXT:
             begin
-                for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
-                    begin
-                        stack_ret_addr[stack_cnt - 1][i]    = ret_addr[i];
-                    end
-
-                for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
-                    begin
-                        stack_ctxt_addr[stack_cnt - 1][i]   = ctxt_addr[i];
-                    end
-
-                for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
-                    begin
-                        stack_tmp_bit_cnt[stack_cnt - 1][i] = tmp_bit_cnt[i];
-                    end
-
-                for (i = 0; i <= 2; i = i + 1)
-                    begin
-                        stack_tmp_pass[stack_cnt - 1][i]    = tmp_pass[i];
-                    end
-
-                for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
-                    begin
-                        stack_tmp_mask[stack_cnt - 1][i]    = tmp_mask[i];
-                    end
-
-                for (i = 0; i <= DATA_DEPTH - 1; i = i + 1)
-                    begin
-                        stack_tmp_C_F[stack_cnt - 1][i]     = tmp_C_F[i];
-                    end
                 st_next = START;
             end
 
         LOAD_CTXT:
             begin
-                for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
-                    begin
-                        ret_addr_ret[i]     = stack_ret_addr[stack_cnt][i];
-                    end
-
-                for (i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
-                    begin
-                        ctxt_addr_ret[i]    = stack_ctxt_addr[stack_cnt][i];
-                    end
-
-                for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
-                    begin
-                        tmp_bit_cnt_ret[i]  = stack_tmp_bit_cnt[stack_cnt][i];
-                    end
-
-                for (i = 0; i <= 2; i = i + 1)
-                    begin
-                        tmp_pass_ret[i]     = stack_tmp_pass[stack_cnt][i];
-                    end
-
-                for (i = 0; i <= DATA_WIDTH - 1; i = i + 1)
-                    begin
-                        tmp_mask_ret[i]     = stack_tmp_mask[stack_cnt][i];
-                    end
-
-                for (i = 0; i <= DATA_DEPTH - 1; i = i + 1)
-                    begin
-                        tmp_C_F_ret[i]      = stack_tmp_C_F[stack_cnt][i];
-                    end
                 st_next = START;
             end
         default: st_next = START;

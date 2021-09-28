@@ -121,6 +121,7 @@ module AP_top
     wire                                ins_cache_rdy;
     wire [3 : 0]                        st_cur_ins_cache;
     wire [9 : 0]                        load_times;
+    wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
 
     wire [ISA_WIDTH - 1 : 0]            instruction;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
@@ -133,12 +134,15 @@ module AP_top
     wire [9 : 0]                        isa_read_len;
 
     wire                                data_cache_rdy;
+    wire                                jmp_addr_rdy;
+    wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr;
     wire [DATA_WIDTH - 1 : 0]           data_in_rbr;
     wire [DATA_DEPTH - 1 : 0]           data_in_cbc;
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_cur_ctxt;
     wire                                DATA_read_req;
     wire                                DATA_store_req;
     wire                                JMP_ADDR_read_req;
+    wire [DDR_ADDR_WIDTH : 0]           JMP_ADDR_to_cache;
     wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
@@ -152,6 +156,7 @@ module AP_top
     wire [2 : 0]                        tmp_pass_ret;
     wire [DATA_WIDTH - 1 : 0]           tmp_mask_ret;
     wire [DATA_DEPTH - 1 : 0]           tmp_C_F_ret;
+    wire                                ctxt_rdy;
 
     AP_controller #(
     DATA_WIDTH, 
@@ -159,7 +164,8 @@ module AP_top
     OPCODE_WIDTH, 
     ADDR_WIDTH_CAM, 
     OPRAND_2_WIDTH,
-    ADDR_WIDTH_MEM
+    ADDR_WIDTH_MEM,
+    DDR_ADDR_WIDTH
     )AP_controller_u 
     (
     .clk                    (ui_clk),
@@ -173,6 +179,8 @@ module AP_top
     .ins_valid              (ins_valid),
     .instruction            (instruction),
     .data_cache_rdy         (data_cache_rdy),
+    .jmp_addr_rdy           (jmp_addr_rdy),
+    .jmp_addr               (jmp_addr),
     .data_in_rbr            (data_in_rbr),
     .data_in_cbc            (data_in_cbc),
     .addr_cur_ctxt          (addr_cur_ctxt),
@@ -184,6 +192,7 @@ module AP_top
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finih       (store_ctxt_finih),
     .addr_cur_ins           (addr_cur_ins),
+    .jmp_addr_pc            (jmp_addr_pc),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
     .ret_addr_ret           (ret_addr_ret),
@@ -201,6 +210,7 @@ module AP_top
     .tmp_pass               (tmp_pass),
     .tmp_mask               (tmp_mask),
     .tmp_C_F                (tmp_C_F),
+    .ctxt_rdy               (ctxt_rdy),
     .data_A_rbr             (data_A_rbr),
     .data_A_cbc             (data_A_cbc),
     .data_B_rbr             (data_B_rbr),
@@ -358,7 +368,8 @@ module AP_top
     program_counter #(
     ADDR_WIDTH_MEM,
     ISA_DEPTH,
-    TOTAL_ISA_DEPTH
+    TOTAL_ISA_DEPTH,
+    DDR_ADDR_WIDTH
     ) program_counter_u 
     (
     .clk                    (ui_clk),
@@ -368,6 +379,7 @@ module AP_top
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
     .addr_cur_ins           (addr_cur_ins),
+    .jmp_addr_pc            (jmp_addr_pc),
     .addr_ins               (addr_ins),
     .ins_cache_rdy          (ins_cache_rdy),
     .st_cur_ins_cache       (st_cur_ins_cache),
@@ -423,6 +435,8 @@ module AP_top
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finih       (store_ctxt_finih),
     .data_cache_rdy         (data_cache_rdy),
+    .jmp_addr_rdy           (jmp_addr_rdy),
+    .jmp_addr               (jmp_addr),
     .data_in_rbr            (data_in_rbr),
     .data_in_cbc            (data_in_cbc),
     .addr_cur_ctxt          (addr_cur_ctxt),
@@ -456,6 +470,7 @@ module AP_top
     .tmp_pass               (tmp_pass),
     .tmp_mask               (tmp_mask),
     .tmp_C_F                (tmp_C_F),
+    .ctxt_rdy               (ctxt_rdy),
     .ret_addr_ret           (ret_addr_ret),
     .ctxt_addr_ret          (ctxt_addr_ret),
     .ctxt_addr_A_ret        (ctxt_addr_A_ret),

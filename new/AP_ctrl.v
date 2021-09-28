@@ -6,6 +6,7 @@ module AP_controller
     parameter ADDR_WIDTH_CAM    = 8,
     parameter OPRAND_2_WIDTH    = 2,
     parameter ADDR_WIDTH_MEM    = 16,
+    parameter DDR_ADDR_WIDTH    = 28,
     parameter ISA_WIDTH         = OPCODE_WIDTH 
                                 + ADDR_WIDTH_CAM
                                 + OPRAND_2_WIDTH 
@@ -28,6 +29,8 @@ module AP_controller
 
     /* the interface of data cache */
     input wire                              data_cache_rdy,
+    input wire                              jmp_addr_rdy,
+    input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr,
     input wire [DATA_WIDTH - 1 : 0]         data_in_rbr,
     input wire [DATA_DEPTH - 1 : 0]         data_in_cbc,
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ctxt,
@@ -41,6 +44,7 @@ module AP_controller
 
     /* the interface of Program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
+    output reg [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg                              ins_inp_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
 
@@ -61,6 +65,7 @@ module AP_controller
     output reg [2 : 0]                      tmp_pass,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask,
     output reg [DATA_DEPTH - 1 : 0]         tmp_C_F,
+    input wire                              ctxt_rdy,
 
     /* the interface of CAM */
     /* datas come from CAM */
@@ -172,7 +177,7 @@ module AP_controller
     localparam                              RSTTAG_TSC      = 6'd25;
 
     localparam                              FINISH_CK       = 6'd26;
-    localparam                              LOAD_RET        = 6'd27;
+    localparam                              LOAD_TMP        = 6'd27;
     localparam                              LOAD_CTXT       = 6'd28;
     localparam                              STORE_TMP       = 6'd29;
     localparam                              STORE_CTXT      = 6'd30;
@@ -218,7 +223,8 @@ module AP_controller
     reg                                     tmp_store_ddr_en;
     reg                                     store_ddr_en_reg;
     reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto;
-
+    reg                                     tag_C_F; /* indicate which one do we store when interrupt*/
+                                                     /* 1 means C, 0 means F */
     assign  store_ddr_en = tmp_store_ddr_en & ~store_ddr_en_reg;
     
 
@@ -386,7 +392,7 @@ module AP_controller
                         RET:
                             begin
                                 ret_valid       = 1;
-                                st_next         = LOAD_RET;
+                                st_next         = LOAD_TMP;
                             end
 
                         LOADRBR:
@@ -740,10 +746,12 @@ module AP_controller
                     if(opt_cur == ADD || opt_cur == SUB)
                         begin
                             tmp_C_F = data_C;
+                            tag_C_F = 1;
                         end
                     else if(opt_cur == TSC || opt_cur == ABS)
                         begin
                             tmp_C_F = data_F;
+                            tag_C_F = 0;
                         end
                     else tmp_C_F = 0;
                     
@@ -816,13 +824,49 @@ module AP_controller
                     inout_mode      = RowxRow;
                     data_addr       = 16'he001;
                     data_cmd        = Addr_load;
-                    if(data_cache_rdy == 1)
+                    if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
                         end
                 end
 
             JMP_INS:
+                begin
+                    data_cmd        = 0;
+                    jmp_addr_pc     = jmp_addr;
+                    st_next         = START;
+                end
+
+            LOAD_TMP:
+                begin
+                    if (ctxt_rdy == 1)
+                        begin
+                            bit_cnt     = tmp_bit_cnt_ret;
+                            pass        = tmp_pass_ret;
+                            mask        = tmp_mask_ret;
+
+                            if (tag_C_F == 1)
+                                begin
+                                    input_C = tmp_C_F_ret;
+                                end
+                            else if (tag_C_F == 0)
+                                begin
+                                    input_F = tmp_C_F_ret;
+                                end
+                            else begin
+                                    input_C = tmp_C_F_ret;
+                                    input_F = tmp_C_F_ret;
+                            end
+
+                            jmp_addr_pc = ret_addr_ret;
+                            data_addr   = ctxt_addr_ret;
+                            st_next     = LOAD_CTXT;
+                        end
+                    
+                    else st_next        = LOAD_TMP;
+                end
+
+            LOAD_CTXT:
                 begin
                     
                 end
@@ -1049,130 +1093,6 @@ module AP_controller
                         st_next = START;
                         ins_inp_valid = 1;
                         end
-                end
-
-            LOAD_RET:
-                begin
-                    bit_cnt         = tmp_bit_cnt_ret;
-                    pass            = tmp_pass_ret;
-                    mask            = tmp_mask_ret;
-                    mask_C          = 1;
-                    mask_F          = 1;
-                    key_A           = 0;
-                    key_B           = 0;
-                    key_C           = 0;
-                    key_F           = 0;
-                    rst_tag         = 0;
-                    ins_inp_valid   = 1;
-                    opt_cur         = RET;
-                    ABS_opt         = 0;
-                    ret_addr_pc     = ret_addr_ret;
-                    st_next         = LOAD_CTXT;
-                    addr_mem_col    = 0;
-                    addr_cam_col    = 0;
-                    matrix_cnt      = 1;
-                end
-
-            LOAD_CTXT:
-                begin
-                    case (op_code_valid)
-                        ADD:
-                        begin
-                            if (matrix_cnt == 1)
-                                begin
-                                    matrix_select_reg   = M_A;
-                                    data_addr           = ctxt_addr_A_ret;
-                                    rst_InA             = 1;
-                                    rst_InC             = 0;
-                                    input_C             = tmp_C_F_ret;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else if (matrix_cnt == 2)
-                                begin
-                                    matrix_select_reg   = M_B;
-                                    data_addr        = ctxt_addr_ret;
-                                    rst_InB             = 1;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else 
-                                begin
-                                    st_next             = RSTTAG_ADD;
-                                end
-                        end
-
-                        SUB:
-                        begin
-                            if (matrix_cnt == 1)
-                                begin
-                                    matrix_select_reg   = M_A;
-                                    data_addr        = ctxt_addr_A_ret;
-                                    rst_InA             = 1;
-                                    rst_InC             = 0;
-                                    input_C             = tmp_C_F_ret;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else if (matrix_cnt == 2)
-                                begin
-                                    matrix_select_reg   = M_B;
-                                    data_addr        = ctxt_addr_ret;
-                                    rst_InB             = 1;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else 
-                                begin
-                                    st_next             = RSTTAG_SUB;
-                                end
-                        end
-
-                        ABS:
-                        begin
-                            if (matrix_cnt == 1)
-                                begin
-                                    matrix_select_reg   = M_A;
-                                    data_addr        = ctxt_addr_A_ret;
-                                    rst_InA             = 1;
-                                    rst_InF             = 0;
-                                    input_F             = tmp_C_F_ret;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else if (matrix_cnt == 2)
-                                begin
-                                    matrix_select_reg   = M_R;
-                                    data_addr        = ctxt_addr_ret;
-                                    rst_InR             = 1;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else 
-                                begin
-                                    st_next             = RSTTAG_ABS;
-                                end
-                        end
-
-                        TSC:
-                        begin
-                            if (matrix_cnt == 1)
-                                begin
-                                    matrix_select_reg   = M_A;
-                                    data_addr        = ctxt_addr_A_ret;
-                                    rst_InA             = 1;
-                                    rst_InF             = 0;
-                                    input_F             = tmp_C_F_ret;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else if (matrix_cnt == 2)
-                                begin
-                                    matrix_select_reg   = M_R;
-                                    data_addr        = ctxt_addr_ret;
-                                    rst_InR             = 1;
-                                    st_next             = LOAD_CBC;
-                                end
-                            else 
-                                begin
-                                    st_next             = RSTTAG_TSC;
-                                end
-                        end
-                        default: ;
-                    endcase
                 end
             
             default: st_next = START;
