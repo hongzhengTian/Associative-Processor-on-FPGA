@@ -22,6 +22,8 @@ module data_cache
     input wire                              store_ctxt_finih,
 
     output reg                              data_cache_rdy,
+    output reg                              jmp_addr_rdy,
+    output reg [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr,
     output reg [DATA_WIDTH - 1 : 0]         data_in_rbr,
     output reg [DATA_DEPTH - 1 : 0]         data_in_cbc,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ctxt,
@@ -71,7 +73,7 @@ reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
 reg                                         tag_store; /* indicate that the current tag is for store data */
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
-reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr;
+
 
 integer j ;
 
@@ -109,11 +111,13 @@ begin
     case (st_cur)
         START:
             begin
-                data_cache_rdy = 0;
-                DATA_read_req  = 0;
+                data_cache_rdy  = 0;
+                jmp_addr_rdy    = 0;
+                DATA_read_req   = 0;
                 data_store_cnt  = 0;
-                DATA_store_req = 0;
-                DATA_to_ddr    = 0;
+                DATA_store_req  = 0;
+                DATA_to_ddr     = 0;
+                JMP_ADDR_read_req = 0;
                 if(data_cnt == DATA_CACHE_DEPTH - 1)
                 begin
                     data_cnt = 0;
@@ -169,9 +173,10 @@ begin
                 JMP_ADDR_read_req   = 1;
                 tag_data        = data_addr;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
-                if(rd_burst_data_valid == 1 && rd_cnt_data >= 2)
+                if(rd_burst_data_valid == 1 && rd_cnt_data == 1)
                     begin
-                        data_cache_rdy = 1;
+                        data_cache_rdy  = 1;
+                        jmp_addr_rdy    = 1;
                         jmp_addr = JMP_ADDR_to_cache;
                     end 
                 st_next             = START;

@@ -2,7 +2,8 @@ module program_counter
 #(
     parameter ADDR_WIDTH_MEM    = 16,
     parameter ISA_DEPTH         = 64,
-    parameter TOTAL_ISA_DEPTH   = 128
+    parameter TOTAL_ISA_DEPTH   = 128,
+    parameter DDR_ADDR_WIDTH    = 28
 )
 (
     /* the interface of system signal */
@@ -14,6 +15,7 @@ module program_counter
     /* the interface of AP_ctrl */
     input wire                              ins_inp_valid,
     input wire [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
+    input wire [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
 
     /* the interface of instruction cache */
@@ -23,16 +25,94 @@ module program_counter
     input wire [9 : 0]                      load_times
 );
     integer i;
-    localparam                              START           = 4'd1;
-    localparam                              LOAD_INS        = 4'd2;
+
     localparam                              SENT_INS        = 4'd3;
-    reg [3 : 0] st_cur_ins_cache_delay;
+
+    localparam                              START           = 4'd1;
+    localparam                              CNT_ADDR        = 4'd2;
+    localparam                              LOAD_JMP_ADDR   = 4'd3;
+    localparam                              LOAD_RET_ADDR   = 4'd4;
+
+    reg [3 : 0]                             st_next;
+    reg [3 : 0]                             st_cur;
+
+    reg [3 : 0]                             st_cur_ins_cache_delay;
+    reg                                     int_set;
+    wire [ADDR_WIDTH_MEM - 1 : 0] jmp_addr_pc_short;
+    assign jmp_addr_pc_short = jmp_addr_pc [ADDR_WIDTH_MEM - 1 : 0];
+
+    /* state machine */
+    always @(posedge clk or negedge rst)
+    begin
+        if (!rst)
+            begin
+                st_cur          <= START;
+            end
+        else
+            begin
+                st_cur          <= st_next;
+            end    
+    end
 
     always @(posedge clk) begin
         st_cur_ins_cache_delay <= st_cur_ins_cache;
     end
 
-    always @( posedge clk or negedge rst or posedge int)
+    always @(posedge int or negedge rst or posedge ins_inp_valid)
+    begin
+        if (!rst)
+        begin
+            int_set <= 0;
+        end
+        else if (int == 1)
+        begin
+            int_set <= 1;    
+        end
+        else if (ins_inp_valid == 1)
+        begin
+            int_set <= 0;
+        end
+        else int_set <= 0;
+    end
+
+    always @(*) 
+    begin
+        case (st_cur)
+            START:
+                begin
+                    st_next = CNT_ADDR;
+                end
+            CNT_ADDR:
+                begin
+                    if (int_set == 1)
+                        begin
+                            st_next = LOAD_JMP_ADDR;
+                        end
+                    else if (ret_valid == 1)
+                        begin
+                            st_next = LOAD_RET_ADDR;
+                        end
+                    else begin
+                            st_next = CNT_ADDR;
+                    end
+                end
+            LOAD_JMP_ADDR:
+                begin
+                    if (ins_inp_valid == 1)
+                        begin
+                            st_next = CNT_ADDR;
+                        end
+                    else st_next    = LOAD_JMP_ADDR;
+                end
+            LOAD_RET_ADDR:
+                begin
+
+                end
+            default: st_next = START;
+        endcase
+    end
+
+    always @(posedge clk or negedge rst) 
     begin
         if (!rst)
         begin
@@ -40,50 +120,34 @@ module program_counter
             addr_cur_ins <= 0;
         end
 
-        else if (int == 1)
-        begin
-            addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};    
-        end
-
-        else if (ret_valid == 0)
-        begin
-            if ((ins_inp_valid == 1) 
-             && (addr_ins < TOTAL_ISA_DEPTH) 
-             && (ins_cache_rdy == 1) 
-             &&(st_cur_ins_cache == SENT_INS)
-             &&(addr_ins != ISA_DEPTH * load_times))
-            begin
-                addr_ins <= addr_ins + 1;
-                addr_cur_ins <= addr_ins + 1;
-            end
-
-            else
-            begin
-                addr_ins <= addr_ins;
-            end
-        end
-
-        
-        else if (ret_valid == 1)
-            begin
-                for(i = 0; i <= ADDR_WIDTH_MEM - 1; i = i + 1)
+        case (st_cur)
+            CNT_ADDR:
                 begin
-                    addr_ins[i] <= ret_addr_pc[i];
+                    if ((ins_inp_valid == 1) 
+                    && (ret_valid == 0)
+                    && (addr_ins < TOTAL_ISA_DEPTH) 
+                    && (ins_cache_rdy == 1) 
+                    &&(st_cur_ins_cache == SENT_INS)
+                    &&(addr_ins != ISA_DEPTH * load_times))
+                    begin
+                        addr_ins <= addr_ins + 1;
+                        addr_cur_ins <= addr_ins + 1;
+                    end
+                    else
+                    begin
+                        addr_ins <= addr_ins;
+                    end
                 end
-            end
-
-        else
-        begin
-            addr_ins <= addr_ins;
-        end
+            LOAD_JMP_ADDR:
+                begin
+                    if (ins_inp_valid == 1)
+                        begin
+                            addr_ins <= jmp_addr_pc_short / 8;
+                        end
+                    else addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
+                end
+            default:;
+            endcase
     end
-
-    /*always@(st_cur_ins_cache_delay)
-    begin
-        if(st_cur_ins_cache_delay == LOAD_INS)
-        begin
-            addr_ins = addr_ins - 1;
-        end
-    end*/
 
 endmodule
