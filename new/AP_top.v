@@ -59,9 +59,11 @@ module AP_top
     wire [ADDR_WIDTH_MEM - 1 : 0]       data_addr;
     wire [2 : 0]                        data_cmd;
     wire                                store_ddr_en;
-    wire                                store_ctxt_finih;
+    wire                                store_ctxt_finish;
+    wire                                load_ctxt_finish;
     wire                                ins_inp_valid;
     wire [ADDR_WIDTH_MEM - 1 : 0]       ret_addr_pc;
+    wire                                ret_addr_pc_rdy;
     wire                                int_set;
     wire                                ret_valid;
     wire [ADDR_WIDTH_MEM - 1 : 0]       ret_addr;
@@ -190,11 +192,13 @@ module AP_top
     .data_addr              (data_addr),
     .data_cmd               (data_cmd),
     .store_ddr_en           (store_ddr_en),
-    .store_ctxt_finih       (store_ctxt_finih),
+    .store_ctxt_finish      (store_ctxt_finish),
+    .load_ctxt_finish       (load_ctxt_finish),
     .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
+    .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .ret_addr_ret           (ret_addr_ret),
     .ctxt_addr_ret          (ctxt_addr_ret),
     .ctxt_addr_A_ret        (ctxt_addr_A_ret),
@@ -352,7 +356,8 @@ module AP_top
     .ddr_rdy                (ddr_rdy),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .store_ctxt_finih       (store_ctxt_finih),
+    .store_ctxt_finish      (store_ctxt_finish),
+    .load_ctxt_finish       (load_ctxt_finish),
     .DATA_read_req          (DATA_read_req),
     .DATA_store_req         (DATA_store_req),
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
@@ -378,6 +383,7 @@ module AP_top
     .int                    (int),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
+    .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .addr_ins               (addr_ins),
@@ -433,7 +439,8 @@ module AP_top
     .data_cmd               (data_cmd),
     .addr_cam_col           (addr_cam_col),
     .store_ddr_en           (store_ddr_en),
-    .store_ctxt_finih       (store_ctxt_finih),
+    .store_ctxt_finish      (store_ctxt_finish),
+    .load_ctxt_finish       (load_ctxt_finish),
     .data_cache_rdy         (data_cache_rdy),
     .jmp_addr_rdy           (jmp_addr_rdy),
     .jmp_addr               (jmp_addr),

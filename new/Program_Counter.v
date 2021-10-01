@@ -15,6 +15,7 @@ module program_counter
     /* the interface of AP_ctrl */
     input wire                              ins_inp_valid,
     input wire [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
+    input wire                              ret_addr_pc_rdy,
     input wire [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
 
@@ -106,7 +107,11 @@ module program_counter
                 end
             LOAD_RET_ADDR:
                 begin
-
+                    if (ins_inp_valid == 1)
+                        begin
+                            st_next = CNT_ADDR;
+                        end
+                    else st_next    = LOAD_RET_ADDR;
                 end
             default: st_next = START;
         endcase
@@ -120,6 +125,7 @@ module program_counter
             addr_cur_ins <= 0;
         end
 
+        else begin
         case (st_cur)
             CNT_ADDR:
                 begin
@@ -146,8 +152,17 @@ module program_counter
                         end
                     else addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
                 end
+            LOAD_RET_ADDR:
+                begin
+                    if (ret_addr_pc_rdy == 1)
+                        begin
+                            addr_ins <= ret_addr_pc;
+                        end
+                    else addr_ins <= addr_ins;
+                end
             default:;
             endcase
+            end
     end
 
 endmodule
