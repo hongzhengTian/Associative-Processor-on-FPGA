@@ -40,13 +40,15 @@ module AP_controller
     output reg [ADDR_WIDTH_MEM - 1 : 0]     data_addr,
     output reg [2 : 0]                      data_cmd,
     output wire                             store_ddr_en,
-    output reg                              store_ctxt_finih,
+    output reg                              store_ctxt_finish,
+    output reg                              load_ctxt_finish,
 
     /* the interface of Program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
     output reg [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg                              ins_inp_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
+    output reg                              ret_addr_pc_rdy,
 
     /* the interface of INT_STACK */
     /* temporary parameters from INT_STACK when RET signal set */
@@ -179,11 +181,12 @@ module AP_controller
     localparam                              FINISH_CK       = 6'd26;
     localparam                              LOAD_TMP        = 6'd27;
     localparam                              LOAD_CTXT       = 6'd28;
-    localparam                              STORE_TMP       = 6'd29;
-    localparam                              STORE_CTXT      = 6'd30;
-    localparam                              STORE_CTXT_FINISH_CHECK = 6'd31;
-    localparam                              GET_JMP_ADDR    = 6'd32;
-    localparam                              JMP_INS         = 6'd33;
+    localparam                              LOAD_CTXT_FINISH_CHECK = 6'd29;
+    localparam                              STORE_TMP       = 6'd30;
+    localparam                              STORE_CTXT      = 6'd31;
+    localparam                              STORE_CTXT_FINISH_CHECK = 6'd32;
+    localparam                              GET_JMP_ADDR    = 6'd33;
+    localparam                              JMP_INS         = 6'd34;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -288,6 +291,19 @@ module AP_controller
                         addr_cam_auto = 0;
                     end
             end
+        else if(st_cur == LOAD_CTXT_FINISH_CHECK)
+            begin
+                if (addr_cam_auto < DATA_WIDTH - 1)
+                    begin
+                        addr_cam_auto = addr_cam_auto + 1;
+                    end
+                
+                else if (addr_cam_auto == DATA_WIDTH - 1 && data_cache_rdy == 1)
+                    begin
+                        matrix_cnt = matrix_cnt + 1;
+                        addr_cam_auto = 0;
+                    end
+            end
         else addr_cam_auto = addr_cam_auto;
     end
     
@@ -330,7 +346,9 @@ module AP_controller
 
     always @(op_code or addr_cam_auto)
     begin
-        if (op_code == STORERBR || op_code == STORECBC || addr_cam_auto == DATA_WIDTH - 1)
+        if (op_code == STORERBR 
+            || op_code == STORECBC 
+            || (addr_cam_auto == DATA_WIDTH - 1)&&(st_cur == STORE_CTXT_FINISH_CHECK))
         begin
             store_ddr_en_reg = 1;
         end
@@ -373,7 +391,8 @@ module AP_controller
                     addr_mem_col    = 0;
                     data_cmd        = 0;
                     ret_valid       = 0;
-                    store_ctxt_finih= 0;
+                    store_ctxt_finish= 0;
+                    ret_addr_pc_rdy = 0;
                     tmp_bit_cnt     = 0;
                     tmp_pass        = 0;
                     tmp_mask        = 0;
@@ -810,7 +829,7 @@ module AP_controller
                             st_next         = STORE_CTXT;
                             if (matrix_cnt == 3)
                             begin
-                                store_ctxt_finih = 1;
+                                store_ctxt_finish = 1;
                             end
                         end
                     
@@ -857,18 +876,106 @@ module AP_controller
                                     input_C = tmp_C_F_ret;
                                     input_F = tmp_C_F_ret;
                             end
-
-                            jmp_addr_pc = ret_addr_ret;
-                            data_addr   = ctxt_addr_ret;
+                            //jmp_addr_pc = ret_addr_ret;
+                            //data_addr   = ctxt_addr_ret; 
+                        end
+                    else if (data_cache_rdy == 1)
+                        begin
                             st_next     = LOAD_CTXT;
                         end
-                    
-                    else st_next        = LOAD_TMP;
+                    else begin
+                        st_next = LOAD_TMP;
+                        end
                 end
 
             LOAD_CTXT:
                 begin
+                    inout_mode  = ColxCol;
+                    data_cmd    = ColxCol_load;
+                    ins_inp_valid   = 0;
+                    addr_cam_col    = addr_cam_auto;
+                    if(matrix_cnt == 1)
+                        begin
+                            rst_InA             = 0;
+                            rst_InB             = 1;
+                            rst_InR             = 1;
+                            addr_input_cbc_A    = addr_cam_col;
+                            data_addr           = ctxt_addr_ret;
+                            if (data_cache_rdy)
+                                begin
+                                    input_A_cbc = data_in_cbc;
+                                    st_next     = LOAD_CTXT_FINISH_CHECK;
+                                end
+                            else begin
+                                st_next         = LOAD_CTXT;
+                            end
+                        end
+                    else if (matrix_cnt == 2)
+                        begin
+                            rst_InA             = 1;
+                            rst_InB             = 0;
+                            rst_InR             = 1;
+                            addr_input_cbc_B    = addr_cam_col;
+                            data_addr           = ctxt_addr_ret + DATA_DEPTH;
+                            if (data_cache_rdy)
+                                begin
+                                    input_B_cbc = data_in_cbc;
+                                    st_next     = LOAD_CTXT_FINISH_CHECK;
+                                end
+                            else begin
+                                st_next         = LOAD_CTXT;
+                            end
+                        end
+                    else if (matrix_cnt == 3)
+                        begin
+                            rst_InA             = 1;
+                            rst_InB             = 1;
+                            rst_InR             = 0;
+                            addr_input_cbc_A    = addr_cam_col;
+                            data_addr           = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+                            if (data_cache_rdy)
+                                begin
+                                    input_A_cbc = data_in_cbc;
+                                    st_next     = LOAD_CTXT_FINISH_CHECK;
+                                end
+                            else begin
+                                st_next         = LOAD_CTXT;
+                            end
+                        end
+                    else if (matrix_cnt == 0)
+                                begin
+                                    ret_addr_pc     = ret_addr_ret;
+                                    ret_addr_pc_rdy = 1;
+                                    data_cmd        = 0;
+                                    if (op_code == RET)
+                                        begin
+                                            st_next = LOAD_CTXT;
+                                        end
+                                    else begin
+                                        st_next         = START;
+                                    end
+                                end
+                    else st_next                = LOAD_CTXT;
+                end
+
+            LOAD_CTXT_FINISH_CHECK:
+                begin
+                    if(addr_cam_auto < DATA_WIDTH)
+                        begin
+                            st_next         = LOAD_CTXT;
+                        end
+                    else if (addr_cam_auto == DATA_WIDTH)
+                        begin
+                            st_next         = LOAD_CTXT;
+                            if (matrix_cnt == 3)
+                            begin
+                                load_ctxt_finish = 1;
+                            end
+                        end
                     
+                    else begin
+                        st_next         = START;
+                    end
                 end
 
             /* pass of ADD */

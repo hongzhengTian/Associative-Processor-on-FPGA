@@ -37,7 +37,8 @@ module DDR_cache_interface
 	output reg [9 : 0] 						rd_cnt_data,
 	output reg [9 : 0]						rd_cnt_data_write,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
-	input wire                              store_ctxt_finih,
+	input wire                              store_ctxt_finish,
+	input wire                              load_ctxt_finish,
 
 	/* interface of ddr_controller */
 	output reg 								rd_burst_req,           /* read request*/
@@ -158,7 +159,8 @@ begin
 end
 
 /* READ part */
-always@(rd_burst_data_valid or rd_burst_data or state or rd_burst_finish)
+//always@(rd_burst_data_valid or rd_burst_data or state or rd_burst_finish)
+always @ (posedge mem_clk)
 begin
 	if(state == MEM_READ_ISA)
 		begin

@@ -19,7 +19,8 @@ module data_cache
     input wire [2 : 0]                      data_cmd,
     input wire [ADDR_WIDTH_CAM - 1 : 0]     addr_cam_col,
     input wire                              store_ddr_en,
-    input wire                              store_ctxt_finih,
+    input wire                              store_ctxt_finish,
+    input wire                              load_ctxt_finish,
 
     output reg                              data_cache_rdy,
     output reg                              jmp_addr_rdy,
@@ -77,13 +78,13 @@ reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
 
 integer j ;
 
-always @(posedge store_ctxt_finih or negedge rst)
+always @(posedge store_ctxt_finish or negedge rst)
 begin
     if (!rst)
         begin
             addr_cur_ctxt  <= addr_init_ctxt;
         end
-    else if (store_ctxt_finih == 1)
+    else if (store_ctxt_finish == 1)
         begin
             addr_cur_ctxt <= addr_cur_ctxt + 3 * DATA_DEPTH;
         end
@@ -229,6 +230,7 @@ begin
         LOAD_DATA:
             begin
                 DATA_read_req   = 1;
+                data_cache_rdy  = 0;///////////////////////////////
                 tag_data        = data_addr;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
                 if (rd_cnt_data <= DATA_CACHE_DEPTH)
