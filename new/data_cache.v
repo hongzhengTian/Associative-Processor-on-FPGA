@@ -136,7 +136,7 @@ begin
                                 begin
                                     tag_data    = data_addr;
                                 end
-                            else if((tag_store == 1) && (data_addr > tag_data))
+                            else if((tag_store == 1) && (data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH))
                                 begin
                                     tag_data    = tag_data;
                                 end

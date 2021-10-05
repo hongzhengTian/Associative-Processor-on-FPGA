@@ -724,6 +724,13 @@ module AP_controller
                             st_next             = START;
                         end
 
+                        /*
+                        M_A:
+                        begin
+                            error               = ERROR_1 // A doesn't need to be output
+                        end
+                        */
+
                         default: st_next        = STORE_RBR;
                     endcase
                 end
