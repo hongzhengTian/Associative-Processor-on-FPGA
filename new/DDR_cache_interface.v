@@ -31,6 +31,7 @@ module DDR_cache_interface
     input wire                              DATA_store_req,
 	input wire								JMP_ADDR_read_req,
     input wire [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
+	input wire                              data_to_ddr_rdy,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
     output reg [DATA_WIDTH - 1 : 0]			DATA_to_cache,
@@ -147,7 +148,7 @@ begin
 
 	else if (state == MEM_WRITE_DATA_STORE)
 	begin
-		if(wr_burst_data_req)                       
+		if(wr_burst_data_req && data_to_ddr_rdy == 1)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{DATA_to_ddr}};  
 				wr_cnt          <= wr_cnt + 10'd1;
@@ -286,8 +287,8 @@ begin
 		CMD <= W_DATA_STORE;
 		wr_burst_req <= 1'b1;
 		rd_burst_req <= 1'b0; 
-		wr_burst_addr <= DATA_write_addr;
-		wr_burst_len <= DATA_CACHE_DEPTH + 1;
+		wr_burst_addr <= DATA_write_addr + 8;
+		wr_burst_len <= DATA_CACHE_DEPTH; ///////
 	end
 
 	else  if(ddr_rdy == 1 && ISA_read_req == 1)

@@ -10,6 +10,7 @@ module data_cache
 (
     /* the interface of system signal */
     input wire                              clk,
+    input wire                              clk_d,
     input wire                              rst,
 
     /* the interface of AP_ctrl */
@@ -35,6 +36,7 @@ module data_cache
     output reg                              JMP_ADDR_read_req,
     input wire [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
+    output reg                              data_to_ddr_rdy,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
     input wire [DATA_WIDTH - 1 : 0]			DATA_to_cache,
@@ -299,16 +301,39 @@ begin
         end    
 end
 
-always @(posedge clk) 
+/*always @(posedge clk) 
 begin
     if(st_cur == STORE_DATA && wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE))
         begin
+            data_to_ddr_rdy <= 1;
             DATA_to_ddr <= data_cache[data_store_cnt];
             data_store_cnt <= data_store_cnt + 1;
         end
     else begin
         DATA_to_ddr <= 0;
+        data_to_ddr_rdy <= 0;
     end
+end*/
+always @(clk_d or wr_burst_data_req or data_to_ddr_rdy)
+begin
+    if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
+        begin
+            data_store_cnt = data_store_cnt + 1;
+        end
+    else data_store_cnt = data_store_cnt;
 end
+
+always @(posedge clk)
+begin
+    if(st_cur == STORE_DATA)
+        begin
+            DATA_to_ddr <= data_cache[data_store_cnt];
+            data_to_ddr_rdy <= 1;
+        end
+    else begin
+        DATA_to_ddr <= 0;
+        data_to_ddr_rdy <= 0;
+    end
+end 
 
 endmodule
