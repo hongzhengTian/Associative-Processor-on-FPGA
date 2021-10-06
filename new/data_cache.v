@@ -56,6 +56,7 @@ localparam                                  GET_DATA_RBR    = 4'd6;
 localparam                                  GET_DATA_CBC    = 4'd7;
 localparam                                  SENT_ADDR       = 4'd8;
 localparam                                  LOAD_JMP_ADDR   = 4'd9;
+localparam                                  STORE_DATA_END  = 4'd10;
 
 /* data_cache command */
 localparam                                  RowxRow_load    = 3'd1;
@@ -283,9 +284,14 @@ begin
                 if (data_store_cnt < DATA_CACHE_DEPTH)
                     st_next     = STORE_DATA;
                 else begin
-                    st_next     = START;
-                    data_cache_rdy = 1;
+                    st_next     = STORE_DATA_END;
+                    //data_cache_rdy = 1;
                 end
+            end
+        STORE_DATA_END:
+            begin
+                st_next         = START;
+                data_cache_rdy  = 1;
             end
         default: st_next = START;
     endcase
@@ -314,7 +320,7 @@ begin
         data_to_ddr_rdy <= 0;
     end
 end*/
-always @(clk_d or wr_burst_data_req or data_to_ddr_rdy)
+always @(clk_d)
 begin
     if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
         begin
