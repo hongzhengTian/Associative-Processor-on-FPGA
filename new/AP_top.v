@@ -146,6 +146,7 @@ module AP_top
     wire                                JMP_ADDR_read_req;
     wire [DDR_ADDR_WIDTH : 0]           JMP_ADDR_to_cache;
     wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
+    wire                                data_to_ddr_rdy;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
     wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
@@ -363,6 +364,7 @@ module AP_top
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
     .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
+    .data_to_ddr_rdy        (data_to_ddr_rdy),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
     .DATA_to_cache          (DATA_to_cache),
@@ -432,6 +434,7 @@ module AP_top
     )data_cache_u 
     (
     .clk                    (ui_clk),
+    .clk_d                  (clk_d),
     .rst                    (sys_rst),
     .data_out_rbr           (data_out_rbr),
     .data_out_cbc           (data_out_cbc),
@@ -452,6 +455,7 @@ module AP_top
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
     .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
+    .data_to_ddr_rdy        (data_to_ddr_rdy),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
     .DATA_to_cache          (DATA_to_cache),

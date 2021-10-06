@@ -146,7 +146,7 @@ module AP_controller
     localparam                              M_R             = 2'd3;
 
     /* clock divider */
-    localparam                              NUM_DIV         = 8;
+    localparam                              NUM_DIV         = 2;
 
     /* states */
     localparam                              START           = 6'd1;
