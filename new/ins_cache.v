@@ -74,6 +74,7 @@ module ins_cache
     reg [INS_CNT_WIDTH - 1 : 0]             ins_load_cnt;
     //reg [9 : 0]                             isa_read_len;
     reg [9 : 0]                             rd_cnt_isa_reg;
+    reg                                         rd_burst_data_valid_delay;
 
     assign st_cur_ins_cache = st_cur;
 
@@ -130,7 +131,7 @@ module ins_cache
 
             SENT_INS:
                 begin
-                    if ((addr_ins - tag_ins) < ISA_DEPTH && addr_ins < {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
+                    if ((addr_ins - tag_ins) < ISA_DEPTH + 1&& addr_ins < {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
                             if(load_times <= 1)
                             instruction     = ins_cache[addr_ins - tag_ins];
@@ -170,9 +171,14 @@ module ins_cache
         endcase
     end
 
-    always @(instruction_to_cache or st_cur or rd_cnt_isa or rd_burst_data_valid) 
+    always @(posedge clk)
     begin
-        if (st_cur == LOAD_INS && rd_burst_data_valid == 1 && rd_cnt_isa >= 1)
+        rd_burst_data_valid_delay <= rd_burst_data_valid;
+    end
+
+    always @(st_cur or rd_cnt_isa) 
+    begin
+        if (st_cur == LOAD_INS && rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
         begin
             ins_cache_rdy = 0;
             ins_cache[rd_cnt_isa - 1] = instruction_to_cache;
