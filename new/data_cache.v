@@ -77,6 +77,7 @@ reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
 reg                                         tag_store; /* indicate that the current tag is for store data */
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
+reg                                         rd_burst_data_valid_delay;
 
 
 integer j ;
@@ -297,9 +298,14 @@ begin
     endcase
 end
 
-always @(DATA_to_cache or st_cur or rd_burst_data_valid or rd_cnt_data) 
+always @(posedge clk)
 begin
-    if(st_cur == LOAD_DATA && rd_burst_data_valid == 1 && rd_cnt_data >= 2)
+    rd_burst_data_valid_delay <= rd_burst_data_valid;
+end
+
+always @(st_cur or rd_cnt_data) 
+begin
+    if(st_cur == LOAD_DATA && rd_burst_data_valid_delay == 1 && rd_cnt_data >= 2)
         begin
             data_cache_rdy = 0;
             data_cache[rd_cnt_data - 2] = DATA_to_cache;
