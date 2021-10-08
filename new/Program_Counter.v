@@ -16,7 +16,7 @@ module program_counter
     input wire                              ins_inp_valid,
     input wire [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
     input wire                              ret_addr_pc_rdy,
-    input wire [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
+    (* DONT_TOUCH = "1" *)input wire [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
 
     /* the interface of instruction cache */
@@ -37,7 +37,6 @@ module program_counter
     reg [3 : 0]                             st_next;
     reg [3 : 0]                             st_cur;
 
-    reg [3 : 0]                             st_cur_ins_cache_delay;
     reg                                     int_set;
     wire [ADDR_WIDTH_MEM - 1 : 0] jmp_addr_pc_short;
     assign jmp_addr_pc_short = jmp_addr_pc [ADDR_WIDTH_MEM - 1 : 0];
@@ -53,10 +52,6 @@ module program_counter
             begin
                 st_cur          <= st_next;
             end    
-    end
-
-    always @(posedge clk) begin
-        st_cur_ins_cache_delay <= st_cur_ins_cache;
     end
 
     always @(posedge int or negedge rst or posedge ins_inp_valid)

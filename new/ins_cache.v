@@ -31,10 +31,8 @@ module ins_cache
     output reg                              ISA_read_req,
     output reg [DDR_ADDR_WIDTH -1 : 0]      ISA_read_addr,
     input wire [ISA_WIDTH - 1 : 0]          instruction_to_cache,
-    input wire                              ddr_rdy,
     input wire [9 : 0]                      rd_cnt_isa,
     input wire                              rd_burst_data_valid,
-    input wire [3 : 0]                      state_interface_module,
     output reg [9 : 0]                      isa_read_len
 );
 
@@ -66,7 +64,7 @@ module ins_cache
 
     reg [15 : 0]                            tag_ins;
     reg [ISA_WIDTH - 1 : 0]                 ins_cache [0 : ISA_DEPTH -1];
-    reg [ISA_WIDTH - 1 : 0]                 int_serve [0 : 9];
+    reg [ISA_WIDTH - 1 : 0]                 int_serve;
 
     reg [3 : 0]                             st_next;
     reg [3 : 0]                             st_cur;
@@ -90,6 +88,7 @@ module ins_cache
                 isa_read_len    <= 0;
                 rd_cnt_isa_reg  <= 0;
                 load_times      <= 0;
+                int_serve       <= 0;
             end
         else
             begin
@@ -142,7 +141,7 @@ module ins_cache
                         end
                     else if (addr_ins >= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
-                            instruction     = int_serve[addr_ins - {{ADDR_WIDTH_MEM - 1}{1'b0}}];
+                            instruction     = int_serve; //[addr_ins - {{ADDR_WIDTH_MEM - 1}{1'b0}}];
                         end
                     else st_next            = LOAD_INS;
                 end

@@ -36,10 +36,7 @@ module DDR_cache_interface
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
     output reg [DATA_WIDTH - 1 : 0]			DATA_to_cache,
 	output reg [9 : 0] 						rd_cnt_data,
-	output reg [9 : 0]						rd_cnt_data_write,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
-	input wire                              store_ctxt_finish,
-	input wire                              load_ctxt_finish,
 
 	/* interface of ddr_controller */
 	output reg 								rd_burst_req,           /* read request*/
@@ -50,7 +47,7 @@ module DDR_cache_interface
 	output reg [DDR_ADDR_WIDTH - 1 : 0] 	wr_burst_addr,        	/* starting addr of write burst*/
 	input wire 								rd_burst_data_valid,    /* data valid signal for readout*/
 	input wire 								wr_burst_data_req,      /* ready for write, app_wdf_rdy*/
-	input wire [DDR_DATA_WIDTH - 1 : 0] 	rd_burst_data,   		/* readout data*/
+	(* DONT_TOUCH = "1" *)input wire [DDR_DATA_WIDTH - 1 : 0] 	rd_burst_data,   		/* readout data*/
 	output reg [DDR_DATA_WIDTH - 1 : 0] 	wr_burst_data,    		/* write input data*/
 	input wire 								rd_burst_finish,        /* read burst finish*/
 	input wire 								wr_burst_finish        /* write burst finish*/
@@ -90,26 +87,12 @@ assign finish_flag_r_int_addr				= (state == MEM_READ_INT_ADDR_END);
 
 reg [2 : 0] CMD;
 
-reg [9 : 0] wr_cnt;
-reg         wr_burst_data_req_delay;
-
-
-/* wr_burst_data_req_delay, to make the store operation correct */
-/* because when we store the data from cache to ddr, the data will be sent
-after cache get the wr_burst_data_req signal, so there will be one clk delay,
-so ddr_interface should start get the data after one clk cycle, not at the
-right time when wr_burst_data_req set.*/
-always @(posedge mem_clk) begin
-	wr_burst_data_req_delay <= wr_burst_data_req;
-end
-
 /* WRITE part */
 always@(posedge mem_clk or posedge rst)
 begin
 	if(rst)
 	begin
 		wr_burst_data   <= {DDR_DATA_WIDTH{1'b0}}; /* put 128 binary 0 to data register */
-		wr_cnt          <= 10'd0;
 	end
 
 	else if(state == MEM_WRITE_ISA)
@@ -118,10 +101,7 @@ begin
 		if(wr_burst_data_req)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{Instruction}};  
-				wr_cnt          <= wr_cnt + 10'd1;
 			end
-		else if(wr_burst_finish)
-			wr_cnt <= 10'd0;
 	end
 
 	else if(state == MEM_WRITE_DATA)
@@ -129,10 +109,7 @@ begin
 		if(wr_burst_data_req)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{Data}};  
-				wr_cnt          <= wr_cnt + 10'd1;
 			end
-		else if(wr_burst_finish)
-			wr_cnt <= 10'd0;
 	end
 
 	else if(state == MEM_WRITE_INT_ADDR)
@@ -140,10 +117,7 @@ begin
 		if(wr_burst_data_req)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h00001a8};  
-				wr_cnt          <= wr_cnt + 10'd1;
 			end
-		else if(wr_burst_finish)
-			wr_cnt <= 10'd0;
 	end
 
 	else if (state == MEM_WRITE_DATA_STORE)
@@ -151,10 +125,7 @@ begin
 		if(wr_burst_data_req && data_to_ddr_rdy == 1)                       
 			begin
 				wr_burst_data   <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{DATA_to_ddr}};  
-				wr_cnt          <= wr_cnt + 10'd1;
 			end
-		else if(wr_burst_finish)
-			wr_cnt <= 10'd0;
 	end
 
 	else wr_burst_data   <= 0;
@@ -221,6 +192,7 @@ begin
 		rd_cnt_isa <= 10'd0;
 		rd_cnt_data <= 10'd0;
 		wr_burst_len <= TOTAL_ISA_DEPTH;
+		rd_burst_len <= 0;
 	end	
 	else if(finish_flag_w_isa)
 	begin
