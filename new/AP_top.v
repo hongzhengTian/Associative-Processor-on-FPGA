@@ -144,7 +144,7 @@ module AP_top
     wire                                DATA_read_req;
     wire                                DATA_store_req;
     wire                                JMP_ADDR_read_req;
-    wire [DDR_ADDR_WIDTH : 0]           JMP_ADDR_to_cache;
+    wire [DDR_ADDR_WIDTH - 1 : 0]       JMP_ADDR_to_cache;
     wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
     wire                                data_to_ddr_rdy;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
@@ -154,7 +154,6 @@ module AP_top
 
     wire [ADDR_WIDTH_MEM - 1 : 0]       ret_addr_ret;
     wire [ADDR_WIDTH_MEM - 1 : 0]       ctxt_addr_ret;
-    wire [ADDR_WIDTH_MEM - 1 : 0]       ctxt_addr_A_ret;
     wire [DATA_WIDTH - 1 : 0]           tmp_bit_cnt_ret;
     wire [2 : 0]                        tmp_pass_ret;
     wire [DATA_WIDTH - 1 : 0]           tmp_mask_ret;
@@ -202,7 +201,6 @@ module AP_top
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .ret_addr_ret           (ret_addr_ret),
     .ctxt_addr_ret          (ctxt_addr_ret),
-    .ctxt_addr_A_ret        (ctxt_addr_A_ret),
     .tmp_bit_cnt_ret        (tmp_bit_cnt_ret),
     .tmp_pass_ret           (tmp_pass_ret),
     .tmp_mask_ret           (tmp_mask_ret),
@@ -357,8 +355,6 @@ module AP_top
     .ddr_rdy                (ddr_rdy),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .store_ctxt_finish      (store_ctxt_finish),
-    .load_ctxt_finish       (load_ctxt_finish),
     .DATA_read_req          (DATA_read_req),
     .DATA_store_req         (DATA_store_req),
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
@@ -415,10 +411,8 @@ module AP_top
     .ISA_read_req           (ISA_read_req),
     .ISA_read_addr          (ISA_read_addr),
     .instruction_to_cache   (instruction_to_cache),
-    .ddr_rdy                (ddr_rdy),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .state_interface_module (state_interface_module),
     .load_times             (load_times),
     .isa_read_len           (isa_read_len)
     );
@@ -436,6 +430,7 @@ module AP_top
     .clk                    (ui_clk),
     .clk_d                  (clk_d),
     .rst                    (sys_rst),
+    .int_set                (int_set),
     .data_out_rbr           (data_out_rbr),
     .data_out_cbc           (data_out_cbc),
     .data_addr              (data_addr),
@@ -443,7 +438,6 @@ module AP_top
     .addr_cam_col           (addr_cam_col),
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finish      (store_ctxt_finish),
-    .load_ctxt_finish       (load_ctxt_finish),
     .data_cache_rdy         (data_cache_rdy),
     .jmp_addr_rdy           (jmp_addr_rdy),
     .jmp_addr               (jmp_addr),
@@ -484,7 +478,6 @@ module AP_top
     .ctxt_rdy               (ctxt_rdy),
     .ret_addr_ret           (ret_addr_ret),
     .ctxt_addr_ret          (ctxt_addr_ret),
-    .ctxt_addr_A_ret        (ctxt_addr_A_ret),
     .tmp_bit_cnt_ret        (tmp_bit_cnt_ret),
     .tmp_pass_ret           (tmp_pass_ret),
     .tmp_mask_ret           (tmp_mask_ret),

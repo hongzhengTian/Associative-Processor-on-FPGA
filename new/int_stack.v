@@ -23,7 +23,6 @@ module int_stack
 
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_ret,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_ret,
-    output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_A_ret,
     output reg [DATA_WIDTH - 1 : 0]         tmp_bit_cnt_ret,
     output reg [2 : 0]                      tmp_pass_ret,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask_ret,
@@ -37,7 +36,7 @@ localparam                                  STACK_CNT_WIDTH = 10;
 
 reg [2 : 0]                                 st_cur;
 reg [2 : 0]                                 st_next;
-reg [STACK_CNT_WIDTH : 0]                   stack_cnt;
+reg [STACK_CNT_WIDTH : 0]                   stack_cnt = 0;
 
 reg [ADDR_WIDTH_MEM - 1 : 0]                stack_ret_addr      [0 : STACK_DEPTH - 1];
 reg [ADDR_WIDTH_MEM - 1 : 0]                stack_ctxt_addr     [0 : STACK_DEPTH - 1];
@@ -77,7 +76,6 @@ begin
             end
             ret_addr_ret    <= 0;
             ctxt_addr_ret   <= 0;
-            ctxt_addr_A_ret <= 0;
             tmp_bit_cnt_ret <= 0;
             tmp_pass_ret    <= 0;
             tmp_mask_ret    <= 0;
@@ -173,7 +171,7 @@ begin
     if (!rst)
         begin
             st_cur          <= START;
-            stack_cnt       <= 0;
+            //stack_cnt       <= 0;
         end
     else
         begin

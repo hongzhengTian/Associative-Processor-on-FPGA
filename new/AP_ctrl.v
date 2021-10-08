@@ -54,7 +54,6 @@ module AP_controller
     /* temporary parameters from INT_STACK when RET signal set */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_ret,
     input wire [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_ret,
-    input wire [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_A_ret,
     input wire [DATA_WIDTH - 1 : 0]         tmp_bit_cnt_ret,
     input wire [2 : 0]                      tmp_pass_ret,
     input wire [DATA_WIDTH - 1 : 0]         tmp_mask_ret,
@@ -187,6 +186,7 @@ module AP_controller
     localparam                              STORE_CTXT_FINISH_CHECK = 6'd32;
     localparam                              GET_JMP_ADDR    = 6'd33;
     localparam                              JMP_INS         = 6'd34;
+    localparam                              RET_STATE       = 6'd35;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -209,7 +209,6 @@ module AP_controller
     //reg [2 : 0]                             pass_cur;
     reg [DATA_WIDTH - 1 : 0]                bit_cnt;
     reg [2 : 0]                             clk_cnt;
-    reg                                     ctxt_loaded;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -712,7 +711,6 @@ module AP_controller
                         begin
                             addr_output_rbr_B   = addr_cam;
                             data_out_rbr        = data_B_rbr;
-                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -720,16 +718,15 @@ module AP_controller
                         begin
                             addr_output_rbr_R   = addr_cam;
                             data_out_rbr        = data_R_rbr;
-                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
-                        /*
                         M_A:
                         begin
-                            error               = ERROR_1 // A doesn't need to be output
+                            addr_output_rbr_A   = addr_cam;
+                            data_out_rbr        = data_A_rbr;
+                            st_next             = START;
                         end
-                        */
 
                         default: st_next        = STORE_RBR;
                     endcase
@@ -959,7 +956,7 @@ module AP_controller
                                             st_next = LOAD_CTXT;
                                         end
                                     else begin
-                                        st_next         = START;
+                                        st_next     = RET_STATE;
                                     end
                                 end
                     else st_next                = LOAD_CTXT;
@@ -983,6 +980,30 @@ module AP_controller
                     else begin
                         st_next         = START;
                     end
+                end
+            
+            RET_STATE:
+                begin
+                    opt_cur         = op_code;
+                    case(op_code)
+                        ADD:
+                            begin
+                                st_next = RSTTAG_ADD;
+                            end
+                        SUB:
+                            begin
+                                st_next = RSTTAG_SUB;
+                            end
+                        TSC:
+                            begin
+                                st_next = RSTTAG_TSC;
+                            end
+                        ABS:
+                            begin
+                                st_next = RSTTAG_ABS;
+                            end
+                        default: st_next = RET_STATE;
+                    endcase
                 end
 
             /* pass of ADD */

@@ -10,8 +10,9 @@ module data_cache
 (
     /* the interface of system signal */
     input wire                              clk,
-    input wire                              clk_d,
+    (* DONT_TOUCH = "1" *)input wire                              clk_d,
     input wire                              rst,
+    input wire                              int_set,
 
     /* the interface of AP_ctrl */
     input wire [DATA_WIDTH - 1 : 0]         data_out_rbr,
@@ -21,7 +22,6 @@ module data_cache
     input wire [ADDR_WIDTH_CAM - 1 : 0]     addr_cam_col,
     input wire                              store_ddr_en,
     input wire                              store_ctxt_finish,
-    input wire                              load_ctxt_finish,
 
     output reg                              data_cache_rdy,
     output reg                              jmp_addr_rdy,
@@ -70,7 +70,6 @@ localparam                                  MEM_WRITE_DATA_STORE 	= 4'd9;
 
 reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
-reg [9 : 0]                                 data_cnt;
 reg [9 : 0]                                 data_store_cnt;
 
 reg [3 : 0]                                 st_next;
@@ -100,12 +99,10 @@ begin
     if (!rst)
         begin
             st_cur          <= START;
-            data_cnt        <= 0;
             tag_store       <= 0;
             tag_data        <= 16'hFFFF;
-            addr_cur_ctxt  <= addr_init_ctxt;
         end
-    else
+    else 
         begin
             st_cur          <= st_next;
         end    
@@ -123,10 +120,6 @@ begin
                 DATA_store_req  = 0;
                 DATA_to_ddr     = 0;
                 JMP_ADDR_read_req = 0;
-                if(data_cnt == DATA_CACHE_DEPTH - 1)
-                begin
-                    data_cnt = 0;
-                end
 
                 case (data_cmd)
                     RowxRow_load:   
@@ -200,9 +193,13 @@ begin
                         st_next         = START;
                     end
 
-                else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH)
+                else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH && int_set == 0)
                     begin
                         st_next         = LOAD_DATA;
+                    end
+                else if (int_set == 1)
+                    begin
+                        st_next         = GET_DATA_CBC;
                     end
                 else    st_next         = SENT_DATA_RBR;
             end
@@ -223,9 +220,13 @@ begin
                         st_next = START;
                     end
                 
-                else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH)
+                else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH && int_set == 0)
                     begin
                         st_next         = LOAD_DATA;
+                    end
+                else if (int_set == 1)
+                    begin
+                        st_next         = GET_DATA_CBC;
                     end
 
                 else st_next = SENT_DATA_CBC;
@@ -251,7 +252,6 @@ begin
                         data_cache_rdy                      = 1;
                         data_cache[data_addr - tag_data]    = data_out_rbr;
                         st_next                             = START;
-                        data_cnt                            = data_cnt + 1;
                     end
                 else if (store_ddr_en == 1)
                     begin

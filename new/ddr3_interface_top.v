@@ -28,8 +28,7 @@ module ddr3_interface_top
     output                              ddr_rdy,
     output [9 : 0]                      rd_cnt_isa,
     output                              rd_burst_data_valid,
-    input                               store_ctxt_finish,
-    input                               load_ctxt_finish,
+
 
     /* interface of DATA_cache */
     input                               DATA_read_req,
@@ -129,8 +128,6 @@ module ddr3_interface_top
         .rd_burst_data_valid(rd_burst_data_valid),
         .wr_burst_data_req(wr_burst_data_req),
         .JMP_ADDR_to_cache(JMP_ADDR_to_cache),
-        .store_ctxt_finish(store_ctxt_finish),
-        .load_ctxt_finish(load_ctxt_finish),
         .rd_burst_data(rd_burst_data),
         .wr_burst_data(wr_burst_data),
         .rd_burst_finish(rd_burst_finish),
@@ -161,7 +158,6 @@ module ddr3_interface_top
         .burst_finish(burst_finish),
         .rd_addr_cnt(rd_addr_cnt),
         .app_rd_data(app_rd_data),
-        .app_rd_data_end(app_rd_data_end),
         .app_rd_data_valid(app_rd_data_valid),
         .app_rdy(app_rdy),
         .app_wdf_rdy(app_wdf_rdy),
@@ -201,7 +197,7 @@ module ddr3_interface_top
     .app_wdf_end                    (app_wdf_end),  // input				app_wdf_end
     .app_wdf_wren                   (app_wdf_wren),  // input				app_wdf_wren
     .app_rd_data                    (app_rd_data),  // output [127:0]		app_rd_data
-    .app_rd_data_end                (app_rd_data_end),  // output			app_rd_data_end
+    .app_rd_data_end                (),  // output			app_rd_data_end
     .app_rd_data_valid              (app_rd_data_valid),  // output			app_rd_data_valid
     .app_rdy                        (app_rdy),  // output			app_rdy
     .app_wdf_rdy                    (app_wdf_rdy),  // output			app_wdf_rdy

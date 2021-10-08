@@ -30,7 +30,6 @@ module ddr_controller
    output [DDR_DATA_WIDTH/8-1:0]    app_wdf_mask,
    output                           app_wdf_wren,
    input [DDR_DATA_WIDTH-1:0]       app_rd_data,
-   input                            app_rd_data_end,
    input                            app_rd_data_valid,
    input                            app_rdy,
    input                            app_wdf_rdy,
@@ -85,7 +84,7 @@ assign rd_burst_data_valid = app_rd_data_valid;
  
 assign wr_burst_data_req = (state == MEM_WRITE) & app_wdf_rdy ;
  
-always@(posedge clk or posedge rst or posedge init_calib_complete)
+always@(posedge clk or posedge rst)
 begin
 	if(rst)
 	begin
@@ -106,6 +105,7 @@ begin
 		rd_data_cnt <= 0;
 		wr_addr_cnt <= 0;
 		wr_data_cnt <= 0;
+		app_addr_r 	<= 0;
 	end
 	else if(init_calib_complete ==  1'b1)
 	begin
