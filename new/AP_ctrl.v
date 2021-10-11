@@ -58,6 +58,10 @@ module AP_controller
     input wire [2 : 0]                      tmp_pass_ret,
     input wire [DATA_WIDTH - 1 : 0]         tmp_mask_ret,
     input wire [DATA_DEPTH - 1 : 0]         tmp_C_F_ret,
+    input wire                              tmp_key_A_ret,
+    input wire                              tmp_key_B_ret,
+    input wire                              tmp_key_C_ret,
+    input wire                              tmp_key_F_ret,
     output reg                              int_set,    
     output reg                              ret_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr,
@@ -66,6 +70,10 @@ module AP_controller
     output reg [2 : 0]                      tmp_pass,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask,
     output reg [DATA_DEPTH - 1 : 0]         tmp_C_F,
+    output reg                              tmp_key_A,
+    output reg                              tmp_key_B,
+    output reg                              tmp_key_C,
+    output reg                              tmp_key_F,
     input wire                              ctxt_rdy,
 
     /* the interface of CAM */
@@ -396,6 +404,10 @@ module AP_controller
                     tmp_pass        = 0;
                     tmp_mask        = 0;
                     tmp_C_F         = 0;
+                    tmp_key_A       = 0;
+                    tmp_key_B       = 0;
+                    tmp_key_C       = 0;
+                    tmp_key_F       = 0;
                     int_set         = 0;
                     ret_addr        = 0;
                     ctxt_addr       = 0;
@@ -409,7 +421,7 @@ module AP_controller
 
                         RET:
                             begin
-                                ret_valid       = 1;
+                                //ret_valid       = 1;
                                 st_next         = LOAD_TMP;
                             end
 
@@ -765,6 +777,10 @@ module AP_controller
                     tmp_bit_cnt = bit_cnt;
                     tmp_pass = pass;
                     tmp_mask = mask;
+                    tmp_key_A = key_A;
+                    tmp_key_B = key_B;
+                    tmp_key_C = key_C;
+                    tmp_key_F = key_F;
 
                     if(opt_cur == ADD || opt_cur == SUB)
                         begin
@@ -862,11 +878,16 @@ module AP_controller
 
             LOAD_TMP:
                 begin
+                    ret_valid       = 1;
                     if (ctxt_rdy == 1)
                         begin
                             bit_cnt     = tmp_bit_cnt_ret;
                             pass        = tmp_pass_ret;
                             mask        = tmp_mask_ret;
+                            key_A       = tmp_key_A_ret;
+                            key_B       = tmp_key_B_ret;
+                            key_C       = tmp_key_C_ret;
+                            key_F       = tmp_key_F_ret;
 
                             if (tag_C_F == 1)
                                 begin
@@ -957,6 +978,9 @@ module AP_controller
                                         end
                                     else begin
                                         st_next     = RET_STATE;
+                                        rst_InC     = 1;
+                                        rst_InF     = 1;
+                                        ret_valid   = 0;
                                     end
                                 end
                     else st_next                = LOAD_CTXT;

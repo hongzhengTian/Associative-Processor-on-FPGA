@@ -41,13 +41,13 @@ module cell_R
 
     integer i, j;
 
-    always @(negedge rst) begin
+    /*always @(negedge rst) begin
         for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
                 D[i][j] <= 0;
             end
         end
-    end
+    end*/
     
     always @(*)
     begin
@@ -73,21 +73,11 @@ module cell_R
                 3'b111: D[i][j] = Ip_row[j];
                 3'b001: 
                 begin
-                    /*if ((Pass == 1) || (Pass == 3)) D[i][j] <= ~Q[i*DATA_WIDTH + j];
-                    else D[i][j] <= Q[i*DATA_WIDTH + j];*/
-
                     if ((Pass == 1) || (Pass == 2)) D[i][j] = ~Q_A[i*DATA_WIDTH + j];
                     else D[i][j] = Q_A[i*DATA_WIDTH + j];
                 end
                 3'b011: 
                 begin
-                    /*if(Q_S[i] == 1)
-                        begin
-                            if ((Pass == 2) || (Pass == 4)) D[i][j] <= ~Q[i*DATA_WIDTH + j];
-                            else D[i][j] <= Q[i*DATA_WIDTH + j];
-                        end
-                    else if ((Q_S[i] == 0) || (Pass == 1)) D[i][j] <= Q_A[i*DATA_WIDTH + j];
-                    else D[i][j] <= Q[i*DATA_WIDTH + j];*/
                     if(Q_S[i] == 1)
                         begin
                             if ((Pass == 2) || (Pass == 3)) D[i][j] = ~Q_A[i*DATA_WIDTH + j];
@@ -122,21 +112,6 @@ module cell_R
                 3'b101: D[j][i] = Ip_col[j];
                 3'b110: D[j][i] = Ip_col[j];
                 3'b111: D[j][i] = Ip_col[j];
-                /*3'b001: 
-                begin
-                    if ((Pass == 1) || (Pass == 3)) D[j][i] <= ~Q[j*DATA_WIDTH + i];
-                    else D[j][i] <= Q[j*DATA_WIDTH + i];
-                end
-                3'b011: 
-                begin
-                    if(Q_S[j] == 1)
-                        begin
-                            if ((Pass == 2) || (Pass == 4)) D[j][i] <= ~Q[j*DATA_WIDTH + i];
-                            else D[j][i] <= Q[j*DATA_WIDTH + i];
-                        end
-                    else if ((Q_S[j] == 0) || (Pass == 1)) D[j][i] <= Q_A[j*DATA_WIDTH + i];
-                    else D[j][i] <= Q[j*DATA_WIDTH + i];
-                end*/
                 3'b001: 
                 begin
                     if ((Pass == 1) || (Pass == 2)) D[j][i] = ~Q_A[j*DATA_WIDTH + i];
@@ -211,37 +186,7 @@ module cell_R
       else D[j][i] = Q[j*DATA_WIDTH + i];
 
     end
-
-    /*always@(*)
-    begin
-    for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-        for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-            case({Ie[i][j], ABS_opt, (tag[i] & Mask[j])})
-            3'b100: D[i][j] <= Ip_row[j];
-            3'b101: D[i][j] <= Ip_row[j];
-            3'b110: D[i][j] <= Ip_row[j];
-            3'b111: D[i][j] <= Ip_row[j];
-            3'b001: 
-            begin
-              if ((Pass == 1) || (Pass == 3)) D[i][j] <= ~Q[i*DATA_WIDTH + j];
-              else D[i][j] <= Q[i*DATA_WIDTH + j];
-            end
-            3'b011: 
-            begin
-              if(Q_S[i] == 1)
-                begin
-                    if ((Pass == 2) || (Pass == 4)) D[i][j] <= ~Q[i*DATA_WIDTH + j];
-                    else D[i][j] <= Q[i*DATA_WIDTH + j];
-                end
-              else if ((Q_S[i] == 0) || (Pass == 1)) D[i][j] <= Q_A[i*DATA_WIDTH + j];
-              else D[i][j] <= Q[i*DATA_WIDTH + j];
-            end
-            default: D[i][j] <= Q[i*DATA_WIDTH + j];
-            endcase
-            end
-        end
-    end*/
-        
+    
     always@(posedge clk)
     for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
         for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
