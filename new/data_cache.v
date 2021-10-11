@@ -292,6 +292,14 @@ begin
         STORE_DATA_END:
             begin
                 st_next         = START;
+                //data_cache_rdy  = 1;
+                if (data_cmd == RowxRow_load || 
+                    data_cmd == ColxCol_load || 
+                    data_cmd == Addr_load)
+                    begin
+                        data_cache_rdy  = 0;
+                    end
+                else
                 data_cache_rdy  = 1;
             end
         default: st_next = START;

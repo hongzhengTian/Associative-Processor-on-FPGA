@@ -33,13 +33,22 @@ module program_counter
     localparam                              CNT_ADDR        = 4'd2;
     localparam                              LOAD_JMP_ADDR   = 4'd3;
     localparam                              LOAD_RET_ADDR   = 4'd4;
+    localparam                              LOAD_RET_END    = 4'd5;
 
     reg [3 : 0]                             st_next;
     reg [3 : 0]                             st_cur;
 
     reg                                     int_set;
+    reg                                     tmp_ret_valid;
+    wire                                    ret_finish;
     wire [ADDR_WIDTH_MEM - 1 : 0] jmp_addr_pc_short;
     assign jmp_addr_pc_short = jmp_addr_pc [ADDR_WIDTH_MEM - 1 : 0];
+    always @(posedge clk)
+    begin
+        tmp_ret_valid <= ret_valid;
+    end
+
+    assign ret_finish = tmp_ret_valid & ~ret_valid;
 
     /* state machine */
     always @(posedge clk or negedge rst)
@@ -102,16 +111,25 @@ module program_counter
                 end
             LOAD_RET_ADDR:
                 begin
+                    if (ret_finish == 1)
+                        begin
+                            st_next = LOAD_RET_END;
+                        end
+                    else st_next    = LOAD_RET_ADDR;
+                end
+            LOAD_RET_END:
+                begin
                     if (ins_inp_valid == 1)
                         begin
                             st_next = CNT_ADDR;
                         end
-                    else st_next    = LOAD_RET_ADDR;
+                    else st_next    = LOAD_RET_END;
                 end
             default: st_next = START;
         endcase
     end
-
+    
+    
     always @(posedge clk or negedge rst) 
     begin
         if (!rst)
@@ -155,6 +173,14 @@ module program_counter
                         end
                     else addr_ins <= addr_ins;
                 end
+            LOAD_RET_END:
+                begin
+                    if (ins_inp_valid == 1)
+                        begin
+                            addr_ins <= addr_ins + 1;
+                        end
+                    else addr_ins <= addr_ins;
+                end 
             default:;
             endcase
             end

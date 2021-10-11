@@ -19,6 +19,10 @@ module int_stack
     input wire [2 : 0]                      tmp_pass,
     input wire [DATA_WIDTH - 1 : 0]         tmp_mask,
     input wire [DATA_DEPTH - 1 : 0]         tmp_C_F,
+    input wire                              tmp_key_A,
+    input wire                              tmp_key_B,
+    input wire                              tmp_key_C,
+    input wire                              tmp_key_F,
     output reg                              ctxt_rdy,
 
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_ret,
@@ -26,7 +30,11 @@ module int_stack
     output reg [DATA_WIDTH - 1 : 0]         tmp_bit_cnt_ret,
     output reg [2 : 0]                      tmp_pass_ret,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask_ret,
-    output reg [DATA_DEPTH - 1 : 0]         tmp_C_F_ret
+    output reg [DATA_DEPTH - 1 : 0]         tmp_C_F_ret,
+    output reg                              tmp_key_A_ret,
+    output reg                              tmp_key_B_ret,
+    output reg                              tmp_key_C_ret,
+    output reg                              tmp_key_F_ret
 );
 
 localparam                                  START           = 3'd1;
@@ -44,6 +52,10 @@ reg [DATA_WIDTH - 1 : 0]                    stack_tmp_bit_cnt   [0 : STACK_DEPTH
 reg [2 : 0]                                 stack_tmp_pass      [0 : STACK_DEPTH - 1];
 reg [DATA_WIDTH - 1 : 0]                    stack_tmp_mask      [0 : STACK_DEPTH - 1];
 reg [DATA_DEPTH - 1 : 0]                    stack_tmp_C_F       [0 : STACK_DEPTH - 1];
+reg                                         stack_tmp_key_A     [0 : STACK_DEPTH - 1];
+reg                                         stack_tmp_key_B     [0 : STACK_DEPTH - 1];
+reg                                         stack_tmp_key_C     [0 : STACK_DEPTH - 1];
+reg                                         stack_tmp_key_F     [0 : STACK_DEPTH - 1];
 
 reg                                         temp_int_set;
 reg                                         temp_ret_set;
@@ -73,6 +85,10 @@ begin
                 stack_tmp_pass[i]       <= 0;
                 stack_tmp_mask[i]       <= 0;
                 stack_tmp_C_F[i]        <= 0;
+                stack_tmp_key_A[i]      <= 0;
+                stack_tmp_key_B[i]      <= 0;
+                stack_tmp_key_C[i]      <= 0;
+                stack_tmp_key_F[i]      <= 0;
             end
             ret_addr_ret    <= 0;
             ctxt_addr_ret   <= 0;
@@ -80,6 +96,10 @@ begin
             tmp_pass_ret    <= 0;
             tmp_mask_ret    <= 0;
             tmp_C_F_ret     <= 0;
+            tmp_key_A_ret   <= 0;
+            tmp_key_B_ret   <= 0;
+            tmp_key_C_ret   <= 0;
+            tmp_key_F_ret   <= 0;
         end
     case (st_cur)
         START:
@@ -117,6 +137,10 @@ begin
                 begin
                     stack_tmp_C_F[stack_cnt - 1][i]     <= tmp_C_F[i];
                 end
+            stack_tmp_key_A[stack_cnt - 1]              <= tmp_key_A;
+            stack_tmp_key_B[stack_cnt - 1]              <= tmp_key_B;
+            stack_tmp_key_C[stack_cnt - 1]              <= tmp_key_C;
+            stack_tmp_key_F[stack_cnt - 1]              <= tmp_key_F;
         end
 
     LOAD_CTXT:
@@ -151,6 +175,10 @@ begin
                 begin
                     tmp_C_F_ret[i]      <= stack_tmp_C_F[stack_cnt][i];
                 end
+            tmp_key_A_ret               <= stack_tmp_key_A[stack_cnt];
+            tmp_key_B_ret               <= stack_tmp_key_B[stack_cnt];
+            tmp_key_C_ret               <= stack_tmp_key_C[stack_cnt];
+            tmp_key_F_ret               <= stack_tmp_key_F[stack_cnt];
         end
 
     default: 
@@ -161,6 +189,10 @@ begin
             tmp_pass_ret     <= 0;
             tmp_mask_ret     <= 0;
             tmp_C_F_ret      <= 0;
+            tmp_key_A_ret    <= 0;
+            tmp_key_B_ret    <= 0;
+            tmp_key_C_ret    <= 0;
+            tmp_key_F_ret    <= 0;
         end
     endcase
 end

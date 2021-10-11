@@ -72,6 +72,14 @@ module AP_top
     wire [2 : 0]                        tmp_pass;
     wire [DATA_WIDTH - 1 : 0]           tmp_mask;
     wire [DATA_DEPTH - 1 : 0]           tmp_C_F;
+    wire                                tmp_key_A;
+    wire                                tmp_key_B;
+    wire                                tmp_key_C;
+    wire                                tmp_key_F;
+    wire                                tmp_key_A_ret;
+    wire                                tmp_key_B_ret;
+    wire                                tmp_key_C_ret;
+    wire                                tmp_key_F_ret;
     wire [DATA_WIDTH - 1 : 0]           input_A_rbr;
     wire [DATA_DEPTH - 1 : 0]           input_A_cbc;
     wire [ADDR_WIDTH_CAM - 1 : 0]       addr_input_rbr_A;
@@ -205,6 +213,10 @@ module AP_top
     .tmp_pass_ret           (tmp_pass_ret),
     .tmp_mask_ret           (tmp_mask_ret),
     .tmp_C_F_ret            (tmp_C_F_ret),
+    .tmp_key_A_ret          (tmp_key_A_ret),
+    .tmp_key_B_ret          (tmp_key_B_ret),
+    .tmp_key_C_ret          (tmp_key_C_ret),
+    .tmp_key_F_ret          (tmp_key_F_ret),
     .int_set                (int_set),
     .ret_valid              (ret_valid),
     .ret_addr               (ret_addr),
@@ -213,6 +225,10 @@ module AP_top
     .tmp_pass               (tmp_pass),
     .tmp_mask               (tmp_mask),
     .tmp_C_F                (tmp_C_F),
+    .tmp_key_A              (tmp_key_A),
+    .tmp_key_B              (tmp_key_B),
+    .tmp_key_C              (tmp_key_C),
+    .tmp_key_F              (tmp_key_F),
     .ctxt_rdy               (ctxt_rdy),
     .data_A_rbr             (data_A_rbr),
     .data_A_cbc             (data_A_cbc),
@@ -475,13 +491,21 @@ module AP_top
     .tmp_pass               (tmp_pass),
     .tmp_mask               (tmp_mask),
     .tmp_C_F                (tmp_C_F),
+    .tmp_key_A              (tmp_key_A),
+    .tmp_key_B              (tmp_key_B),
+    .tmp_key_C              (tmp_key_C),
+    .tmp_key_F              (tmp_key_F),
     .ctxt_rdy               (ctxt_rdy),
     .ret_addr_ret           (ret_addr_ret),
     .ctxt_addr_ret          (ctxt_addr_ret),
     .tmp_bit_cnt_ret        (tmp_bit_cnt_ret),
     .tmp_pass_ret           (tmp_pass_ret),
     .tmp_mask_ret           (tmp_mask_ret),
-    .tmp_C_F_ret            (tmp_C_F_ret)
+    .tmp_C_F_ret            (tmp_C_F_ret),
+    .tmp_key_A_ret          (tmp_key_A_ret),
+    .tmp_key_B_ret          (tmp_key_B_ret),
+    .tmp_key_C_ret          (tmp_key_C_ret),
+    .tmp_key_F_ret          (tmp_key_F_ret)
     );
     
 endmodule
