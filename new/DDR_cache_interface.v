@@ -190,7 +190,7 @@ begin
 		rd_burst_addr <= 0;
 		wr_burst_addr <= 0;
 		rd_cnt_isa <= 10'd0;
-		rd_cnt_data <= 10'd0;
+		//rd_cnt_data <= 10'd0;
 		wr_burst_len <= TOTAL_ISA_DEPTH;
 		rd_burst_len <= 0;
 	end	

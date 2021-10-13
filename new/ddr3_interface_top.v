@@ -88,6 +88,7 @@ module ddr3_interface_top
 	wire                        rd_burst_finish;              
 	wire                        wr_burst_finish;           
 	wire                        burst_finish;
+    wire [11:0]                 device_temp;
     
     DDR_cache_interface #(
     DDR_DATA_WIDTH, 
@@ -210,6 +211,7 @@ module ddr3_interface_top
     .ui_clk                         (ui_clk),  // output			ui_clk
     .ui_clk_sync_rst                (ui_clk_sync_rst),  // output			ui_clk_sync_rst
     .app_wdf_mask                   (app_wdf_mask),  // input [15:0]		app_wdf_mask
+    .device_temp                    (device_temp),
     // System Clock Ports
     .sys_clk_i                      (sys_clk_i),
     .sys_rst                        (sys_rst) // input sys_rst

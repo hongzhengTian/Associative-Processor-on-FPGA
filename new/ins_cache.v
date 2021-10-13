@@ -96,6 +96,11 @@ module ins_cache
             end    
     end
 
+    always @(posedge clk or negedge rst)
+    begin
+        
+    end
+
     always @(posedge clk)
     begin
         if (TOTAL_ISA_DEPTH - rd_cnt_isa_reg > ISA_DEPTH )

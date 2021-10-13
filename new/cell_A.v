@@ -88,7 +88,7 @@ integer i, j;
         end
       end
 
-      else if (input_mode == COPY_B || input_mode == COPY_A)
+      else if (input_mode == COPY_B)
       begin
           for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -98,7 +98,7 @@ integer i, j;
         end
       end
 
-      else if (input_mode == COPY_R || input_mode == COPY_A)
+      else if (input_mode == COPY_R)
       begin
           for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -108,7 +108,18 @@ integer i, j;
         end
       end
 
-      else D[i][j] = Q[i*DATA_WIDTH + j];
+      else //if (input_mode == COPY_A)
+      begin
+          Ie_C = {{DATA_WIDTH}{1'b0}};
+          Ie_R = {{DATA_DEPTH}{1'b0}};
+          for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+            for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+                 D[i][j] = Q[i*DATA_WIDTH + j];
+            end
+        end
+      end
+
+      //else D[i][j] = Q[i*DATA_WIDTH + j];
 
     end
     

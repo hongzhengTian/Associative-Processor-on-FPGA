@@ -196,7 +196,7 @@ COPY_A) cell_R(
 .tag(tag_TSC),
 .Mask(Mask),
 .clk(clk),
-.rst(rst),
+//.rst(rst),
 .Q_out_row(Q_out_R_row),
 .Q_out_col(Q_out_R_col),
 .Q(Q_R)

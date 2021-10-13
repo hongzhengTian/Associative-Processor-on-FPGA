@@ -26,7 +26,7 @@ module cell_R
     input wire [DATA_DEPTH - 1 : 0]tag,
     input wire [DATA_WIDTH - 1 : 0]Mask,
     input wire clk,
-    input wire rst,
+    //input wire rst,
     output reg [DATA_WIDTH - 1 : 0] Q_out_row,
     output reg [DATA_DEPTH - 1 : 0] Q_out_col,
     output reg [DATA_WIDTH * DATA_DEPTH - 1 : 0]Q
@@ -40,14 +40,6 @@ module cell_R
     reg [DATA_WIDTH - 1: 0] Ie [0 : DATA_DEPTH - 1];
 
     integer i, j;
-
-    /*always @(negedge rst) begin
-        for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-            for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                D[i][j] <= 0;
-            end
-        end
-    end*/
     
     always @(*)
     begin
@@ -133,7 +125,7 @@ module cell_R
           end
         end
 
-        else if (input_mode == COPY_A || input_mode == COPY_R)
+        else if (input_mode == COPY_A)
         begin
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -158,7 +150,7 @@ module cell_R
             end
         end
 
-        else if (input_mode == COPY_B || input_mode == COPY_R)
+        else if (input_mode == COPY_B)
         begin
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -183,7 +175,33 @@ module cell_R
             end
         end
 
-      else D[j][i] = Q[j*DATA_WIDTH + i];
+        else
+        begin
+            Ie_C = {{DATA_WIDTH}{1'b0}};
+            Ie_R = {{DATA_DEPTH}{1'b0}};
+            for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+                for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+                    if(ABS_opt == 0 && (tag[i] & Mask[j]) == 1)
+                        begin
+                            if ((Pass == 1) || (Pass == 2)) D[i][j] = ~Q_A[i*DATA_WIDTH + j];
+                            else D[i][j] = Q_A[i*DATA_WIDTH + j];
+                        end
+                    else if (ABS_opt == 1 && (tag[i] & Mask[j]) == 1) 
+                        begin
+                            if(Q_S[i] == 1)
+                                begin
+                                    if ((Pass == 2) || (Pass == 3)) D[i][j] = ~Q_A[i*DATA_WIDTH + j];
+                                    else D[i][j] = Q_A[i*DATA_WIDTH + j];
+                                end
+                            else if ((Q_S[i] == 0) || (Pass == 1)) D[i][j] = Q_A[i*DATA_WIDTH + j];
+                            else D[i][j] = Q_A[i*DATA_WIDTH + j];
+                        end
+                    else D[i][j] = Q[i*DATA_WIDTH + j];
+                end
+            end
+        end
+
+      //else D[j][i] = Q[j*DATA_WIDTH + i];
 
     end
     
