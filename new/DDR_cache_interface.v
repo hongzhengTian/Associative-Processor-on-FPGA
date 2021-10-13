@@ -133,9 +133,14 @@ end
 
 /* READ part */
 //always@(rd_burst_data_valid or rd_burst_data or state or rd_burst_finish)
-always @ (posedge mem_clk)
+always @ (posedge mem_clk or posedge rst)
 begin
-	if(state == MEM_READ_ISA)
+	if (rst)
+		begin
+			rd_cnt_isa <= 10'd0;
+			rd_cnt_data <= 10'd0;
+		end
+	else if(state == MEM_READ_ISA)
 		begin
 			instruction_to_cache <= rd_burst_data[ISA_WIDTH - 1 : 0];
 			if(rd_burst_data_valid)
@@ -189,8 +194,7 @@ begin
 		rd_burst_req <= 1'b0;
 		rd_burst_addr <= 0;
 		wr_burst_addr <= 0;
-		rd_cnt_isa <= 10'd0;
-		//rd_cnt_data <= 10'd0;
+		
 		wr_burst_len <= TOTAL_ISA_DEPTH;
 		rd_burst_len <= 0;
 	end	
