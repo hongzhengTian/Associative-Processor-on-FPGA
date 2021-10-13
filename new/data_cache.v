@@ -123,28 +123,28 @@ begin
                                 begin
                                     if ((tag_store == 1) && (data_addr <= tag_data))
                                         begin
-                                            tag_data    = data_addr;
+                                            tag_data    <= data_addr;
                                         end
                                     else if((tag_store == 1) && (data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH))
                                         begin
-                                            tag_data    = tag_data;
+                                            tag_data    <= tag_data;
                                         end
                                     else begin
-                                        tag_data    = data_addr;
-                                        tag_store   = 1;
+                                        tag_data    <= data_addr;
+                                        tag_store   <= 1;
                                     end
                                 end
                             ColxCol_store:
                                 begin
                                     if (store_ddr_en == 0)
                                         begin
-                                            tag_data    = data_addr;
-                                            tag_store   = 1;
+                                            tag_data    <= data_addr;
+                                            tag_store   <= 1;
                                         end
                                     else 
                                         begin
-                                            tag_data    = tag_data;
-                                            tag_store   = tag_store;
+                                            tag_data    <= tag_data;
+                                            tag_store   <= tag_store;
                                         end
                                 end
                             default:;
@@ -152,11 +152,11 @@ begin
                     end
                 SENT_ADDR:
                     begin
-                        tag_data = data_addr;
+                        tag_data <= data_addr;
                     end
                 LOAD_DATA:
                     begin
-                        tag_data = data_addr;
+                        tag_data <= data_addr;
                     end
                 default:;
             endcase
