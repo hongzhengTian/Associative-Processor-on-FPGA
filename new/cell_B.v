@@ -134,7 +134,7 @@ module cell_B
         end
       end
 
-      else if (input_mode == COPY_A || input_mode == COPY_B)
+      else if (input_mode == COPY_A)
       begin
           for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -146,7 +146,7 @@ module cell_B
         end
       end
 
-      else if (input_mode == COPY_R || input_mode == COPY_B)
+      else if (input_mode == COPY_R)
       begin
           for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -158,7 +158,22 @@ module cell_B
         end
       end
 
-      else D[j][i] = Q[j*DATA_WIDTH + i];
+      else
+      begin
+          Ie_C = {{DATA_WIDTH}{1'b0}};
+          Ie_R = {{DATA_DEPTH}{1'b0}};
+          for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+            for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+                if (tag[i] == 1 && Mask[j] == 1 )
+                    begin
+                        D[i][j] = Qb[i*DATA_WIDTH + j];
+                    end
+                else D[i][j] = Q[i*DATA_WIDTH + j];
+            end
+        end
+      end
+
+      //else D[j][i] = Q[j*DATA_WIDTH + i];
 
     end
 

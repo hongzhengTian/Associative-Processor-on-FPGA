@@ -99,13 +99,68 @@ begin
     if (!rst)
         begin
             st_cur          <= START;
-            tag_store       <= 0;
-            tag_data        <= 16'hFFFF;
         end
     else 
         begin
             st_cur          <= st_next;
         end    
+end
+
+always @(posedge clk or negedge rst) 
+begin
+    if (!rst)
+        begin
+            tag_store       <= 0;
+            tag_data        <= 16'hFFFF;
+        end
+    else 
+        begin
+            case (st_cur)
+                START:
+                    begin
+                        case (data_cmd)
+                            RowxRow_store:
+                                begin
+                                    if ((tag_store == 1) && (data_addr <= tag_data))
+                                        begin
+                                            tag_data    = data_addr;
+                                        end
+                                    else if((tag_store == 1) && (data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH))
+                                        begin
+                                            tag_data    = tag_data;
+                                        end
+                                    else begin
+                                        tag_data    = data_addr;
+                                        tag_store   = 1;
+                                    end
+                                end
+                            ColxCol_store:
+                                begin
+                                    if (store_ddr_en == 0)
+                                        begin
+                                            tag_data    = data_addr;
+                                            tag_store   = 1;
+                                        end
+                                    else 
+                                        begin
+                                            tag_data    = tag_data;
+                                            tag_store   = tag_store;
+                                        end
+                                end
+                            default:;
+                        endcase
+                    end
+                SENT_ADDR:
+                    begin
+                        tag_data = data_addr;
+                    end
+                LOAD_DATA:
+                    begin
+                        tag_data = data_addr;
+                    end
+                default:;
+            endcase
+        end
 end
 
 always @(*) 
@@ -129,18 +184,6 @@ begin
                     RowxRow_store:  
                         begin
                             st_next     = GET_DATA_RBR;
-                            if ((tag_store == 1) && (data_addr <= tag_data))
-                                begin
-                                    tag_data    = data_addr;
-                                end
-                            else if((tag_store == 1) && (data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH))
-                                begin
-                                    tag_data    = tag_data;
-                                end
-                            else begin
-                                tag_data    = data_addr;
-                                tag_store   = 1;
-                            end
                         end
                     ColxCol_load:   
                         begin
@@ -151,8 +194,6 @@ begin
                             if (store_ddr_en == 0)
                                 begin
                                     st_next     = GET_DATA_CBC;
-                                    tag_data    = data_addr;
-                                    tag_store   = 1;
                                 end
                             else begin
                                 st_next = STORE_DATA;
@@ -169,7 +210,7 @@ begin
         SENT_ADDR:
             begin
                 JMP_ADDR_read_req   = 1;
-                tag_data        = data_addr;
+                
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
                 if(rd_burst_data_valid == 1 && rd_cnt_data == 1)
                     begin
@@ -236,7 +277,7 @@ begin
             begin
                 DATA_read_req   = 1;
                 data_cache_rdy  = 0;///////////////////////////////
-                tag_data        = data_addr;
+                
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
                 if (rd_cnt_data <= DATA_CACHE_DEPTH)
                     st_next     = LOAD_DATA;
