@@ -10,7 +10,6 @@ module CAM
   )
     (
     input wire clk,
-    input wire rst,
     input wire [2 : 0]input_mode,
     input wire [DATA_WIDTH - 1 : 0] Mask,
     input wire [2:0]Pass,
@@ -196,7 +195,6 @@ COPY_A) cell_R(
 .tag(tag_TSC),
 .Mask(Mask),
 .clk(clk),
-//.rst(rst),
 .Q_out_row(Q_out_R_row),
 .Q_out_col(Q_out_R_col),
 .Q(Q_R)
