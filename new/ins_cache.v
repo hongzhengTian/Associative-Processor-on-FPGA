@@ -83,8 +83,6 @@ module ins_cache
             begin
                 st_cur          <= START;
                 ins_cache_init  <= 0;
-                ins_cache_rdy   <= 0;
-                //ins_cache [0]   <= 0;
                 isa_read_len    <= 0;
                 rd_cnt_isa_reg  <= 0;
                 load_times      <= 0;
@@ -94,6 +92,33 @@ module ins_cache
             begin
                 st_cur          <= st_next;
             end    
+    end
+
+    always @(posedge clk or negedge rst)
+    begin
+        if (!rst)
+            begin
+                ins_cache_rdy <= 0;
+            end
+        else begin
+            case (st_cur)
+                START:
+                    begin
+                        if (ins_cache_init == 1)
+                            begin
+                                ins_cache_rdy <= 1;
+                            end
+                    end
+                LOAD_INS:
+                    begin
+                        if (rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
+                            begin
+                                ins_cache_rdy <= 0;
+                            end
+                    end
+                default:;
+            endcase
+        end
     end
 
     always @(posedge clk)
@@ -118,13 +143,7 @@ module ins_cache
                         end
                     else begin
                         ins_valid = 0;
-                        ins_cache_rdy = 1;
                         st_next = SENT_INS;
-                        /*if (addr_ins != 0)
-                        begin
-                            st_next = SENT_INS;
-                        end
-                        else st_next = START;*/
                     end
                 end
 
@@ -179,9 +198,7 @@ module ins_cache
     begin
         if (st_cur == LOAD_INS && rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
         begin
-            ins_cache_rdy = 0;
             ins_cache[rd_cnt_isa - 1] = instruction_to_cache;
-            //ins_load_cnt = ins_load_cnt + 1;
         end
     end
 
