@@ -293,7 +293,6 @@ module AP_top
     .Key_A                  (key_A),
     .Mask                   (mask),
     .clk                    (cam_clk_i),
-    .rst                    (sys_rst),
     .addr_input_Row_B       (addr_input_rbr_B),
     .addr_input_Col_B       (addr_input_cbc_B),
     .rstInB                 (rst_InB),
