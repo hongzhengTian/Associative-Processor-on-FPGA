@@ -70,9 +70,8 @@ module ins_cache
     reg [3 : 0]                             st_cur;
     reg                                     ins_cache_init;
     reg [INS_CNT_WIDTH - 1 : 0]             ins_load_cnt;
-    //reg [9 : 0]                             isa_read_len;
     reg [9 : 0]                             rd_cnt_isa_reg;
-    reg                                         rd_burst_data_valid_delay;
+    reg                                     rd_burst_data_valid_delay;
 
     assign st_cur_ins_cache = st_cur;
 
@@ -82,10 +81,8 @@ module ins_cache
         if (!rst)
             begin
                 st_cur          <= START;
-                ins_cache_init  <= 0;
-                isa_read_len    <= 0;
-                rd_cnt_isa_reg  <= 0;
-                load_times      <= 0;
+                
+                
                 int_serve       <= 0;
             end
         else
@@ -98,7 +95,10 @@ module ins_cache
     begin
         if (!rst)
             begin
-                ins_cache_rdy <= 0;
+                ins_cache_rdy   <= 0;
+                rd_cnt_isa_reg  <= 0;
+                ins_cache_init  <= 0;
+                load_times      <= 0;
             end
         else begin
             case (st_cur)
@@ -115,15 +115,24 @@ module ins_cache
                             begin
                                 ins_cache_rdy <= 0;
                             end
+                        if (rd_cnt_isa >= isa_read_len)
+                            begin
+                                rd_cnt_isa_reg <=rd_cnt_isa;
+                                ins_cache_init <= 1;
+                            end
                     end
                 default:;
             endcase
         end
     end
 
-    always @(posedge clk)
+    always @(posedge clk or negedge rst)
     begin
-        if (TOTAL_ISA_DEPTH - rd_cnt_isa_reg > ISA_DEPTH )
+        if (!rst)
+            begin
+                isa_read_len <= 0;
+            end
+        else if (TOTAL_ISA_DEPTH - rd_cnt_isa_reg > ISA_DEPTH )
             begin
                 isa_read_len <= ISA_DEPTH;
             end
@@ -179,9 +188,9 @@ module ins_cache
                     else begin
                         st_next = START;
                         ISA_read_req = 0;
-                        ins_cache_init = 1;
+                        
                         load_times = load_times + 1;
-                        rd_cnt_isa_reg =rd_cnt_isa;
+                        
                     end
                 end
             
