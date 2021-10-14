@@ -81,9 +81,6 @@ module ins_cache
         if (!rst)
             begin
                 st_cur          <= START;
-                
-                
-                int_serve       <= 0;
             end
         else
             begin
@@ -99,6 +96,7 @@ module ins_cache
                 rd_cnt_isa_reg  <= 0;
                 ins_cache_init  <= 0;
                 load_times      <= 0;
+                int_serve       <= 0;
             end
         else begin
             case (st_cur)
@@ -117,8 +115,9 @@ module ins_cache
                             end
                         if (rd_cnt_isa >= isa_read_len)
                             begin
-                                rd_cnt_isa_reg <=rd_cnt_isa;
-                                ins_cache_init <= 1;
+                                rd_cnt_isa_reg  <= rd_cnt_isa;
+                                ins_cache_init  <= 1;
+                                load_times      <= load_times + 1;
                             end
                     end
                 default:;
@@ -183,14 +182,10 @@ module ins_cache
                     if (rd_cnt_isa < isa_read_len )//&& state_interface_module == MEM_READ_ISA)
                         begin
                             st_next = LOAD_INS;
-                            
                         end
                     else begin
                         st_next = START;
                         ISA_read_req = 0;
-                        
-                        load_times = load_times + 1;
-                        
                     end
                 end
             
