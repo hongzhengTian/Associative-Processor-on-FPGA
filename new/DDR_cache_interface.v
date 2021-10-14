@@ -137,8 +137,11 @@ always @ (posedge mem_clk or posedge rst)
 begin
 	if (rst)
 		begin
-			rd_cnt_isa <= 10'd0;
-			rd_cnt_data <= 10'd0;
+			rd_cnt_isa 				<= 10'd0;
+			rd_cnt_data 			<= 10'd0;
+			instruction_to_cache 	<= 0;
+			DATA_to_cache 			<= 0;
+			JMP_ADDR_to_cache 		<= 0;
 		end
 	else if(state == MEM_READ_ISA)
 		begin
