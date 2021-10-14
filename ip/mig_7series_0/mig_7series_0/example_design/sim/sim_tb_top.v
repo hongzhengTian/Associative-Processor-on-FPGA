@@ -162,8 +162,8 @@ module sim_tb_top;
 
     initial 
     begin
-        $readmemb("C:/Users/42207/OneDrive/UCR/UCI/Project/AP/program/dataGenandCompiler/ISA_Bin.txt", MEM_ISA);
-        $readmemb("C:/Users/42207/OneDrive/UCR/UCI/Project/AP/program/dataGenandCompiler/DATA.txt", MEM_DATA);
+        $readmemb("C:/Users/42207/OneDrive/UCI/Project/AP/program/dataGenandCompiler/ISA_Bin.txt", MEM_ISA);
+        $readmemb("C:/Users/42207/OneDrive/UCI/Project/AP/program/dataGenandCompiler/DATA.txt", MEM_DATA);
         /*MEM_ISA[0]      <= 0;
         MEM_ISA[1]      <= {RESET, 8'd0, 2'd0, 16'd0};
         MEM_ISA[2]      <= {LOADRBR, 8'd0, M_A, 16'h1000};
@@ -182,7 +182,6 @@ module sim_tb_top;
         MEM_ISA[15]     <= {LOADRBR, 8'd13, M_A, 16'h100D};
         MEM_ISA[16]     <= {LOADRBR, 8'd14, M_A, 16'h100E};
         MEM_ISA[17]     <= {LOADRBR, 8'd15, M_A, 16'h100F};
-
         MEM_ISA[18]     <= {LOADCBC, 8'd0, M_B, 16'h1010};
         MEM_ISA[19]     <= {LOADCBC, 8'd1, M_B, 16'h1010};
         MEM_ISA[20]     <= {LOADCBC, 8'd2, M_B, 16'h1010};
@@ -191,9 +190,7 @@ module sim_tb_top;
         MEM_ISA[23]     <= {LOADCBC, 8'd5, M_B, 16'h1010};
         MEM_ISA[24]     <= {LOADCBC, 8'd6, M_B, 16'h1010};
         MEM_ISA[25]     <= {LOADCBC, 8'd7, M_B, 16'h1010};
-
         MEM_ISA[26]     <= {ADD, 8'd0, 2'd0, 16'd0};
-
         MEM_ISA[27]     <= {STORERBR, 8'd0, M_B, 16'h1020};
         MEM_ISA[28]     <= {STORERBR, 8'd1, M_B, 16'h1021};
         MEM_ISA[29]     <= {STORERBR, 8'd2, M_B, 16'h1022};
@@ -210,7 +207,6 @@ module sim_tb_top;
         MEM_ISA[40]     <= {STORERBR, 8'd13, M_B, 16'h102D};
         MEM_ISA[41]     <= {STORERBR, 8'd14, M_B, 16'h102E};
         MEM_ISA[42]     <= {STORERBR, 8'd15, M_B, 16'h102F};
-
         MEM_ISA[43]     <= {LOADRBR, 8'd0, M_A, 16'h1030};
         MEM_ISA[44]     <= {LOADRBR, 8'd1, M_A, 16'h1031};
         MEM_ISA[45]     <= {LOADRBR, 8'd2, M_A, 16'h1032};
@@ -227,13 +223,11 @@ module sim_tb_top;
         MEM_ISA[56]     <= {LOADRBR, 8'd13, M_A, 16'h103D};
         MEM_ISA[57]     <= {LOADRBR, 8'd14, M_A, 16'h103E};
         MEM_ISA[58]     <= {LOADRBR, 8'd15, M_A, 16'h103F};
-
         MEM_ISA[59]     <= {ADD, 8'd0, 2'd0, 16'd0};
         MEM_ISA[60]     <= {COPY, 6'd0, M_A, M_B, 16'h0000};
         MEM_ISA[61]     <= {ADD, 8'd0, 2'd0, 16'd0};
         MEM_ISA[62]     <= {COPY, 6'd0, M_A, M_B, 16'h0000};
         MEM_ISA[63]     <= {ADD, 8'd0, 2'd0, 16'd0};
-
         MEM_ISA[64]     <= {STORECBC, 8'd0, M_B, 16'h1040};
         MEM_ISA[65]     <= {STORECBC, 8'd1, M_B, 16'h1040};
         MEM_ISA[66]     <= {STORECBC, 8'd2, M_B, 16'h1040};
@@ -242,7 +236,6 @@ module sim_tb_top;
         MEM_ISA[69]     <= {STORECBC, 8'd5, M_B, 16'h1040};
         MEM_ISA[70]     <= {STORECBC, 8'd6, M_B, 16'h1040};
         MEM_ISA[71]     <= {STORECBC, 8'd7, M_B, 16'h1040};
-
         MEM_ISA[72]     <= {LOADCBC, 8'd0, M_A, 16'h1020};
         MEM_ISA[73]     <= {LOADCBC, 8'd1, M_A, 16'h1020};
         MEM_ISA[74]     <= {LOADCBC, 8'd2, M_A, 16'h1020};
@@ -251,9 +244,7 @@ module sim_tb_top;
         MEM_ISA[77]     <= {LOADCBC, 8'd5, M_A, 16'h1020};
         MEM_ISA[78]     <= {LOADCBC, 8'd6, M_A, 16'h1020};
         MEM_ISA[79]     <= {LOADCBC, 8'd7, M_A, 16'h1020};
-
         MEM_ISA[80]     <= {SUB, 8'd0, 2'd0, 16'd0}; 
-
         MEM_ISA[81]     <= {STORECBC, 8'd0, M_B, 16'h1050};
         MEM_ISA[82]     <= {STORECBC, 8'd1, M_B, 16'h1050};
         MEM_ISA[83]     <= {STORECBC, 8'd2, M_B, 16'h1050};
@@ -262,9 +253,7 @@ module sim_tb_top;
         MEM_ISA[86]     <= {STORECBC, 8'd5, M_B, 16'h1050};
         MEM_ISA[87]     <= {STORECBC, 8'd6, M_B, 16'h1050};
         MEM_ISA[88]     <= {STORECBC, 8'd7, M_B, 16'h1050};
-
         MEM_ISA[89]     <= {SUB, 8'd0, 2'd0, 16'd0}; 
-
         MEM_ISA[90]     <= {STORECBC, 8'd0, M_B, 16'h1060};
         MEM_ISA[91]     <= {STORECBC, 8'd1, M_B, 16'h1060};
         MEM_ISA[92]     <= {STORECBC, 8'd2, M_B, 16'h1060};
@@ -273,7 +262,6 @@ module sim_tb_top;
         MEM_ISA[95]     <= {STORECBC, 8'd5, M_B, 16'h1060};
         MEM_ISA[96]     <= {STORECBC, 8'd6, M_B, 16'h1060};
         MEM_ISA[97]     <= {STORECBC, 8'd7, M_B, 16'h1060};
-
         MEM_ISA[98]     <= {LOADRBR, 8'd0, M_A, 16'h1040};
         MEM_ISA[99]     <= {LOADRBR, 8'd1, M_A, 16'h1041};
         MEM_ISA[100]     <= {LOADRBR, 8'd2, M_A, 16'h1042};
@@ -290,9 +278,7 @@ module sim_tb_top;
         MEM_ISA[111]     <= {LOADRBR, 8'd13, M_A, 16'h104D};
         MEM_ISA[112]     <= {LOADRBR, 8'd14, M_A, 16'h104E};
         MEM_ISA[113]     <= {LOADRBR, 8'd15, M_A, 16'h104F};
-
         MEM_ISA[114]     <= {ABS, 8'd0, 2'd0, 16'd0}; 
-
         MEM_ISA[115]     <= {STORECBC, 8'd0, M_R, 16'h1080};
         MEM_ISA[116]     <= {STORECBC, 8'd1, M_R, 16'h1080};
         MEM_ISA[117]     <= {STORECBC, 8'd2, M_R, 16'h1080};
@@ -301,9 +287,7 @@ module sim_tb_top;
         MEM_ISA[120]     <= {STORECBC, 8'd5, M_R, 16'h1080};
         MEM_ISA[121]     <= {STORECBC, 8'd6, M_R, 16'h1080};
         MEM_ISA[122]     <= {STORECBC, 8'd7, M_R, 16'h1080};
-
         MEM_ISA[123]     <= {TSC, 8'd0, 2'd0, 16'd0}; 
-
         MEM_ISA[124]     <= {STORERBR, 8'd0, M_R, 16'h102C};
         MEM_ISA[125]     <= {STORERBR, 8'd1, M_R, 16'h102D};
         MEM_ISA[126]     <= {STORERBR, 8'd2, M_R, 16'h102E};
@@ -536,6 +520,3 @@ module sim_tb_top;
     
 
 endmodule
-
-
-

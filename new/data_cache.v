@@ -212,13 +212,14 @@ begin
                 JMP_ADDR_read_req   = 1;
                 
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
-                if(rd_burst_data_valid == 1 && rd_cnt_data == 1)
+                if(rd_burst_data_valid_delay == 1 && rd_cnt_data == 1)
                     begin
                         data_cache_rdy  = 1;
                         jmp_addr_rdy    = 1;
-                        jmp_addr = JMP_ADDR_to_cache;
+                        jmp_addr        = JMP_ADDR_to_cache;
+                        st_next         = START;
                     end 
-                st_next             = START;
+                else st_next            = SENT_ADDR;
             end
 
         SENT_DATA_RBR:
