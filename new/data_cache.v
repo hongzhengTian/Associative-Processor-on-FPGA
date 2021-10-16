@@ -171,9 +171,9 @@ begin
                 data_cache_rdy  = 0;
                 jmp_addr_rdy    = 0;
                 DATA_read_req   = 0;
-                data_store_cnt  = 0;
+                //data_store_cnt  = 0;
                 DATA_store_req  = 0;
-                DATA_to_ddr     = 0;
+                //DATA_to_ddr     = 0;
                 JMP_ADDR_read_req = 0;
 
                 case (data_cmd)
@@ -292,7 +292,7 @@ begin
                 if(store_ddr_en == 0)
                     begin
                         data_cache_rdy                      = 1;
-                        data_cache[data_addr - tag_data]    = data_out_rbr;
+                        //data_cache[data_addr - tag_data]    = data_out_rbr;
                         st_next                             = START;
                     end
                 else if (store_ddr_en == 1)
@@ -307,9 +307,9 @@ begin
                 if(store_ddr_en == 0)
                     begin
                         data_cache_rdy                      = 1;
-                        for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
+                        /*for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
                             data_cache[j][addr_cam_col] = data_out_cbc[j];
-                        end
+                        end*/
                         st_next = START;
                     end
                 else if(store_ddr_en == 1)
@@ -357,10 +357,21 @@ always @(st_cur or rd_cnt_data)
 begin
     if(st_cur == LOAD_DATA && rd_burst_data_valid_delay == 1 && rd_cnt_data >= 2)
         begin
-            data_cache_rdy = 0;
+            //data_cache_rdy = 0;
             data_cache[rd_cnt_data - 2] = DATA_to_cache;
             //data_load_cnt = data_load_cnt + 1;
         end    
+    else if (st_cur == GET_DATA_RBR && store_ddr_en == 0)
+        begin
+            data_cache[data_addr - tag_data] = data_out_rbr;
+        end
+    else if (st_cur == GET_DATA_CBC && store_ddr_en == 0)
+        begin
+            for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) 
+                begin
+                    data_cache[j][addr_cam_col] = data_out_cbc[j];
+                end
+        end
 end
 
 /*always @(posedge clk) 
@@ -378,7 +389,11 @@ begin
 end*/
 always @(clk_d)
 begin
-    if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
+    if (st_cur == START)
+        begin
+            data_store_cnt = 0;
+        end
+    else if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
         begin
             data_store_cnt = data_store_cnt + 1;
         end
