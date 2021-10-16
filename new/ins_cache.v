@@ -159,9 +159,7 @@ module ins_cache
                 begin
                     if ((addr_ins - tag_ins) < ISA_DEPTH + 1&& addr_ins < {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
-                            if(load_times <= 1)
-                            instruction     = ins_cache[addr_ins - tag_ins];
-                            else instruction     = ins_cache[addr_ins - tag_ins - 1];
+                            instruction     = ins_cache[addr_ins - tag_ins - 1];
                             ins_valid       = {OPCODE_WIDTH{1'b1}};
                             //ins_counter     = ins_counter + 1;
                             st_next         = START;
@@ -170,7 +168,11 @@ module ins_cache
                         begin
                             instruction     = int_serve; //[addr_ins - {{ADDR_WIDTH_MEM - 1}{1'b0}}];
                         end
-                    else st_next            = LOAD_INS;
+                    else begin
+                        st_next            = LOAD_INS;
+                        instruction        = 0;
+                        ins_valid          = 0;
+                    end
                 end
 
             LOAD_INS:
@@ -189,7 +191,11 @@ module ins_cache
                     end
                 end
             
-            default : ;
+            default : begin
+                st_next = START;
+                ISA_read_req = 0;
+                ISA_read_addr = 0; /* maybe wrong here when load ISA */
+            end
         endcase
     end
 
