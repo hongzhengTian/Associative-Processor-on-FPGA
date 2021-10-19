@@ -1269,7 +1269,10 @@ module AP_controller
                         end
                 end
             
-            default: st_next = START;
+            default: begin
+                st_next = START;
+                tmp_C_F = 0;
+                end
 
         endcase
     end

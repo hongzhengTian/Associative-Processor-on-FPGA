@@ -204,11 +204,11 @@ module ins_cache
         rd_burst_data_valid_delay <= rd_burst_data_valid;
     end
 
-    always @(st_cur or rd_cnt_isa) 
+    always @(posedge clk) 
     begin
         if (st_cur == LOAD_INS && rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
         begin
-            ins_cache[rd_cnt_isa - 1] = instruction_to_cache;
+            ins_cache[rd_cnt_isa - 1] <= instruction_to_cache;
         end
     end
 
