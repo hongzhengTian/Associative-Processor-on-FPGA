@@ -353,23 +353,23 @@ begin
     rd_burst_data_valid_delay <= rd_burst_data_valid;
 end
 
-always @(st_cur or rd_cnt_data) 
+always @(posedge clk) 
 begin
     if(st_cur == LOAD_DATA && rd_burst_data_valid_delay == 1 && rd_cnt_data >= 2)
         begin
             //data_cache_rdy = 0;
-            data_cache[rd_cnt_data - 2] = DATA_to_cache;
+            data_cache[rd_cnt_data - 2] <= DATA_to_cache;
             //data_load_cnt = data_load_cnt + 1;
         end    
-    else if (st_cur == GET_DATA_RBR && store_ddr_en == 0)
+    else if (st_cur == GET_DATA_RBR)// && store_ddr_en == 0)
         begin
-            data_cache[data_addr - tag_data] = data_out_rbr;
+            data_cache[data_addr - tag_data] <= data_out_rbr;
         end
-    else if (st_cur == GET_DATA_CBC && store_ddr_en == 0)
+    else if (st_cur == GET_DATA_CBC)// && store_ddr_en == 0)
         begin
             for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) 
                 begin
-                    data_cache[j][addr_cam_col] = data_out_cbc[j];
+                    data_cache[j][addr_cam_col] <= data_out_cbc[j];
                 end
         end
 end
