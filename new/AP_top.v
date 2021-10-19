@@ -201,7 +201,7 @@ module AP_top
     .data_cmd               (data_cmd),
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finish      (store_ctxt_finish),
-    .load_ctxt_finish       (load_ctxt_finish),
+    //.load_ctxt_finish       (load_ctxt_finish),
     .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .ins_inp_valid          (ins_inp_valid),

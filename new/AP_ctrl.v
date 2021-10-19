@@ -41,7 +41,7 @@ module AP_controller
     output reg [2 : 0]                      data_cmd,
     output wire                             store_ddr_en,
     output reg                              store_ctxt_finish,
-    output reg                              load_ctxt_finish,
+    //output reg                              load_ctxt_finish,
 
     /* the interface of Program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
@@ -333,22 +333,62 @@ module AP_controller
 
     always @(posedge clk) 
     begin
-        if((st_cur == PASS_4_ADD)
-        ||(st_cur == PASS_4_SUB)
-        ||(st_cur == PASS_4_ABS)
-        ||(st_cur == PASS_3_TSC))
-        begin
-            bit_cnt <= bit_cnt + 1;
-        end
-        else bit_cnt <= bit_cnt;
+        case (st_cur)
+            START:
+                begin
+                    bit_cnt <= 0;
+                end
+            LOAD_TMP:
+                begin
+                    if (ctxt_rdy == 1)
+                    bit_cnt <= tmp_bit_cnt_ret;
+                end
+            PASS_4_ADD:
+                begin
+                    bit_cnt <= bit_cnt + 1;
+                end
+            PASS_4_SUB:
+                begin
+                    bit_cnt <= bit_cnt + 1;
+                end
+            PASS_4_ABS:
+                begin
+                    bit_cnt <= bit_cnt + 1;
+                end
+            PASS_3_TSC:
+                begin
+                    bit_cnt <= bit_cnt + 1;
+                end
+            default: bit_cnt <= bit_cnt;
+        endcase
     end
 
     always @(posedge clk) 
     begin
-        if(st_cur == FINISH_CK && bit_cnt < DATA_WIDTH)
-        begin
-            mask <= mask << 1;
-        end
+        case (st_cur)
+                START:
+                    begin
+                        mask <= 1;
+                    end
+                LOAD_TMP:
+                    begin
+                        if (ctxt_rdy == 1)
+                            begin
+                                mask <= tmp_mask_ret;
+                            end
+                        else begin
+                            mask <= mask;
+                        end
+                    end
+                FINISH_CK:
+                    begin
+                        if (bit_cnt < DATA_WIDTH)
+                            begin
+                                mask <= mask << 1;
+                            end
+                    end
+                default: mask <= mask;
+        endcase
     end
 
     always @(op_code or addr_cam_auto)
@@ -375,9 +415,8 @@ module AP_controller
         case (st_cur)
             START:
                 begin
-                    bit_cnt         = 0;
+                    //bit_cnt         = 0;
                     pass            = 0;
-                    mask            = 1;
                     mask_C          = 1;
                     mask_F          = 1;
                     key_A           = 0;
@@ -421,7 +460,6 @@ module AP_controller
 
                         RET:
                             begin
-                                //ret_valid       = 1;
                                 st_next         = LOAD_TMP;
                             end
 
@@ -442,29 +480,24 @@ module AP_controller
                         COPY:
                             begin
                                 opt_cur         = op_code;
-                                //ins_inp_valid   = 0;
                                 st_next         = COPY_MT;
                             end
 
                         STORERBR:
                             begin
                                 opt_cur         = op_code;
-                                //ins_inp_valid   = 0;
                                 st_next         = STORE_RBR;
                             end
 
                         STORECBC:
                             begin
                                 opt_cur         = op_code;
-                                //ins_inp_valid   = 0;
                                 st_next         = STORE_CBC;
                             end
 
                         ADD:
                             begin
-                                mask            = 1;
                                 pass            = 0;
-                                bit_cnt         = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InC         = 1;
@@ -473,9 +506,7 @@ module AP_controller
 
                         SUB:
                             begin
-                                mask            = 1;
                                 pass            = 0;
-                                bit_cnt         = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InC         = 1;
@@ -484,9 +515,7 @@ module AP_controller
 
                         ABS:
                             begin
-                                mask            = 1;
                                 pass            = 0;
-                                bit_cnt         = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InF         = 1;
@@ -495,9 +524,7 @@ module AP_controller
 
                         TSC:
                             begin
-                                mask            = 1;
                                 pass            = 0;
-                                bit_cnt         = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InF         = 1;
@@ -756,7 +783,6 @@ module AP_controller
                         begin
                             addr_output_cbc_B   = addr_cam_col;
                             data_out_cbc        = data_B_cbc;
-                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -764,7 +790,6 @@ module AP_controller
                         begin
                             addr_output_cbc_R   = addr_cam;
                             data_out_cbc        = data_R_cbc;
-                            //ins_inp_valid       = 1;
                             st_next             = START;
                         end
 
@@ -804,7 +829,6 @@ module AP_controller
             STORE_CTXT:
                 begin
                     inout_mode = ColxCol;
-                    //data_addr  = addr_cur_ctxt;
                     data_cmd   = ColxCol_store;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
@@ -881,9 +905,7 @@ module AP_controller
                     ret_valid       = 1;
                     if (ctxt_rdy == 1)
                         begin
-                            bit_cnt     = tmp_bit_cnt_ret;
                             pass        = tmp_pass_ret;
-                            mask        = tmp_mask_ret;
                             key_A       = tmp_key_A_ret;
                             key_B       = tmp_key_B_ret;
                             key_C       = tmp_key_C_ret;
@@ -901,8 +923,6 @@ module AP_controller
                                     input_C = tmp_C_F_ret;
                                     input_F = tmp_C_F_ret;
                             end
-                            //jmp_addr_pc = ret_addr_ret;
-                            //data_addr   = ctxt_addr_ret; 
                         end
                     else if (data_cache_rdy == 1)
                         begin
@@ -995,10 +1015,10 @@ module AP_controller
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
-                            if (matrix_cnt == 3)
+                            /*if (matrix_cnt == 3)
                             begin
                                 load_ctxt_finish = 1;
-                            end
+                            end*/
                         end
                     
                     else begin
@@ -1069,7 +1089,6 @@ module AP_controller
                     key_B = 1;
                     key_C = 1;
                     st_next = RSTTAG_ADD;
-                    //bit_cnt = bit_cnt + 1;
                 end
                 
             RSTTAG_ADD:
@@ -1123,7 +1142,6 @@ module AP_controller
                     key_B = 0;
                     key_C = 1;
                     st_next = RSTTAG_SUB;
-                    //bit_cnt = bit_cnt + 1;
                 end
                 
             RSTTAG_SUB:
@@ -1177,7 +1195,6 @@ module AP_controller
                     key_F = 0;
                     ABS_opt = 1;
                     st_next = RSTTAG_ABS;
-                    //bit_cnt = bit_cnt + 1;
                 end
                 
             RSTTAG_ABS:
@@ -1220,7 +1237,6 @@ module AP_controller
                     key_A = 1;
                     key_F = 0;
                     ABS_opt = 0;
-                    //bit_cnt = bit_cnt + 1;
                     st_next = RSTTAG_TSC;
                 end
                 
@@ -1239,7 +1255,6 @@ module AP_controller
                 begin
                     if(bit_cnt < DATA_WIDTH)
                         begin
-                            //mask = mask << 1'b1;
                             case(opt_cur)
                                 ADD: st_next = PASS_1_ADD;
                                 SUB: st_next = PASS_1_SUB;
