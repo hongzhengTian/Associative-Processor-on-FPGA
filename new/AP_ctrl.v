@@ -1265,7 +1265,7 @@ module AP_controller
                         end
                     else begin
                         st_next = START;
-                        ins_inp_valid = 1;
+                        //ins_inp_valid = 1;
                         end
                 end
             
