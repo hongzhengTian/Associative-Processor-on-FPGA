@@ -97,6 +97,7 @@ module ins_cache
                 ins_cache_init  <= 0;
                 load_times      <= 0;
                 int_serve       <= 0;
+                tag_ins         <= 0;
             end
         else begin
             case (st_cur)
@@ -109,6 +110,7 @@ module ins_cache
                     end
                 LOAD_INS:
                     begin
+                        tag_ins <= addr_ins;
                         if (rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
                             begin
                                 ins_cache_rdy <= 0;
@@ -167,6 +169,7 @@ module ins_cache
                     else if (addr_ins >= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
                             instruction     = int_serve; //[addr_ins - {{ADDR_WIDTH_MEM - 1}{1'b0}}];
+                            st_next         = SENT_INS;
                         end
                     else begin
                         st_next            = LOAD_INS;
@@ -178,7 +181,7 @@ module ins_cache
             LOAD_INS:
                 begin
                     ISA_read_req = 1;
-                    tag_ins = addr_ins;
+                    //tag_ins = addr_ins;
                     ISA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, addr_ins} * 8;///////
                     //if (ins_load_cnt <= ISA_DEPTH)
                     if (rd_cnt_isa < isa_read_len )//&& state_interface_module == MEM_READ_ISA)
@@ -192,9 +195,13 @@ module ins_cache
                 end
             
             default : begin
-                st_next = START;
-                ISA_read_req = 0;
-                ISA_read_addr = 0; /* maybe wrong here when load ISA */
+                st_next         = START;
+                ISA_read_req    = 0;
+                ISA_read_addr   = 0; /* maybe wrong here when load ISA */
+                instruction     = 0;
+                ins_valid       = 0;
+                ISA_read_req    = 0;
+                ISA_read_addr   = 0;
             end
         endcase
     end
