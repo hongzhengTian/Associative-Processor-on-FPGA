@@ -146,7 +146,7 @@ module program_counter
                     && (ret_valid == 0)
                     && (addr_ins < TOTAL_ISA_DEPTH) 
                     && (ins_cache_rdy == 1) 
-                    //&&(st_cur_ins_cache == SENT_INS)
+                    &&(st_cur_ins_cache == SENT_INS)
                     &&(addr_ins != ISA_DEPTH * load_times)
                     )
                     begin
