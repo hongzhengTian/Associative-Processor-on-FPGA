@@ -398,11 +398,15 @@ begin
 end*/
 always @(clk_d)
 begin
-    if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
+    if (st_cur == START)
+        begin
+            data_store_cnt = 0;
+        end
+    else if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
         begin
             data_store_cnt = data_store_cnt + 1;
         end
-    else data_store_cnt = 0;
+    //else data_store_cnt = 0;
 end
 
 always @(posedge clk)
