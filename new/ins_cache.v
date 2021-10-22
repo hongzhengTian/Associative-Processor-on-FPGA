@@ -171,9 +171,8 @@ module ins_cache
                             st_next = LOAD_INS;
                         end
                     else begin
-                        instruction = ins_cache[addr_ins - tag_ins - 1];
-                        ins_valid   = 0;
-                        st_next     = SENT_INS;
+                        ins_valid = 0;
+                        st_next = SENT_INS;
                     end
                 end
 
@@ -190,7 +189,6 @@ module ins_cache
                     else if (addr_ins >= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
                             instruction     = int_serve; //[addr_ins - {{ADDR_WIDTH_MEM - 1}{1'b0}}];
-                            ins_valid       = {OPCODE_WIDTH{1'b1}};
                             st_next         = SENT_INS;
                         end
                     else begin
@@ -202,8 +200,6 @@ module ins_cache
 
             LOAD_INS:
                 begin
-                    instruction        = 0;
-                    ins_valid          = 0;
                     ISA_read_req = 1;
                     ISA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, addr_ins} * 8;///////
                     if (rd_cnt_isa < isa_read_len )//&& state_interface_module == MEM_READ_ISA)
