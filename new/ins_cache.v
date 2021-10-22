@@ -145,8 +145,9 @@ module ins_cache
         case (st_cur)
             START:
                 begin
-                    ISA_read_req = 0;
-                    ins_load_cnt = 0;
+                    ISA_read_req    = 0;
+                    ISA_read_addr   = 0;
+                    ins_load_cnt    = 0;
                     if(ins_cache_init == 0)
                         begin
                             st_next = LOAD_INS;
@@ -159,6 +160,8 @@ module ins_cache
 
             SENT_INS:
                 begin
+                    ISA_read_req    = 0;
+                    ISA_read_addr   = 0;
                     if ((addr_ins - tag_ins) < ISA_DEPTH + 1&& addr_ins < {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
                             instruction     = ins_cache[addr_ins - tag_ins - 1];
@@ -181,9 +184,7 @@ module ins_cache
             LOAD_INS:
                 begin
                     ISA_read_req = 1;
-                    //tag_ins = addr_ins;
                     ISA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, addr_ins} * 8;///////
-                    //if (ins_load_cnt <= ISA_DEPTH)
                     if (rd_cnt_isa < isa_read_len )//&& state_interface_module == MEM_READ_ISA)
                         begin
                             st_next = LOAD_INS;
@@ -200,8 +201,6 @@ module ins_cache
                 ISA_read_addr   = 0; /* maybe wrong here when load ISA */
                 instruction     = 0;
                 ins_valid       = 0;
-                ISA_read_req    = 0;
-                ISA_read_addr   = 0;
             end
         endcase
     end
