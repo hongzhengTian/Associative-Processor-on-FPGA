@@ -344,7 +344,18 @@ begin
                 else
                 data_cache_rdy  = 1;
             end
-        default: st_next = START;
+        default: begin
+            st_next = START;
+            data_cache_rdy = 0;
+            jmp_addr_rdy = 0;
+            jmp_addr = 0;
+            data_in_cbc = 0;
+            data_in_rbr = 0;
+            DATA_store_req = 0;
+            DATA_read_req = 0;
+            JMP_ADDR_read_req = 0;
+            
+            end
     endcase
 end
 
@@ -357,9 +368,7 @@ always @(posedge clk)
 begin
     if(st_cur == LOAD_DATA && rd_burst_data_valid_delay == 1 && rd_cnt_data >= 2)
         begin
-            //data_cache_rdy = 0;
             data_cache[rd_cnt_data - 2] <= DATA_to_cache;
-            //data_load_cnt = data_load_cnt + 1;
         end    
     else if (st_cur == GET_DATA_RBR)// && store_ddr_en == 0)
         begin
@@ -389,15 +398,11 @@ begin
 end*/
 always @(clk_d)
 begin
-    if (st_cur == START)
-        begin
-            data_store_cnt = 0;
-        end
-    else if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
+    if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
         begin
             data_store_cnt = data_store_cnt + 1;
         end
-    else data_store_cnt = data_store_cnt;
+    else data_store_cnt = 0;
 end
 
 always @(posedge clk)

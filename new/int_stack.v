@@ -211,12 +211,15 @@ begin
         end    
 end
 
-always @(st_cur)
+always @(negedge rst or posedge int_set_pause or posedge ret_set_pause)
 begin
-    if(st_cur == STORE_CTXT)
-        stack_cnt = stack_cnt + 1;
-    else if(st_cur == LOAD_CTXT)
-        stack_cnt = stack_cnt -1 ;
+    if (!rst)
+        stack_cnt <= 0;
+    else if(int_set_pause == 1)
+        stack_cnt <= stack_cnt + 1;
+    else if(ret_set_pause == 1)
+        stack_cnt <= stack_cnt -1 ;
+    else stack_cnt <= stack_cnt;
 end
 
 always @(*)
