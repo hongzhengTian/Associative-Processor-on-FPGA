@@ -77,6 +77,9 @@ reg [3 : 0]                                 st_cur;
 reg                                         tag_store; /* indicate that the current tag is for store data */
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
 reg                                         rd_burst_data_valid_delay;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
+reg [DATA_WIDTH - 1 : 0]                    data_in_rbr_tmp;
+reg [DATA_DEPTH - 1 : 0]                    data_in_cbc_tmp;
 
 
 integer j ;
@@ -112,6 +115,7 @@ begin
         begin
             tag_store       <= 0;
             tag_data        <= 16'hFFFF;
+            jmp_addr_tmp    <= 0;
         end
     else 
         begin
@@ -153,6 +157,20 @@ begin
                 SENT_ADDR:
                     begin
                         tag_data <= data_addr;
+                        if(rd_burst_data_valid_delay == 1 && rd_cnt_data == 1)
+                        begin
+                            jmp_addr_tmp <= JMP_ADDR_to_cache;
+                        end 
+                        else begin
+                            jmp_addr_tmp <= 0;
+                        end
+                    end
+                SENT_DATA_RBR:
+                    begin
+                        if((data_addr - tag_data) < DATA_CACHE_DEPTH)
+                            begin
+                                data_in_rbr_tmp     <= data_cache[data_addr - tag_data];
+                            end
                     end
                 LOAD_DATA:
                     begin
@@ -170,8 +188,9 @@ begin
             begin
                 data_cache_rdy  = 0;
                 jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
                 DATA_read_req   = 0;
-                //data_store_cnt  = 0;
+                data_in_rbr = data_in_rbr_tmp;
                 DATA_store_req  = 0;
                 //DATA_to_ddr     = 0;
                 JMP_ADDR_read_req = 0;
@@ -210,7 +229,7 @@ begin
         SENT_ADDR:
             begin
                 JMP_ADDR_read_req   = 1;
-                
+                data_in_rbr = 0;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
                 if(rd_burst_data_valid_delay == 1 && rd_cnt_data == 1)
                     begin
@@ -219,14 +238,23 @@ begin
                         jmp_addr        = JMP_ADDR_to_cache;
                         st_next         = START;
                     end 
-                else st_next            = SENT_ADDR;
+                else begin
+                    st_next             = SENT_ADDR;
+                    data_cache_rdy      = 0;
+                    jmp_addr_rdy    = 0;
+                    jmp_addr = 0;
+                end
             end
 
         SENT_DATA_RBR:
             begin
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
                 if (tag_data == 16'hFFFF)
                     begin
                         st_next         = LOAD_DATA;
+                        data_cache_rdy  = 0;
+                        data_in_rbr     = data_in_rbr_tmp;
                     end
                 else if((data_addr - tag_data) < DATA_CACHE_DEPTH)
                     begin
@@ -238,19 +266,31 @@ begin
                 else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH && int_set == 0)
                     begin
                         st_next         = LOAD_DATA;
+                        data_in_rbr = data_in_rbr_tmp;
+                        data_cache_rdy  = 0;
                     end
                 else if (int_set == 1)
                     begin
                         st_next         = GET_DATA_CBC;
+                        data_in_rbr = data_in_rbr_tmp;
+                        data_cache_rdy  = 0;
                     end
-                else    st_next         = SENT_DATA_RBR;
+                else begin
+                        st_next         = SENT_DATA_RBR;
+                        data_in_rbr = data_in_rbr_tmp;
+                        data_cache_rdy  = 0;
+                    end
             end
 
         SENT_DATA_CBC:
             begin
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
+                data_in_rbr = 0;
                 if (tag_data == 16'hFFFF)
                     begin
                         st_next         = LOAD_DATA;
+                        data_cache_rdy  = 0;
                     end
                 else if((data_addr - tag_data) < DATA_CACHE_DEPTH)
                     begin
@@ -265,21 +305,28 @@ begin
                 else if ((data_addr - tag_data) >= DATA_CACHE_DEPTH && int_set == 0)
                     begin
                         st_next         = LOAD_DATA;
+                        data_cache_rdy  = 0;
                     end
                 else if (int_set == 1)
                     begin
                         st_next         = GET_DATA_CBC;
+                        data_cache_rdy  = 0;
                     end
 
-                else st_next = SENT_DATA_CBC;
+                else begin
+                    st_next = SENT_DATA_CBC;
+                    data_cache_rdy  = 0;
+                end
             end
 
         LOAD_DATA:
             begin
                 DATA_read_req   = 1;
                 data_cache_rdy  = 0;///////////////////////////////
-                
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
+                data_in_rbr = 0;
                 if (rd_cnt_data <= DATA_CACHE_DEPTH)
                     st_next     = LOAD_DATA;
                 else begin
@@ -289,52 +336,66 @@ begin
 
         GET_DATA_RBR:
             begin
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
+                data_in_rbr = 0;
                 if(store_ddr_en == 0)
                     begin
-                        data_cache_rdy                      = 1;
-                        //data_cache[data_addr - tag_data]    = data_out_rbr;
-                        st_next                             = START;
+                        data_cache_rdy  = 1;
+                        st_next         = START;
                     end
                 else if (store_ddr_en == 1)
                     begin
-                        st_next                             = STORE_DATA;
+                        st_next         = STORE_DATA;
+                        data_cache_rdy  = 0;
                     end
-                else    st_next                             = GET_DATA_RBR;
+                else begin
+                        st_next         = GET_DATA_RBR;
+                        data_cache_rdy  = 0;
+                    end
             end
 
         GET_DATA_CBC:
             begin
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
+                data_in_rbr = 0;
                 if(store_ddr_en == 0)
                     begin
-                        data_cache_rdy                      = 1;
-                        /*for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
-                            data_cache[j][addr_cam_col] = data_out_cbc[j];
-                        end*/
-                        st_next = START;
+                        data_cache_rdy  = 1;
+                        st_next         = START;
                     end
                 else if(store_ddr_en == 1)
                     begin
-                        st_next                             = STORE_DATA;
+                        st_next         = STORE_DATA;
+                        data_cache_rdy  = 0;
                     end
-                else    st_next                             = GET_DATA_CBC;
+                else begin
+                        st_next         = GET_DATA_CBC;
+                        data_cache_rdy  = 0;
+                    end
             end
 
         STORE_DATA:
             begin
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
                 DATA_store_req  = 1;
                 data_cache_rdy  = 0;
                 DATA_write_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, tag_data} * 8;
+                data_in_rbr = 0;
                 if (data_store_cnt < DATA_CACHE_DEPTH)
                     st_next     = STORE_DATA;
                 else begin
                     st_next     = STORE_DATA_END;
-                    //data_cache_rdy = 1;
                 end
             end
         STORE_DATA_END:
             begin
                 st_next         = START;
-                //data_cache_rdy  = 1;
+                jmp_addr_rdy    = 0;
+                jmp_addr = jmp_addr_tmp;
+                data_in_rbr = 0;
                 if (data_cmd == RowxRow_load || 
                     data_cmd == ColxCol_load || 
                     data_cmd == Addr_load)
@@ -348,7 +409,7 @@ begin
             st_next = START;
             data_cache_rdy = 0;
             jmp_addr_rdy = 0;
-            jmp_addr = 0;
+            jmp_addr = jmp_addr_tmp;
             data_in_cbc = 0;
             data_in_rbr = 0;
             DATA_store_req = 0;
