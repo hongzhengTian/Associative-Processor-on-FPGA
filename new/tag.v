@@ -26,8 +26,8 @@ tag_TSC
     
     always@(tag_A or tag_B or tag_C or tag_F_TSC)
     for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-        tag_and[i] <= tag_A[i] & tag_B[i] & tag_C[i];
-        tag_and_TSC[i] <= tag_A[i] & tag_F_TSC[i];
+        tag_and[i] = tag_A[i] & tag_B[i] & tag_C[i];
+        tag_and_TSC[i] = tag_A[i] & tag_F_TSC[i];
     end
     
     always @(posedge clk or negedge rst)

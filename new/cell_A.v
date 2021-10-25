@@ -134,13 +134,14 @@ integer i, j;
             end
         end
     
-    always @(addr_output_Col or addr_output_Row or input_mode or Q)
+    //always @(addr_output_Col or addr_output_Row or input_mode or Q)
+    always @(posedge clk)
     begin
         if (input_mode == RowxRow)
         begin
-            for (j = 0; j < DATA_WIDTH; j = j + 1) OutE_C[j] = 1'b1;
+            for (j = 0; j < DATA_WIDTH; j = j + 1) OutE_C[j] <= 1'b1;
             for (i = 0; i < DATA_DEPTH; i = i + 1)begin
-                OutE_R[i] = (addr_output_Row==i)?1'b1:1'b0;
+                OutE_R[i] <= (addr_output_Row==i)?1'b1:1'b0;
             end
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
@@ -151,9 +152,9 @@ integer i, j;
 
         else if(input_mode == ColxCol)
         begin
-            for (j = 0; j < DATA_DEPTH; j = j + 1) OutE_R[j] = 1'b1;
+            for (j = 0; j < DATA_DEPTH; j = j + 1) OutE_R[j] <= 1'b1;
             for (i = 0; i < DATA_WIDTH; i = i + 1)begin
-                OutE_C[i] = (addr_output_Col==i)?1'b1:1'b0;
+                OutE_C[i] <= (addr_output_Col==i)?1'b1:1'b0;
             end
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
@@ -168,10 +169,10 @@ integer i, j;
             for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
                 begin
                     case ({Mask[j],Key})
-                    2'b00: tag_cell[i*DATA_WIDTH + j] <= 1'b1;
-                    2'b01: tag_cell[i*DATA_WIDTH + j] <= 1'b1;
-                    2'b10: tag_cell[i*DATA_WIDTH + j] <= Qb[i*DATA_WIDTH + j];
-                    2'b11: tag_cell[i*DATA_WIDTH + j] <= Q[i*DATA_WIDTH + j];
+                    2'b00: tag_cell[i*DATA_WIDTH + j] = 1'b1;
+                    2'b01: tag_cell[i*DATA_WIDTH + j] = 1'b1;
+                    2'b10: tag_cell[i*DATA_WIDTH + j] = Qb[i*DATA_WIDTH + j];
+                    2'b11: tag_cell[i*DATA_WIDTH + j] = Q[i*DATA_WIDTH + j];
                     default: ;
                     endcase
                 end
