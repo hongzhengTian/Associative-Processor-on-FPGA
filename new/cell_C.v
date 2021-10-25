@@ -30,7 +30,7 @@ module cell_C
   always@(tag, Ie, Pass, Ip, Qb, Q)
   for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
     begin
-        if (Ie[i] == 1) D[i] <= Ip[i];
+        if (Ie[i] == 1) D[i] = Ip[i];
         /*else if ((Ie[i] == 0)&&(tag[i] == 1)&&(Pass == 1))  D[i] <= Qb[i];
         else if ((Ie[i] == 0)&&(tag[i] == 1)&&(Pass == 2))  D[i] <= Q[i];
         else if ((Ie[i] == 0)&&(tag[i] == 1)&&(Pass == 3))  D[i] <= Qb[i];
@@ -39,16 +39,16 @@ module cell_C
         else if ((Ie[i] == 0)&&(tag[i] == 1))
         begin
             case (Pass)
-            1: D[i] <= Qb[i];
-            2: D[i] <= Q[i];
-            3: D[i] <= Qb[i];
-            4: D[i] <= Q[i];
-            default: D[i] <= Q[i];
+            1: D[i] = Qb[i];
+            2: D[i] = Q[i];
+            3: D[i] = Qb[i];
+            4: D[i] = Q[i];
+            default: D[i] = Q[i];
             endcase
         end
         
 
-        else D[i] <= Q[i];
+        else D[i] = Q[i];
     end
     end
     
@@ -64,10 +64,10 @@ module cell_C
    for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
     begin
         case ({Mask,Key})
-            2'b00: tag_cell[i] <= 1'b1;
-            2'b01: tag_cell[i] <= 1'b1;
-            2'b10: tag_cell[i] <= Qb[i];
-            2'b11: tag_cell[i] <= Q[i];
+            2'b00: tag_cell[i] = 1'b1;
+            2'b01: tag_cell[i] = 1'b1;
+            2'b10: tag_cell[i] = Qb[i];
+            2'b11: tag_cell[i] = Q[i];
             default: ;
         endcase
     end

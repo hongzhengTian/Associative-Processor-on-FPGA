@@ -214,30 +214,31 @@ module cell_R
         end
     end
 
-    always @(*)
+    //always @(*)
+    always @(posedge clk)
     begin
         if (input_mode == RowxRow)
         begin
-            for (j = 0; j < DATA_WIDTH; j = j + 1) OutE_C[j] = 1'b1;
+            for (j = 0; j < DATA_WIDTH; j = j + 1) OutE_C[j] <= 1'b1;
             for (i = 0; i < DATA_DEPTH; i = i + 1)begin
-                OutE_R[i] = (addr_output_Row==i)?1'b1:1'b0;
+                OutE_R[i] <= (addr_output_Row==i)?1'b1:1'b0;
             end
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                    if((OutE_R[i]&OutE_C[j] == 1)) Q_out_row[j] = Q[i*DATA_WIDTH + j];
+                    if((OutE_R[i]&OutE_C[j] == 1)) Q_out_row[j] <= Q[i*DATA_WIDTH + j];
                 end
             end
         end
 
         else if(input_mode == ColxCol)
         begin
-            for (j = 0; j < DATA_DEPTH; j = j + 1) OutE_R[j] = 1'b1;
+            for (j = 0; j < DATA_DEPTH; j = j + 1) OutE_R[j] <= 1'b1;
             for (i = 0; i < DATA_WIDTH; i = i + 1)begin
-                OutE_C[i] = (addr_output_Col==i)?1'b1:1'b0;
+                OutE_C[i] <= (addr_output_Col==i)?1'b1:1'b0;
             end
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
-                    if((OutE_R[j]&OutE_C[i] == 1)) Q_out_col[j] = Q[j*DATA_WIDTH + i];
+                    if((OutE_R[j]&OutE_C[i] == 1)) Q_out_col[j] <= Q[j*DATA_WIDTH + i];
                 end
             end
         end
