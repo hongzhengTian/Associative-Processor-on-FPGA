@@ -41,9 +41,7 @@ module data_cache
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
     input wire [DATA_WIDTH - 1 : 0]			DATA_to_cache,
     input wire [9 : 0]                      rd_cnt_data,
-    input wire                              rd_burst_data_valid,
-    input wire                              wr_burst_data_req,
-    input wire [3 : 0]                      state_interface_module
+    input wire                              rd_burst_data_valid
 );
 
 /* states */
@@ -71,6 +69,7 @@ localparam                                  MEM_WRITE_DATA_STORE 	= 4'd9;
 reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
 reg [9 : 0]                                 data_store_cnt;
+reg [9 : 0]                                 data_store_cnt_tmp;
 
 reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
@@ -80,6 +79,8 @@ reg                                         rd_burst_data_valid_delay;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
 reg [DATA_WIDTH - 1 : 0]                    data_in_rbr_tmp;
 reg [DATA_DEPTH - 1 : 0]                    data_in_cbc_tmp;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_read_addr_tmp;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_write_addr_tmp;
 
 
 integer j ;
@@ -116,12 +117,18 @@ begin
             tag_store       <= 0;
             tag_data        <= 16'hFFFF;
             jmp_addr_tmp    <= 0;
+            data_in_rbr_tmp <= 0;
+            data_in_cbc_tmp <= 0;
+            DATA_read_addr_tmp <= 0;
+            DATA_write_addr_tmp <= 0;
+            data_store_cnt_tmp <= 0;
         end
     else 
         begin
             case (st_cur)
                 START:
                     begin
+                        data_store_cnt_tmp <= 0;
                         case (data_cmd)
                             RowxRow_store:
                                 begin
@@ -157,6 +164,7 @@ begin
                 SENT_ADDR:
                     begin
                         tag_data <= data_addr;
+                        DATA_read_addr_tmp <= {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
                         if(rd_burst_data_valid_delay == 1 && rd_cnt_data == 1)
                         begin
                             jmp_addr_tmp <= JMP_ADDR_to_cache;
@@ -172,9 +180,24 @@ begin
                                 data_in_rbr_tmp     <= data_cache[data_addr - tag_data];
                             end
                     end
+                SENT_DATA_CBC:
+                    begin
+                        if((data_addr - tag_data) < DATA_CACHE_DEPTH)
+                            begin
+                                for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) 
+                                    begin
+                                        data_in_cbc_tmp[j] = data_cache[j][addr_cam_col];
+                                    end 
+                            end
+                    end
                 LOAD_DATA:
                     begin
                         tag_data <= data_addr;
+                        DATA_read_addr_tmp <= {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
+                    end
+                STORE_DATA:
+                    begin
+                        DATA_write_addr_tmp <= {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, tag_data} * 8; 
                     end
                 default:;
             endcase
@@ -190,11 +213,12 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 DATA_read_req   = 0;
-                data_in_rbr = data_in_rbr_tmp;
                 DATA_store_req  = 0;
-                //DATA_to_ddr     = 0;
                 JMP_ADDR_read_req = 0;
-
+                data_in_rbr = data_in_rbr_tmp;
+                data_in_cbc = data_in_cbc_tmp;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 case (data_cmd)
                     RowxRow_load:   
                         begin
@@ -229,8 +253,12 @@ begin
         SENT_ADDR:
             begin
                 JMP_ADDR_read_req   = 1;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if(rd_burst_data_valid_delay == 1 && rd_cnt_data == 1)
                     begin
                         data_cache_rdy  = 1;
@@ -250,6 +278,12 @@ begin
             begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
+                data_in_cbc = 0;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if (tag_data == 16'hFFFF)
                     begin
                         st_next         = LOAD_DATA;
@@ -287,10 +321,16 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 data_in_rbr = 0;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if (tag_data == 16'hFFFF)
                     begin
                         st_next         = LOAD_DATA;
                         data_cache_rdy  = 0;
+                        data_in_cbc = data_in_cbc_tmp;
                     end
                 else if((data_addr - tag_data) < DATA_CACHE_DEPTH)
                     begin
@@ -306,27 +346,34 @@ begin
                     begin
                         st_next         = LOAD_DATA;
                         data_cache_rdy  = 0;
+                        data_in_cbc = data_in_cbc_tmp;
                     end
                 else if (int_set == 1)
                     begin
                         st_next         = GET_DATA_CBC;
                         data_cache_rdy  = 0;
+                        data_in_cbc = data_in_cbc_tmp;
                     end
 
                 else begin
                     st_next = SENT_DATA_CBC;
                     data_cache_rdy  = 0;
+                    data_in_cbc = data_in_cbc_tmp;
                 end
             end
 
         LOAD_DATA:
             begin
                 DATA_read_req   = 1;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
                 data_cache_rdy  = 0;///////////////////////////////
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 DATA_read_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, data_addr} * 8;
+                DATA_write_addr = DATA_write_addr_tmp;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
                 if (rd_cnt_data <= DATA_CACHE_DEPTH)
                     st_next     = LOAD_DATA;
                 else begin
@@ -339,6 +386,12 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if(store_ddr_en == 0)
                     begin
                         data_cache_rdy  = 1;
@@ -360,6 +413,12 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if(store_ddr_en == 0)
                     begin
                         data_cache_rdy  = 1;
@@ -381,9 +440,13 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 DATA_store_req  = 1;
+                DATA_read_req   = 0;
+                JMP_ADDR_read_req = 0;
                 data_cache_rdy  = 0;
                 DATA_write_addr = {{(DDR_ADDR_WIDTH - ADDR_WIDTH_MEM){1'b0}}, tag_data} * 8;
+                DATA_read_addr = DATA_read_addr_tmp;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
                 if (data_store_cnt < DATA_CACHE_DEPTH)
                     st_next     = STORE_DATA;
                 else begin
@@ -396,6 +459,12 @@ begin
                 jmp_addr_rdy    = 0;
                 jmp_addr = jmp_addr_tmp;
                 data_in_rbr = 0;
+                data_in_cbc = 0;
+                DATA_read_req   = 0;
+                DATA_store_req  = 0;
+                JMP_ADDR_read_req = 0;
+                DATA_read_addr = DATA_read_addr_tmp;
+                DATA_write_addr = DATA_write_addr_tmp;
                 if (data_cmd == RowxRow_load || 
                     data_cmd == ColxCol_load || 
                     data_cmd == Addr_load)
@@ -415,7 +484,8 @@ begin
             DATA_store_req = 0;
             DATA_read_req = 0;
             JMP_ADDR_read_req = 0;
-            
+            DATA_read_addr = DATA_read_addr_tmp;
+            DATA_write_addr = DATA_write_addr_tmp;
             end
     endcase
 end
@@ -444,30 +514,15 @@ begin
         end
 end
 
-/*always @(posedge clk) 
+always @(posedge clk)
 begin
-    if(st_cur == STORE_DATA && wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE))
+    if((st_cur == STORE_DATA) && (data_to_ddr_rdy == 1))
         begin
-            data_to_ddr_rdy <= 1;
-            DATA_to_ddr <= data_cache[data_store_cnt];
             data_store_cnt <= data_store_cnt + 1;
         end
     else begin
-        DATA_to_ddr <= 0;
-        data_to_ddr_rdy <= 0;
+        data_store_cnt <= 0;
     end
-end*/
-always @(clk_d)
-begin
-    if (st_cur == START)
-        begin
-            data_store_cnt = 0;
-        end
-    else if(wr_burst_data_req && (state_interface_module == MEM_WRITE_DATA_STORE) && (data_to_ddr_rdy == 1))
-        begin
-            data_store_cnt = data_store_cnt + 1;
-        end
-    //else data_store_cnt = 0;
 end
 
 always @(posedge clk)

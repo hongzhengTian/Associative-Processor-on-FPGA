@@ -469,9 +469,7 @@ module AP_top
     .DATA_write_addr        (DATA_write_addr),
     .DATA_to_cache          (DATA_to_cache),
     .rd_cnt_data            (rd_cnt_data),
-    .rd_burst_data_valid    (rd_burst_data_valid),
-    .wr_burst_data_req      (wr_burst_data_req),
-    .state_interface_module (state_interface_module)
+    .rd_burst_data_valid    (rd_burst_data_valid)
     );
 
     
