@@ -507,6 +507,12 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
+                    input_A_rbr         = 0;
+                    input_B_rbr         = 0;
+                    input_R_rbr         = 0;
                     matrix_select_reg = matrix_select;
                     case (op_code_valid)
                         RESET:
@@ -604,6 +610,8 @@ module AP_controller
                             rst_InB         = 1;
                             rst_InR         = 1;
                             addr_input_rbr_A    = addr_cam;
+                            addr_input_rbr_B    = 0;
+                            addr_input_rbr_R    = 0;
                             if (data_cache_rdy)
                                 begin
                                     input_A_rbr = data_in_rbr;
@@ -623,6 +631,8 @@ module AP_controller
                             rst_InB         = 0;
                             rst_InR         = 1;
                             addr_input_rbr_B    = addr_cam;
+                            addr_input_rbr_A    = 0;
+                            addr_input_rbr_R    = 0;
                             if (data_cache_rdy)
                                 begin
                                     input_B_rbr = data_in_rbr;
@@ -642,6 +652,8 @@ module AP_controller
                             rst_InB         = 1;
                             rst_InR         = 0;
                             addr_input_rbr_R    = addr_cam;
+                            addr_input_rbr_A    = 0;
+                            addr_input_rbr_B    = 0;
                             if (data_cache_rdy)
                                 begin
                                     input_R_rbr = data_in_rbr;
@@ -662,6 +674,9 @@ module AP_controller
                                 rst_InA         = 1;
                                 rst_InB         = 1;
                                 rst_InR         = 1;
+                                addr_input_rbr_A    = 0;
+                                addr_input_rbr_B    = 0;
+                                addr_input_rbr_R    = 0;
                             end
                             
                     endcase
@@ -680,6 +695,9 @@ module AP_controller
                     key_F           = 0;
                     rst_tag         = 0;
                     ABS_opt         = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case (matrix_select_reg)
                         M_A:
                         begin
@@ -792,6 +810,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -881,6 +902,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -927,6 +951,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -948,13 +975,6 @@ module AP_controller
 
             STORE_TMP:
                 begin
-                    /*tmp_bit_cnt     = bit_cnt;
-                    tmp_pass        = pass;
-                    tmp_mask        = mask;
-                    tmp_key_A       = key_A;
-                    tmp_key_B       = key_B;
-                    tmp_key_C       = key_C;
-                    tmp_key_F       = key_F;*/
                     pass            = pass_tmp;
                     key_A           = key_A_tmp;
                     key_B           = key_B_tmp;
@@ -969,17 +989,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
-                    /*if(opt_cur == ADD || opt_cur == SUB)
-                        begin
-                            tmp_C_F = data_C;
-                            tag_C_F = 1;
-                        end
-                    else if(opt_cur == TSC || opt_cur == ABS)
-                        begin
-                            tmp_C_F = data_F;
-                            tag_C_F = 0;
-                        end
-                    else tmp_C_F = 0;*/
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     
                     int_set = 1;
                     ret_addr = addr_cur_ins;
@@ -1007,6 +1019,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(matrix_cnt == 1)
                         begin
                             data_addr           = addr_cur_ctxt;
@@ -1053,6 +1068,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -1090,6 +1108,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
@@ -1114,6 +1135,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = START;
                 end
 
@@ -1129,6 +1153,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if (ctxt_rdy == 1)
                         begin
                             pass        = tmp_pass_ret;
@@ -1182,6 +1209,9 @@ module AP_controller
                     key_F           = key_F_tmp;
                     rst_tag         = 0;
                     ABS_opt         = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(matrix_cnt == 1)
                         begin
                             rst_InA             = 0;
@@ -1283,6 +1313,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
@@ -1317,6 +1350,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case(op_code)
                         ADD:
                             begin
@@ -1355,6 +1391,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -1374,6 +1413,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -1393,6 +1435,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ADD;
                 end
             
@@ -1412,6 +1457,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -1431,6 +1479,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case(pass)
                     1: st_next      = PASS_2_ADD;
                     2: st_next      = PASS_3_ADD;
@@ -1457,6 +1508,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next = RSTTAG_SUB;
                 end
                 
@@ -1476,6 +1530,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_SUB;
                 end
                 
@@ -1495,6 +1552,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_SUB;
                 end
             
@@ -1514,6 +1574,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_SUB;
                 end
                 
@@ -1533,6 +1596,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case(pass)
                     1: st_next      = PASS_2_SUB;
                     2: st_next      = PASS_3_SUB;
@@ -1559,6 +1625,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -1578,6 +1647,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -1597,6 +1669,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ABS;
                 end
             
@@ -1616,6 +1691,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -1635,6 +1713,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case(pass)
                     1: st_next      = PASS_2_ABS;
                     2: st_next      = PASS_3_ABS;
@@ -1661,6 +1742,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -1680,6 +1764,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -1699,6 +1786,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -1718,6 +1808,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     case(pass)
                     1: st_next = PASS_2_TSC;
                     2: st_next = PASS_3_TSC;
@@ -1741,6 +1834,9 @@ module AP_controller
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
                     if(bit_cnt < DATA_WIDTH)
                         begin
                             ins_inp_valid   = 0;
@@ -1774,6 +1870,9 @@ module AP_controller
                 addr_input_cbc_A    = 0;
                 addr_input_cbc_B    = 0;
                 addr_input_cbc_R    = 0;
+                addr_input_rbr_A    = 0;
+                addr_input_rbr_B    = 0;
+                addr_input_rbr_R    = 0;
                 end
 
         endcase
