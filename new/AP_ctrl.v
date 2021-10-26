@@ -214,9 +214,15 @@ module AP_controller
     
     reg [5 : 0]                             st_next;
     reg [OPCODE_WIDTH - 1 : 0]              opt_cur;
-    reg [2 : 0]                             pass_cur;
+    
     reg [DATA_WIDTH - 1 : 0]                bit_cnt;
     reg [2 : 0]                             clk_cnt;
+
+    reg [2 : 0]                             pass_tmp;
+    reg                                     key_A_tmp;
+    reg                                     key_B_tmp;
+    reg                                     key_C_tmp;
+    reg                                     key_F_tmp;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -333,7 +339,13 @@ module AP_controller
 
     always @(posedge clk) 
     begin
-        pass_cur <= pass;
+        pass_tmp <= pass;
+        mask_C   <= 1;
+        mask_F   <= 1;
+        key_A_tmp <= key_A;
+        key_B_tmp <= key_B;
+        key_C_tmp <= key_C;
+        key_F_tmp <= key_F;
         case (st_cur)
             START:
                 begin
@@ -417,8 +429,6 @@ module AP_controller
             START:
                 begin
                     pass            = 0;
-                    mask_C          = 1;
-                    mask_F          = 1;
                     key_A           = 0;
                     key_B           = 0;
                     key_C           = 0;
@@ -544,6 +554,10 @@ module AP_controller
                     data_addr       = addr_mem;
                     data_cmd        = RowxRow_load;
                     pass            = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
                     case (matrix_select_reg)
                         M_A: 
                         begin
@@ -612,6 +626,10 @@ module AP_controller
                     data_cmd        = ColxCol_load;
                     addr_cam_col    = addr_cam;
                     pass            = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
                     case (matrix_select_reg)
                         M_A:
                         begin
@@ -697,6 +715,10 @@ module AP_controller
                 begin
                     ins_inp_valid = 0;
                     pass          = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -763,6 +785,10 @@ module AP_controller
                     data_cmd   = RowxRow_store;
                     ins_inp_valid   = 0;
                     pass            = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -797,6 +823,10 @@ module AP_controller
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam;
                     pass            = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -819,13 +849,17 @@ module AP_controller
             STORE_TMP:
                 begin
                     tmp_bit_cnt = bit_cnt;
-                    tmp_pass = pass;
-                    tmp_mask = mask;
-                    tmp_key_A = key_A;
-                    tmp_key_B = key_B;
-                    tmp_key_C = key_C;
-                    tmp_key_F = key_F;
-                    pass = pass_cur;
+                    tmp_pass    = pass;
+                    tmp_mask    = mask;
+                    tmp_key_A   = key_A;
+                    tmp_key_B   = key_B;
+                    tmp_key_C   = key_C;
+                    tmp_key_F   = key_F;
+                    pass        = pass_tmp;
+                    key_A       = key_A_tmp;
+                    key_B       = key_B_tmp;
+                    key_C       = key_C_tmp;
+                    key_F       = key_F_tmp;
                     ins_inp_valid   = 0;
 
                     if(opt_cur == ADD || opt_cur == SUB)
@@ -854,6 +888,10 @@ module AP_controller
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
                     pass            = 0;
+                    key_A       = 0;
+                    key_B       = 0;
+                    key_C       = 0;
+                    key_F       = 0;
                     if(matrix_cnt == 1)
                         begin
                             data_addr           = addr_cur_ctxt;
@@ -888,6 +926,10 @@ module AP_controller
                 begin
                     ins_inp_valid   = 0;
                     pass = 0;
+                    key_A       = 0;
+                    key_B       = 0;
+                    key_C       = 0;
+                    key_F       = 0;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -913,6 +955,10 @@ module AP_controller
                     data_addr       = 16'he001;
                     data_cmd        = Addr_load;
                     pass = 0;
+                    key_A       = 0;
+                    key_B       = 0;
+                    key_C       = 0;
+                    key_F       = 0;
                     if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
@@ -925,6 +971,10 @@ module AP_controller
                     data_cmd        = 0;
                     jmp_addr_pc     = jmp_addr;
                     pass = 0;
+                    key_A       = 0;
+                    key_B       = 0;
+                    key_C       = 0;
+                    key_F       = 0;
                     st_next         = START;
                 end
 
@@ -956,11 +1006,19 @@ module AP_controller
                     else if (data_cache_rdy == 1)
                         begin
                             st_next     = LOAD_CTXT;
-                            pass = pass_cur;
+                            pass = pass_tmp;
+                            key_A       = key_A_tmp;
+                            key_B       = key_B_tmp;
+                            key_C       = key_C_tmp;
+                            key_F       = key_F_tmp;
                         end
                     else begin
                         st_next = LOAD_TMP;
-                        pass = pass_cur;
+                        pass = pass_tmp;
+                        key_A       = key_A_tmp;
+                        key_B       = key_B_tmp;
+                        key_C       = key_C_tmp;
+                        key_F       = key_F_tmp;
                         end
                 end
 
@@ -970,7 +1028,11 @@ module AP_controller
                     data_cmd    = ColxCol_load;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
-                    pass = pass_cur;
+                    pass = pass_tmp;
+                    key_A       = key_A_tmp;
+                    key_B       = key_B_tmp;
+                    key_C       = key_C_tmp;
+                    key_F       = key_F_tmp;
                     if(matrix_cnt == 1)
                         begin
                             rst_InA             = 0;
@@ -1041,7 +1103,11 @@ module AP_controller
             LOAD_CTXT_FINISH_CHECK:
                 begin
                     ins_inp_valid   = 0;
-                    pass = pass_cur;
+                    pass = pass_tmp;
+                    key_A       = key_A_tmp;
+                    key_B       = key_B_tmp;
+                    key_C       = key_C_tmp;
+                    key_F       = key_F_tmp;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
@@ -1064,7 +1130,11 @@ module AP_controller
                 begin
                     opt_cur         = op_code;
                     ins_inp_valid   = 0;
-                    pass = pass_cur;
+                    pass = pass_tmp;
+                    key_A       = key_A_tmp;
+                    key_B       = key_B_tmp;
+                    key_C       = key_C_tmp;
+                    key_F       = key_F_tmp;
                     case(op_code)
                         ADD:
                             begin
@@ -1095,6 +1165,7 @@ module AP_controller
                     key_A = 1;
                     key_B = 1;
                     key_C = 0;
+                    key_F = 0;
                     st_next = RSTTAG_ADD;
                 end
                 
@@ -1106,6 +1177,7 @@ module AP_controller
                     key_A = 1;
                     key_B = 0;
                     key_C = 0;
+                    key_F = 0;
                     st_next = RSTTAG_ADD;
                 end
                 
@@ -1117,6 +1189,7 @@ module AP_controller
                     key_A = 0;
                     key_B = 0;
                     key_C = 1;
+                    key_F = 0;
                     st_next = RSTTAG_ADD;
                 end
             
@@ -1128,6 +1201,7 @@ module AP_controller
                     key_A = 0;
                     key_B = 1;
                     key_C = 1;
+                    key_F = 0;
                     st_next = RSTTAG_ADD;
                 end
                 
@@ -1135,7 +1209,11 @@ module AP_controller
                 begin
                     ins_inp_valid   = 0;
                     rst_tag = 0;
-                    pass = pass_cur;
+                    pass = pass_tmp;
+                    key_A       = 0;
+                    key_B       = 0;
+                    key_C       = 0;
+                    key_F       = 0;
                     case(pass)
                     1: st_next = PASS_2_ADD;
                     2: st_next = PASS_3_ADD;
@@ -1154,6 +1232,7 @@ module AP_controller
                     key_A = 1;
                     key_B = 0;
                     key_C = 0;
+                    key_F = 0;
                     st_next = RSTTAG_SUB;
                 end
                 
@@ -1165,6 +1244,7 @@ module AP_controller
                     key_A = 1;
                     key_B = 1;
                     key_C = 0;
+                    key_F = 0;
                     st_next = RSTTAG_SUB;
                 end
                 
@@ -1176,6 +1256,7 @@ module AP_controller
                     key_A = 0;
                     key_B = 1;
                     key_C = 1;
+                    key_F = 0;
                     st_next = RSTTAG_SUB;
                 end
             
@@ -1187,6 +1268,7 @@ module AP_controller
                     key_A = 0;
                     key_B = 0;
                     key_C = 1;
+                    key_F = 0;
                     st_next = RSTTAG_SUB;
                 end
                 
@@ -1194,7 +1276,11 @@ module AP_controller
                 begin
                 rst_tag = 0;
                 ins_inp_valid   = 0;
-                pass = pass_cur;
+                pass = pass_tmp;
+                key_A       = 0;
+                key_B       = 0;
+                key_C       = 0;
+                key_F       = 0;
                 case(pass)
                 1: st_next = PASS_2_SUB;
                 2: st_next = PASS_3_SUB;
@@ -1211,6 +1297,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 1;
                     key_A = 1;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 0;
                     ABS_opt = 1;
                     st_next = RSTTAG_ABS;
@@ -1222,6 +1310,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 2;
                     key_A = 0;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 1;
                     ABS_opt = 1;
                     st_next = RSTTAG_ABS;
@@ -1233,6 +1323,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 3;
                     key_A = 1;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 1;
                     ABS_opt = 1;
                     st_next = RSTTAG_ABS;
@@ -1244,6 +1336,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 4;
                     key_A = 1;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 0;
                     ABS_opt = 1;
                     st_next = RSTTAG_ABS;
@@ -1253,7 +1347,11 @@ module AP_controller
                 begin
                 rst_tag = 0; 
                 ins_inp_valid   = 0;
-                pass = pass_cur;
+                pass = pass_tmp;
+                key_A       = 0;
+                key_B       = 0;
+                key_C       = 0;
+                key_F       = 0;
                 case(pass)
                 1: st_next = PASS_2_ABS;
                 2: st_next = PASS_3_ABS;
@@ -1270,6 +1368,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 1;
                     key_A = 0;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 1;
                     ABS_opt = 0;
                     st_next = RSTTAG_TSC;
@@ -1281,6 +1381,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 2;
                     key_A = 1;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 1;
                     ABS_opt = 0;
                     st_next = RSTTAG_TSC;
@@ -1292,6 +1394,8 @@ module AP_controller
                     rst_tag = 1;
                     pass = 3;
                     key_A = 1;
+                    key_B = 0;
+                    key_C = 0;
                     key_F = 0;
                     ABS_opt = 0;
                     st_next = RSTTAG_TSC;
@@ -1301,7 +1405,11 @@ module AP_controller
                 begin
                 rst_tag = 0; 
                 ins_inp_valid   = 0; 
-                pass = pass_cur;
+                pass = pass_tmp;
+                key_A       = 0;
+                key_B       = 0;
+                key_C       = 0;
+                key_F       = 0;
                 case(pass)
                 1: st_next = PASS_2_TSC;
                 2: st_next = PASS_3_TSC;
@@ -1312,7 +1420,11 @@ module AP_controller
     
             FINISH_CK:
                 begin
-                    pass = pass_cur;
+                    pass = pass_tmp;
+                    key_A       = key_A_tmp;
+                    key_B       = key_B_tmp;
+                    key_C       = key_C_tmp;
+                    key_F       = key_F_tmp;
                     if(bit_cnt < DATA_WIDTH)
                         begin
                             ins_inp_valid   = 0;
@@ -1334,7 +1446,11 @@ module AP_controller
                 st_next = START;
                 tmp_C_F = 0;
                 ins_inp_valid   = 0;
-                pass = pass_cur;
+                pass = pass_tmp;
+                key_A       = key_A_tmp;
+                key_B       = key_B_tmp;
+                key_C       = key_C_tmp;
+                key_F       = key_F_tmp;
                 end
 
         endcase
