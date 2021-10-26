@@ -214,7 +214,7 @@ module AP_controller
     
     reg [5 : 0]                             st_next;
     reg [OPCODE_WIDTH - 1 : 0]              opt_cur;
-    //reg [2 : 0]                             pass_cur;
+    reg [2 : 0]                             pass_cur;
     reg [DATA_WIDTH - 1 : 0]                bit_cnt;
     reg [2 : 0]                             clk_cnt;
 
@@ -333,6 +333,7 @@ module AP_controller
 
     always @(posedge clk) 
     begin
+        pass_cur <= pass;
         case (st_cur)
             START:
                 begin
@@ -423,7 +424,6 @@ module AP_controller
                     key_C           = 0;
                     key_F           = 0;
                     rst_tag         = 0;
-                    
                     opt_cur         = 0;
                     ABS_opt         = 0;
                     rst_InA         = 1;
@@ -501,7 +501,6 @@ module AP_controller
 
                         ADD:
                             begin
-                                pass            = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InC         = 1;
@@ -510,7 +509,6 @@ module AP_controller
 
                         SUB:
                             begin
-                                pass            = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InC         = 1;
@@ -519,7 +517,6 @@ module AP_controller
 
                         ABS:
                             begin
-                                pass            = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InF         = 1;
@@ -528,7 +525,6 @@ module AP_controller
 
                         TSC:
                             begin
-                                pass            = 0;
                                 opt_cur         = op_code;
                                 ins_inp_valid   = 0;
                                 rst_InF         = 1;
@@ -547,7 +543,7 @@ module AP_controller
                     inout_mode      = RowxRow;
                     data_addr       = addr_mem;
                     data_cmd        = RowxRow_load;
-                    
+                    pass            = 0;
                     case (matrix_select_reg)
                         M_A: 
                         begin
@@ -614,8 +610,8 @@ module AP_controller
                     inout_mode      = ColxCol;
                     data_addr       = addr_mem;
                     data_cmd        = ColxCol_load;
-                    
                     addr_cam_col    = addr_cam;
+                    pass            = 0;
                     case (matrix_select_reg)
                         M_A:
                         begin
@@ -700,6 +696,7 @@ module AP_controller
             COPY_MT:
                 begin
                     ins_inp_valid = 0;
+                    pass          = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -765,6 +762,7 @@ module AP_controller
                     data_addr  = addr_mem;
                     data_cmd   = RowxRow_store;
                     ins_inp_valid   = 0;
+                    pass            = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -798,6 +796,7 @@ module AP_controller
                     data_cmd   = ColxCol_store;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam;
+                    pass            = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -826,7 +825,7 @@ module AP_controller
                     tmp_key_B = key_B;
                     tmp_key_C = key_C;
                     tmp_key_F = key_F;
-
+                    pass = pass_cur;
                     ins_inp_valid   = 0;
 
                     if(opt_cur == ADD || opt_cur == SUB)
@@ -854,6 +853,7 @@ module AP_controller
                     data_cmd   = ColxCol_store;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
+                    pass            = 0;
                     if(matrix_cnt == 1)
                         begin
                             data_addr           = addr_cur_ctxt;
@@ -887,6 +887,7 @@ module AP_controller
             STORE_CTXT_FINISH_CHECK:
                 begin
                     ins_inp_valid   = 0;
+                    pass = 0;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -911,6 +912,7 @@ module AP_controller
                     inout_mode      = RowxRow;
                     data_addr       = 16'he001;
                     data_cmd        = Addr_load;
+                    pass = 0;
                     if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
@@ -922,6 +924,7 @@ module AP_controller
                     ins_inp_valid   = 0;
                     data_cmd        = 0;
                     jmp_addr_pc     = jmp_addr;
+                    pass = 0;
                     st_next         = START;
                 end
 
@@ -953,9 +956,11 @@ module AP_controller
                     else if (data_cache_rdy == 1)
                         begin
                             st_next     = LOAD_CTXT;
+                            pass = pass_cur;
                         end
                     else begin
                         st_next = LOAD_TMP;
+                        pass = pass_cur;
                         end
                 end
 
@@ -965,6 +970,7 @@ module AP_controller
                     data_cmd    = ColxCol_load;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
+                    pass = pass_cur;
                     if(matrix_cnt == 1)
                         begin
                             rst_InA             = 0;
@@ -1035,6 +1041,7 @@ module AP_controller
             LOAD_CTXT_FINISH_CHECK:
                 begin
                     ins_inp_valid   = 0;
+                    pass = pass_cur;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
@@ -1057,6 +1064,7 @@ module AP_controller
                 begin
                     opt_cur         = op_code;
                     ins_inp_valid   = 0;
+                    pass = pass_cur;
                     case(op_code)
                         ADD:
                             begin
@@ -1127,6 +1135,7 @@ module AP_controller
                 begin
                     ins_inp_valid   = 0;
                     rst_tag = 0;
+                    pass = pass_cur;
                     case(pass)
                     1: st_next = PASS_2_ADD;
                     2: st_next = PASS_3_ADD;
@@ -1185,6 +1194,7 @@ module AP_controller
                 begin
                 rst_tag = 0;
                 ins_inp_valid   = 0;
+                pass = pass_cur;
                 case(pass)
                 1: st_next = PASS_2_SUB;
                 2: st_next = PASS_3_SUB;
@@ -1243,6 +1253,7 @@ module AP_controller
                 begin
                 rst_tag = 0; 
                 ins_inp_valid   = 0;
+                pass = pass_cur;
                 case(pass)
                 1: st_next = PASS_2_ABS;
                 2: st_next = PASS_3_ABS;
@@ -1290,6 +1301,7 @@ module AP_controller
                 begin
                 rst_tag = 0; 
                 ins_inp_valid   = 0; 
+                pass = pass_cur;
                 case(pass)
                 1: st_next = PASS_2_TSC;
                 2: st_next = PASS_3_TSC;
@@ -1300,6 +1312,7 @@ module AP_controller
     
             FINISH_CK:
                 begin
+                    pass = pass_cur;
                     if(bit_cnt < DATA_WIDTH)
                         begin
                             ins_inp_valid   = 0;
@@ -1321,6 +1334,7 @@ module AP_controller
                 st_next = START;
                 tmp_C_F = 0;
                 ins_inp_valid   = 0;
+                pass = pass_cur;
                 end
 
         endcase
