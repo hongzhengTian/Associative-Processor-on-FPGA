@@ -339,28 +339,45 @@ module AP_controller
 
     always @(posedge clk or negedge rst_STATE) 
     begin
-        pass_tmp <= pass;
-        mask_C   <= 1;
-        mask_F   <= 1;
-        key_A_tmp <= key_A;
-        key_B_tmp <= key_B;
-        key_C_tmp <= key_C;
-        key_F_tmp <= key_F;
+        pass_tmp        <= pass;
+        mask_C          <= 1;
+        mask_F          <= 1;
+        key_A_tmp       <= key_A;
+        key_B_tmp       <= key_B;
+        key_C_tmp       <= key_C;
+        key_F_tmp       <= key_F;
         if (!rst_STATE)
             begin
-                opt_cur <= 0;
-                mask <= 0;
-                bit_cnt <= 0;
-                rst_InC <= 0;
-                rst_InF <= 0;
+                opt_cur         <= 0;
+                mask            <= 0;
+                bit_cnt         <= 0;
+                rst_InC         <= 0;
+                rst_InF         <= 0;
+                tmp_bit_cnt     <= 0;
+                tmp_pass        <= 0;
+                tmp_mask        <= 0;
+                tmp_C_F         <= 0;
+                tmp_key_A       <= 0;
+                tmp_key_B       <= 0;
+                tmp_key_C       <= 0;
+                tmp_key_F       <= 0;
+                tag_C_F         <= 0;
             end
         else begin
             case (st_cur)
                 START:
                     begin
-                        bit_cnt <= 0;
-                        opt_cur <= op_code;
-                        mask <= 1;
+                        bit_cnt         <= 0;
+                        opt_cur         <= op_code;
+                        mask            <= 1;
+                        tmp_bit_cnt     <= 0;
+                        tmp_pass        <= 0;
+                        tmp_mask        <= 0;
+                        tmp_C_F         <= 0;
+                        tmp_key_A       <= 0;
+                        tmp_key_B       <= 0;
+                        tmp_key_C       <= 0;
+                        tmp_key_F       <= 0;
                         if ((op_code_valid == ADD) || (op_code_valid == SUB))
                             begin
                                 rst_InC <= 1;
@@ -389,6 +406,27 @@ module AP_controller
                                 rst_InC <= 1;
                                 rst_InF <= 1;
                             end
+                    end
+                STORE_TMP:
+                    begin
+                        tmp_bit_cnt     <= bit_cnt;
+                        tmp_pass        <= pass;
+                        tmp_mask        <= mask;
+                        tmp_key_A       <= key_A;
+                        tmp_key_B       <= key_B;
+                        tmp_key_C       <= key_C;
+                        tmp_key_F       <= key_F;
+                        if(opt_cur == ADD || opt_cur == SUB)
+                            begin
+                                tmp_C_F <= data_C;
+                                tag_C_F <= 1;
+                            end
+                        else if(opt_cur == TSC || opt_cur == ABS)
+                            begin
+                                tmp_C_F <= data_F;
+                                tag_C_F <= 0;
+                            end
+                        else tmp_C_F <= 0;
                     end
                 PASS_4_ADD:
                     begin
@@ -463,14 +501,14 @@ module AP_controller
                     ret_valid       = 0;
                     store_ctxt_finish= 0;
                     ret_addr_pc_rdy = 0;
-                    tmp_bit_cnt     = 0;
+                    /*tmp_bit_cnt     = 0;
                     tmp_pass        = 0;
                     tmp_mask        = 0;
                     tmp_C_F         = 0;
                     tmp_key_A       = 0;
                     tmp_key_B       = 0;
                     tmp_key_C       = 0;
-                    tmp_key_F       = 0;
+                    tmp_key_F       = 0;*/
                     int_set         = 0;
                     ret_addr        = 0;
                     ctxt_addr       = 0;
@@ -895,13 +933,13 @@ module AP_controller
 
             STORE_TMP:
                 begin
-                    tmp_bit_cnt     = bit_cnt;
+                    /*tmp_bit_cnt     = bit_cnt;
                     tmp_pass        = pass;
                     tmp_mask        = mask;
                     tmp_key_A       = key_A;
                     tmp_key_B       = key_B;
                     tmp_key_C       = key_C;
-                    tmp_key_F       = key_F;
+                    tmp_key_F       = key_F;*/
                     pass            = pass_tmp;
                     key_A           = key_A_tmp;
                     key_B           = key_B_tmp;
@@ -913,7 +951,7 @@ module AP_controller
                     rst_InA         = 1;
                     rst_InB         = 1;
                     rst_InR         = 1;
-                    if(opt_cur == ADD || opt_cur == SUB)
+                    /*if(opt_cur == ADD || opt_cur == SUB)
                         begin
                             tmp_C_F = data_C;
                             tag_C_F = 1;
@@ -923,7 +961,7 @@ module AP_controller
                             tmp_C_F = data_F;
                             tag_C_F = 0;
                         end
-                    else tmp_C_F = 0;
+                    else tmp_C_F = 0;*/
                     
                     int_set = 1;
                     ret_addr = addr_cur_ins;
@@ -1611,7 +1649,6 @@ module AP_controller
             
             default: begin
                 st_next         = START;
-                tmp_C_F         = 0;
                 ins_inp_valid   = 0;
                 pass            = pass_tmp;
                 key_A           = key_A_tmp;
