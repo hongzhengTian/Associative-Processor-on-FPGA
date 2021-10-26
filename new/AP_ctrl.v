@@ -362,6 +362,8 @@ module AP_controller
                 tmp_key_C       <= 0;
                 tmp_key_F       <= 0;
                 tag_C_F         <= 0;
+                input_C         <= 0;
+                input_F         <= 0;
             end
         else begin
             case (st_cur)
@@ -389,15 +391,34 @@ module AP_controller
                         else begin
                             rst_InF <= 0;
                             rst_InC <= 0;
+                            input_C <= 0;
+                            input_F <= 0;
                         end
                     end
                 LOAD_TMP:
                     begin
-                        if (ctxt_rdy == 1)
+                        /*if (ctxt_rdy == 1)
                             begin
                                 bit_cnt <= tmp_bit_cnt_ret;
                                 mask <= tmp_mask_ret;
+                            end*/
+                        if (ctxt_rdy == 1)
+                        begin
+                            bit_cnt     <= tmp_bit_cnt_ret;
+                            mask        <= tmp_mask_ret;
+                            if (tag_C_F == 1)
+                                begin
+                                    input_C <= tmp_C_F_ret;
+                                end
+                            else if (tag_C_F == 0)
+                                begin
+                                    input_F <= tmp_C_F_ret;
+                                end
+                            else begin
+                                    input_C <= tmp_C_F_ret;
+                                    input_F <= tmp_C_F_ret;
                             end
+                        end
                     end
                 LOAD_CTXT:
                     begin
@@ -494,8 +515,8 @@ module AP_controller
                     rst_InA             = 1;
                     rst_InB             = 1;
                     rst_InR             = 1;
-                    input_C             = 0;
-                    input_F             = 0;
+                    //input_C             = 0;
+                    //input_F             = 0;
                     addr_mem_col        = 0;
                     data_cmd            = 0;
                     ret_valid           = 0;
@@ -515,8 +536,9 @@ module AP_controller
                     input_R_rbr         = 0;
                     input_A_cbc         = 0;
                     input_B_cbc         = 0;
-                    input_R_cbc         = 0;//TODO
-                    matrix_select_reg = matrix_select;
+                    input_R_cbc         = 0;
+
+                    matrix_select_reg   = matrix_select;
                     case (op_code_valid)
                         RESET:
                             begin
@@ -1263,7 +1285,7 @@ module AP_controller
                             key_C       = tmp_key_C_ret;
                             key_F       = tmp_key_F_ret;
 
-                            if (tag_C_F == 1)
+                            /*if (tag_C_F == 1)
                                 begin
                                     input_C = tmp_C_F_ret;
                                 end
@@ -1274,7 +1296,7 @@ module AP_controller
                             else begin
                                     input_C = tmp_C_F_ret;
                                     input_F = tmp_C_F_ret;
-                            end
+                            end*/
                         end
                     else if (data_cache_rdy == 1)
                         begin
