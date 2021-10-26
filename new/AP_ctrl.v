@@ -351,6 +351,8 @@ module AP_controller
                 opt_cur <= 0;
                 mask <= 0;
                 bit_cnt <= 0;
+                rst_InC <= 0;
+                rst_InF <= 0;
             end
         else begin
             case (st_cur)
@@ -359,6 +361,18 @@ module AP_controller
                         bit_cnt <= 0;
                         opt_cur <= op_code;
                         mask <= 1;
+                        if ((op_code_valid == ADD) || (op_code_valid == SUB))
+                            begin
+                                rst_InC <= 1;
+                            end
+                        else if ((op_code_valid == ABS) || (op_code_valid == TSC))
+                            begin
+                                rst_InF <= 1;
+                            end
+                        else begin
+                            rst_InF <= 0;
+                            rst_InC <= 0;
+                        end
                     end
                 LOAD_TMP:
                     begin
@@ -366,6 +380,14 @@ module AP_controller
                             begin
                                 bit_cnt <= tmp_bit_cnt_ret;
                                 mask <= tmp_mask_ret;
+                            end
+                    end
+                LOAD_CTXT:
+                    begin
+                        if ((matrix_cnt == 0) && (op_code != RET))
+                            begin
+                                rst_InC <= 1;
+                                rst_InF <= 1;
                             end
                     end
                 PASS_4_ADD:
@@ -433,9 +455,7 @@ module AP_controller
                     ABS_opt         = 0;
                     rst_InA         = 1;
                     rst_InB         = 1;
-                    rst_InC         = 0;
                     input_C         = 0;
-                    rst_InF         = 0;
                     input_F         = 0;
                     rst_InR         = 1;
                     addr_mem_col    = 0;
@@ -502,28 +522,24 @@ module AP_controller
                         ADD:
                             begin
                                 ins_inp_valid   = 0;
-                                rst_InC         = 1;
                                 st_next         = PASS_1_ADD;
                             end
 
                         SUB:
                             begin
                                 ins_inp_valid   = 0;
-                                rst_InC         = 1;
                                 st_next         = PASS_1_SUB;
                             end
 
                         ABS:
                             begin
                                 ins_inp_valid   = 0;
-                                rst_InF         = 1;
                                 st_next         = PASS_1_ABS;
                             end
 
                         TSC:
                             begin
                                 ins_inp_valid   = 0;
-                                rst_InF         = 1;
                                 st_next         = PASS_1_TSC;
                             end
                         default: 
@@ -1101,8 +1117,6 @@ module AP_controller
                                         end
                                     else begin
                                         st_next     = RET_STATE;
-                                        rst_InC     = 1;
-                                        rst_InF     = 1;
                                         ret_valid   = 0;
                                     end
                                 end
