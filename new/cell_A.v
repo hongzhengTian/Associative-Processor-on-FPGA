@@ -139,7 +139,15 @@ integer i, j;
     begin
         if (input_mode == RowxRow)
         begin
-            for (j = 0; j < DATA_WIDTH; j = j + 1) OutE_C[j] <= 1'b1;
+            if (addr_output_Row == DATA_DEPTH + 3)
+                begin
+                    OutE_C <= 0;
+                end
+            else begin
+                for (j = 0; j < DATA_WIDTH; j = j + 1) 
+                    OutE_C[j] <= 1'b1;
+            end
+            
             for (i = 0; i < DATA_DEPTH; i = i + 1)begin
                 OutE_R[i] <= (addr_output_Row==i)?1'b1:1'b0;
             end
@@ -152,7 +160,15 @@ integer i, j;
 
         else if(input_mode == ColxCol)
         begin
-            for (j = 0; j < DATA_DEPTH; j = j + 1) OutE_R[j] <= 1'b1;
+            if (addr_output_Col == DATA_WIDTH + 3)
+                begin
+                    OutE_R <= 0;
+                end
+            else begin
+                for (j = 0; j < DATA_DEPTH; j = j + 1) 
+                    OutE_R[j] <= 1'b1;
+            end
+            
             for (i = 0; i < DATA_WIDTH; i = i + 1)begin
                 OutE_C[i] <= (addr_output_Col==i)?1'b1:1'b0;
             end
