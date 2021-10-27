@@ -223,6 +223,8 @@ module AP_controller
     reg                                     key_B_tmp;
     reg                                     key_C_tmp;
     reg                                     key_F_tmp;
+    reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto_tmp;
+    reg [1 : 0]                             matrix_cnt_tmp;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -299,28 +301,41 @@ module AP_controller
                 if (addr_cam_auto < DATA_WIDTH )
                     begin
                         addr_cam_auto = addr_cam_auto + 1;
+                        matrix_cnt = matrix_cnt_tmp;
                     end
                 
                 else if (addr_cam_auto == DATA_WIDTH && data_cache_rdy == 1)
                     begin
-                        matrix_cnt = matrix_cnt + 1;
                         addr_cam_auto = 0;
+                        matrix_cnt = matrix_cnt + 1;
                     end
+                else begin
+                    addr_cam_auto = addr_cam_auto_tmp;
+                    matrix_cnt = matrix_cnt_tmp;
+                end
             end
         else if(st_cur == LOAD_CTXT_FINISH_CHECK)
             begin
                 if (addr_cam_auto < DATA_WIDTH - 1)
                     begin
                         addr_cam_auto = addr_cam_auto + 1;
+                        matrix_cnt = matrix_cnt_tmp;
                     end
                 
                 else if (addr_cam_auto == DATA_WIDTH - 1 && data_cache_rdy == 1)
                     begin
-                        matrix_cnt = matrix_cnt + 1;
                         addr_cam_auto = 0;
+                        matrix_cnt = matrix_cnt + 1;
                     end
+                else begin
+                    addr_cam_auto = addr_cam_auto_tmp;
+                    matrix_cnt = matrix_cnt_tmp;
+                end
             end
-        else addr_cam_auto = addr_cam_auto;
+        else begin
+            addr_cam_auto = addr_cam_auto_tmp;
+            matrix_cnt = matrix_cnt_tmp;
+        end
     end
     
     /* state machine */
@@ -349,6 +364,7 @@ module AP_controller
         key_B_tmp       <= key_B;
         key_C_tmp       <= key_C;
         key_F_tmp       <= key_F;
+        tmp_store_ddr_en <= store_ddr_en_reg;
         if (!rst_STATE)
             begin
                 opt_cur         <= 0;
@@ -369,6 +385,9 @@ module AP_controller
                 input_F         <= 0;
                 data_out_cbc_tmp<= 0;
                 data_out_rbr_tmp<= 0;
+                addr_cam_auto_tmp <= 0;
+                matrix_cnt_tmp  <= 0;
+                matrix_select_reg <= 0;
             end
         else begin
             case (st_cur)
@@ -385,6 +404,9 @@ module AP_controller
                         tmp_key_B       <= 0;
                         tmp_key_C       <= 0;
                         tmp_key_F       <= 0;
+                        addr_cam_auto_tmp <= addr_cam_auto;
+                        matrix_cnt_tmp  <= matrix_cnt;
+                        matrix_select_reg <= matrix_select;
                         if ((op_code_valid == ADD) || (op_code_valid == SUB))
                             begin
                                 rst_InC <= 1;
@@ -432,6 +454,11 @@ module AP_controller
                                 rst_InC <= 1;
                                 rst_InF <= 1;
                             end
+                    end
+                LOAD_CTXT_FINISH_CHECK:
+                    begin
+                        addr_cam_auto_tmp <= addr_cam_auto;
+                        matrix_cnt_tmp <= matrix_cnt;
                     end
                 STORE_RBR:
                     begin
@@ -505,6 +532,11 @@ module AP_controller
                             end
                         else tmp_C_F <= 0;
                     end
+                STORE_CTXT_FINISH_CHECK:
+                    begin
+                        addr_cam_auto_tmp <= addr_cam_auto;
+                        matrix_cnt_tmp <= matrix_cnt;
+                    end
                 PASS_4_ADD:
                     begin
                         bit_cnt <= bit_cnt + 1;
@@ -548,11 +580,6 @@ module AP_controller
         else begin
             store_ddr_en_reg = 0;
         end
-    end
-
-    always @(posedge clk) 
-    begin
-        tmp_store_ddr_en <= store_ddr_en_reg;
     end
 
     /* state transfer */
@@ -601,7 +628,7 @@ module AP_controller
                     addr_output_cbc_R   = DATA_WIDTH + 3;
                     data_out_cbc        = data_out_cbc_tmp;
                     data_out_rbr        = data_out_rbr_tmp;
-                    matrix_select_reg   = matrix_select;
+                    //matrix_select_reg   = matrix_select;
                     case (op_code_valid)
                         RESET:
                             begin
