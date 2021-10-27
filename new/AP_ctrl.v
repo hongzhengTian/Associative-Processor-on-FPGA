@@ -380,6 +380,8 @@ module AP_controller
                 tmp_key_B       <= 0;
                 tmp_key_C       <= 0;
                 tmp_key_F       <= 0;
+                ret_addr        <= 0;
+                ctxt_addr       <= 0;
                 tag_C_F         <= 0;
                 input_C         <= 0;
                 input_F         <= 0;
@@ -404,6 +406,8 @@ module AP_controller
                         tmp_key_B       <= 0;
                         tmp_key_C       <= 0;
                         tmp_key_F       <= 0;
+                        ret_addr        <= 0;
+                        ctxt_addr       <= 0;
                         addr_cam_auto_tmp <= addr_cam_auto;
                         matrix_cnt_tmp  <= matrix_cnt;
                         matrix_select_reg <= matrix_select;
@@ -520,6 +524,8 @@ module AP_controller
                         tmp_key_B       <= key_B;
                         tmp_key_C       <= key_C;
                         tmp_key_F       <= key_F;
+                        ret_addr        <= addr_cur_ins;
+                        ctxt_addr       <= addr_cur_ctxt;
                         if(opt_cur == ADD || opt_cur == SUB)
                             begin
                                 tmp_C_F <= data_C;
@@ -598,16 +604,12 @@ module AP_controller
                     rst_InA             = 1;
                     rst_InB             = 1;
                     rst_InR             = 1;
-                    //input_C             = 0;
-                    //input_F             = 0;
                     addr_mem_col        = 0;
                     data_cmd            = 0;
                     ret_valid           = 0;
                     store_ctxt_finish   = 0;
                     ret_addr_pc_rdy     = 0;
                     int_set             = 0;
-                    ret_addr            = 0;
-                    ctxt_addr           = 0;
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
                     addr_input_cbc_R    = 0;
@@ -1248,8 +1250,6 @@ module AP_controller
                     addr_output_cbc_B   = 0;
                     addr_output_cbc_R   = 0;
                     int_set             = 1;
-                    ret_addr            = addr_cur_ins;
-                    ctxt_addr           = addr_cur_ctxt;
                     data_out_rbr        = 0;
                     data_out_cbc        = 0;
                     ret_valid           = 0;
