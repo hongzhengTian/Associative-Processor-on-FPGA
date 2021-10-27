@@ -392,6 +392,7 @@ module AP_controller
                 matrix_select_reg <= 0;
                 ret_addr_pc     <= 0;
                 ret_addr_pc_rdy <= 0;
+                store_ctxt_finish <= 0;
             end
         else begin
             case (st_cur)
@@ -411,6 +412,7 @@ module AP_controller
                         ret_addr        <= 0;
                         ctxt_addr       <= 0;
                         ret_addr_pc_rdy <= 0;
+                        store_ctxt_finish <= 0;
                         addr_cam_auto_tmp <= addr_cam_auto;
                         matrix_cnt_tmp  <= matrix_cnt;
                         matrix_select_reg <= matrix_select;
@@ -555,6 +557,10 @@ module AP_controller
                     begin
                         addr_cam_auto_tmp <= addr_cam_auto;
                         matrix_cnt_tmp <= matrix_cnt;
+                        if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 3))
+                        begin
+                            store_ctxt_finish = 1;
+                        end
                     end
                 PASS_4_ADD:
                     begin
@@ -620,7 +626,7 @@ module AP_controller
                     addr_mem_col        = 0;
                     data_cmd            = 0;
                     ret_valid           = 0;
-                    store_ctxt_finish   = 0;
+                    //store_ctxt_finish   = 0;
                     //ret_addr_pc_rdy     = 0;
                     int_set             = 0;
                     addr_input_cbc_A    = 0;
@@ -1412,10 +1418,10 @@ module AP_controller
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
-                            if (matrix_cnt == 3)
+                            /*if (matrix_cnt == 3)
                             begin
                                 store_ctxt_finish = 1;
-                            end
+                            end*/
                         end
                     
                     else begin
