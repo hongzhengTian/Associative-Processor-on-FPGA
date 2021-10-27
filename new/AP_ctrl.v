@@ -1028,6 +1028,7 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     int_set             = 0;
+                    data_cmd            = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -1292,6 +1293,7 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next             = STORE_CTXT;
                 end
 
@@ -1411,6 +1413,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 1;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -1545,6 +1548,7 @@ module AP_controller
                     data_out_cbc        = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     if (ctxt_rdy == 1)
                         begin
                             pass        = tmp_pass_ret;
@@ -1575,7 +1579,7 @@ module AP_controller
             LOAD_CTXT:
                 begin
                     inout_mode      = ColxCol;
-                    data_cmd        = ColxCol_load;
+                    //data_cmd        = ColxCol_load;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
                     pass            = pass_tmp;
@@ -1610,6 +1614,7 @@ module AP_controller
                             addr_input_cbc_B    = 0;
                             addr_input_cbc_R    = 0;
                             data_addr           = ctxt_addr_ret;
+                            data_cmd            = ColxCol_load;
                             if (data_cache_rdy)
                                 begin
                                     input_A_cbc = data_in_cbc;
@@ -1633,6 +1638,7 @@ module AP_controller
                             addr_input_cbc_A    = 0;
                             addr_input_cbc_R    = 0;
                             data_addr           = ctxt_addr_ret + DATA_DEPTH;
+                            data_cmd            = ColxCol_load;
                             if (data_cache_rdy)
                                 begin
                                     input_B_cbc = data_in_cbc;
@@ -1656,6 +1662,7 @@ module AP_controller
                             addr_input_cbc_A    = 0;
                             addr_input_cbc_B    = 0;
                             data_addr           = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+                            data_cmd            = ColxCol_load;
                             if (data_cache_rdy)
                                 begin
                                     input_R_cbc = data_in_cbc;
@@ -1704,6 +1711,7 @@ module AP_controller
                         input_A_cbc     = 0;
                         input_B_cbc     = 0;
                         input_R_cbc     = 0;
+                        data_cmd        = ColxCol_load;
                     end
                 end
 
@@ -1743,6 +1751,7 @@ module AP_controller
                     ret_valid           = 1;
                     int_set             = 0;
                     inout_mode          = ColxCol;
+                    data_cmd            = ColxCol_load;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
@@ -1793,6 +1802,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     case(op_code)
                         ADD:
                             begin
@@ -1851,6 +1861,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -1890,6 +1901,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -1929,6 +1941,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ADD;
                 end
             
@@ -1968,6 +1981,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ADD;
                 end
                 
@@ -2007,6 +2021,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     case(pass)
                     1: st_next      = PASS_2_ADD;
                     2: st_next      = PASS_3_ADD;
@@ -2053,6 +2068,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next = RSTTAG_SUB;
                 end
                 
@@ -2092,6 +2108,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_SUB;
                 end
                 
@@ -2131,6 +2148,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_SUB;
                 end
             
@@ -2170,6 +2188,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_SUB;
                 end
                 
@@ -2209,6 +2228,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     case(pass)
                     1: st_next      = PASS_2_SUB;
                     2: st_next      = PASS_3_SUB;
@@ -2255,6 +2275,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -2294,6 +2315,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -2333,6 +2355,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ABS;
                 end
             
@@ -2372,6 +2395,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_ABS;
                 end
                 
@@ -2411,6 +2435,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     case(pass)
                     1: st_next      = PASS_2_ABS;
                     2: st_next      = PASS_3_ABS;
@@ -2457,6 +2482,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -2496,6 +2522,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -2535,6 +2562,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     st_next         = RSTTAG_TSC;
                 end
                 
@@ -2574,6 +2602,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     case(pass)
                     1: st_next = PASS_2_TSC;
                     2: st_next = PASS_3_TSC;
@@ -2617,6 +2646,7 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     inout_mode          = 0;
+                    data_cmd            = 0;
                     if(bit_cnt < DATA_WIDTH)
                         begin
                             ins_inp_valid   = 0;
@@ -2670,6 +2700,7 @@ module AP_controller
                 ret_valid           = 0;
                 int_set             = 0;
                 inout_mode          = 0;
+                data_cmd            = 0;
                 end
 
         endcase
