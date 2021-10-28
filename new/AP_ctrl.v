@@ -392,6 +392,7 @@ module AP_controller
                 matrix_select_reg <= 0;
                 ret_addr_pc     <= 0;
                 ret_addr_pc_rdy <= 0;
+                jmp_addr_pc     <= 0;
                 store_ctxt_finish <= 0;
             end
         else begin
@@ -561,6 +562,10 @@ module AP_controller
                         begin
                             store_ctxt_finish = 1;
                         end
+                    end
+                JMP_INS:
+                    begin
+                        jmp_addr_pc     <= jmp_addr;
                     end
                 PASS_4_ADD:
                     begin
@@ -1480,7 +1485,7 @@ module AP_controller
                 begin
                     ins_inp_valid   = 0;
                     data_cmd        = 0;
-                    jmp_addr_pc     = jmp_addr;
+                   // jmp_addr_pc     = jmp_addr;
                     pass            = 0;
                     key_A           = 0;
                     key_B           = 0;
