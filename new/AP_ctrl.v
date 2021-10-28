@@ -365,6 +365,8 @@ module AP_controller
         key_F_tmp       <= key_F;
         tmp_store_ddr_en <= store_ddr_en_reg;
         addr_cam_tmp    <= addr_cam;
+        addr_cam_auto_tmp <= addr_cam_auto;
+        matrix_cnt_tmp  <= matrix_cnt;
         if (!rst_STATE)
             begin
                 opt_cur         <= 0;
@@ -387,8 +389,8 @@ module AP_controller
                 input_F         <= 0;
                 data_out_cbc_tmp<= 0;
                 data_out_rbr_tmp<= 0;
-                addr_cam_auto_tmp <= 0;
-                matrix_cnt_tmp  <= 0;
+                //addr_cam_auto_tmp <= 0;
+                //matrix_cnt_tmp  <= 0;
                 matrix_select_reg <= 0;
                 ret_addr_pc     <= 0;
                 ret_addr_pc_rdy <= 0;
@@ -415,8 +417,8 @@ module AP_controller
                         ctxt_addr       <= 0;
                         ret_addr_pc_rdy <= 0;
                         store_ctxt_finish <= 0;
-                        addr_cam_auto_tmp <= addr_cam_auto;
-                        matrix_cnt_tmp  <= matrix_cnt;
+                        //addr_cam_auto_tmp <= addr_cam_auto;
+                        //matrix_cnt_tmp  <= matrix_cnt;
                         matrix_select_reg <= matrix_select;
                         data_addr_tmp   <= 0;
                         if ((op_code_valid == ADD) || (op_code_valid == SUB))
@@ -473,8 +475,8 @@ module AP_controller
                     end
                 LOAD_CTXT_FINISH_CHECK:
                     begin
-                        addr_cam_auto_tmp <= addr_cam_auto;
-                        matrix_cnt_tmp <= matrix_cnt;
+                        //addr_cam_auto_tmp <= addr_cam_auto;
+                        //matrix_cnt_tmp <= matrix_cnt;
                     end
                 STORE_RBR:
                     begin
@@ -556,8 +558,8 @@ module AP_controller
                     end
                 STORE_CTXT_FINISH_CHECK:
                     begin
-                        addr_cam_auto_tmp <= addr_cam_auto;
-                        matrix_cnt_tmp <= matrix_cnt;
+                       // addr_cam_auto_tmp <= addr_cam_auto;
+                       // matrix_cnt_tmp <= matrix_cnt;
                         if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 3))
                         begin
                             store_ctxt_finish <= 1;
