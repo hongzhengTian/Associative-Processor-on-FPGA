@@ -560,7 +560,7 @@ module AP_controller
                         matrix_cnt_tmp <= matrix_cnt;
                         if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 3))
                         begin
-                            store_ctxt_finish = 1;
+                            store_ctxt_finish <= 1;
                         end
                     end
                 JMP_INS:
