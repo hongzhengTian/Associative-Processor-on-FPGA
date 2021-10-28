@@ -224,6 +224,8 @@ module AP_controller
     reg [1 : 0]                             matrix_cnt_tmp;
     reg [ADDR_WIDTH_MEM - 1 : 0]            data_addr_tmp;
     reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_tmp;
+   // reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto_tmp_2;
+  //  reg [1 : 0]                             matrix_cnt_tmp_2;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -287,53 +289,59 @@ module AP_controller
             end
     end
 
-    always@(st_cur)
+    /*always @(clk)
+    begin
+        addr_cam_auto_tmp_2   = addr_cam_auto_tmp;
+        matrix_cnt_tmp_2      = matrix_cnt_tmp;
+    end*/
+
+    always@(posedge clk)
     begin
         if (st_cur == START)
         begin
-            addr_cam_auto   = 0;
-            matrix_cnt      = 1;
+            addr_cam_auto   <= 0;
+            matrix_cnt      <= 1;
         end
 
         else if(st_cur == STORE_CTXT_FINISH_CHECK)
             begin
-                if (addr_cam_auto < DATA_WIDTH )
+                if (addr_cam_auto < DATA_WIDTH)
                     begin
-                        addr_cam_auto = addr_cam_auto + 1;
-                        matrix_cnt = matrix_cnt_tmp;
+                        addr_cam_auto <= addr_cam_auto + 1;
+                       // matrix_cnt = matrix_cnt_tmp_2;
                     end
                 
-                else if (addr_cam_auto == DATA_WIDTH && data_cache_rdy == 1)
+                else if (addr_cam_auto == DATA_WIDTH)
                     begin
-                        addr_cam_auto = 0;
-                        matrix_cnt = matrix_cnt + 1;
+                        addr_cam_auto <= 0;
+                        matrix_cnt <= matrix_cnt + 1;
                     end
                 else begin
-                    addr_cam_auto = addr_cam_auto_tmp;
-                    matrix_cnt = matrix_cnt_tmp;
+                    //addr_cam_auto = addr_cam_auto_tmp_2;
+                   // matrix_cnt = matrix_cnt_tmp_2;
                 end
             end
         else if(st_cur == LOAD_CTXT_FINISH_CHECK)
             begin
                 if (addr_cam_auto < DATA_WIDTH - 1)
                     begin
-                        addr_cam_auto = addr_cam_auto + 1;
-                        matrix_cnt = matrix_cnt_tmp;
+                        addr_cam_auto <= addr_cam_auto + 1;
+                     //   matrix_cnt = matrix_cnt_tmp_2;
                     end
                 
-                else if (addr_cam_auto == DATA_WIDTH - 1 && data_cache_rdy == 1)
+                else if (addr_cam_auto == DATA_WIDTH - 1)
                     begin
-                        addr_cam_auto = 0;
-                        matrix_cnt = matrix_cnt + 1;
+                        addr_cam_auto <= 0;
+                        matrix_cnt <= matrix_cnt + 1;
                     end
                 else begin
-                    addr_cam_auto = addr_cam_auto_tmp;
-                    matrix_cnt = matrix_cnt_tmp;
+                    //addr_cam_auto = addr_cam_auto_tmp_2;
+                //    matrix_cnt = matrix_cnt_tmp_2;
                 end
             end
         else begin
-            addr_cam_auto = addr_cam_auto_tmp;
-            matrix_cnt = matrix_cnt_tmp;
+            //addr_cam_auto = addr_cam_auto_tmp_2;
+           // matrix_cnt = matrix_cnt_tmp_2;
         end
     end
     
@@ -365,8 +373,8 @@ module AP_controller
         key_F_tmp       <= key_F;
         tmp_store_ddr_en <= store_ddr_en_reg;
         addr_cam_tmp    <= addr_cam;
-        addr_cam_auto_tmp <= addr_cam_auto;
-        matrix_cnt_tmp  <= matrix_cnt;
+        //addr_cam_auto_tmp <= addr_cam_auto;
+        //matrix_cnt_tmp  <= matrix_cnt;
         if (!rst_STATE)
             begin
                 opt_cur         <= 0;
@@ -560,7 +568,7 @@ module AP_controller
                     begin
                        // addr_cam_auto_tmp <= addr_cam_auto;
                        // matrix_cnt_tmp <= matrix_cnt;
-                        if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 3))
+                        if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 0))
                         begin
                             store_ctxt_finish <= 1;
                         end
@@ -601,7 +609,7 @@ module AP_controller
         end
     end
 
-    always @(op_code or addr_cam_auto)
+    always @(op_code or addr_cam_auto or st_cur)
     begin
         if (op_code == STORERBR 
             || op_code == STORECBC 
@@ -1350,7 +1358,13 @@ module AP_controller
                             addr_output_cbc_B   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_A_cbc;
-                            st_next             = STORE_CTXT_FINISH_CHECK;
+                            if (data_cache_rdy == 1)
+                                begin
+                                    st_next = STORE_CTXT_FINISH_CHECK;
+                                end
+                            else begin
+                                st_next = STORE_CTXT;
+                            end
                         end
                     else if (matrix_cnt == 2)
                         begin
@@ -1359,27 +1373,37 @@ module AP_controller
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_B_cbc;
-                            st_next             = STORE_CTXT_FINISH_CHECK;
+                            if (data_cache_rdy == 1)
+                                begin
+                                    st_next = STORE_CTXT_FINISH_CHECK;
+                                end
+                            else begin
+                                st_next = STORE_CTXT;
+                            end
                         end
                     else if (matrix_cnt == 3)
                         begin
-                            if (addr_cam_auto == DATA_WIDTH && data_cache_rdy == 1)
+                            data_addr           = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
+                            addr_output_cbc_R   = addr_cam_col;
+                            addr_output_cbc_A   = 0;
+                            addr_output_cbc_B   = 0;
+                            data_out_cbc        = data_R_cbc;
+                            if (data_cache_rdy == 1)
                                 begin
-                                    st_next             = GET_JMP_ADDR;
-                                    addr_output_cbc_A   = 0;
-                                    addr_output_cbc_B   = 0;
-                                    addr_output_cbc_R   = 0;
-                                    data_out_cbc        = 0;
-                                    data_addr       = data_addr_tmp;
+                                    st_next = STORE_CTXT_FINISH_CHECK;
                                 end
                             else begin
-                                data_addr           = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
-                                addr_output_cbc_R   = addr_cam_col;
-                                addr_output_cbc_A   = 0;
-                                addr_output_cbc_B   = 0;
-                                data_out_cbc        = data_R_cbc;
-                                st_next             = STORE_CTXT_FINISH_CHECK;
+                                st_next = STORE_CTXT;
                             end
+                        end
+                    else if (matrix_cnt == 0)
+                        begin
+                            st_next             = GET_JMP_ADDR;
+                            addr_output_cbc_A   = 0;
+                            addr_output_cbc_B   = 0;
+                            addr_output_cbc_R   = 0;
+                            data_out_cbc        = 0;
+                            data_addr           = data_addr_tmp;
                         end
                     else begin
                         st_next             = STORE_CTXT;
@@ -1429,14 +1453,18 @@ module AP_controller
                     inout_mode          = 0;
                     data_cmd            = 0;
                     data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto_tmp;
-                    if(addr_cam_auto < DATA_WIDTH)
+                    addr_cam_col    = addr_cam_auto;
+                    /*if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
                         end
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
+                        end*/
+                    if (addr_cam_auto <= DATA_WIDTH)
+                        begin
+                            st_next = STORE_CTXT;
                         end
                     
                     else begin
@@ -1771,16 +1799,11 @@ module AP_controller
                     inout_mode          = ColxCol;
                     data_cmd            = ColxCol_load;
                     data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto_tmp;
-                    if(addr_cam_auto < DATA_WIDTH)
+                    addr_cam_col    = addr_cam_auto;
+                    if(addr_cam_auto <= DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
                         end
-                    else if (addr_cam_auto == DATA_WIDTH)
-                        begin
-                            st_next         = LOAD_CTXT;
-                        end
-                    
                     else begin
                         st_next         = START;
                     end
@@ -1824,7 +1847,7 @@ module AP_controller
                     inout_mode          = 0;
                     data_cmd            = 0;
                     data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto_tmp;
+                    addr_cam_col    = addr_cam_auto;
                     case(op_code)
                         ADD:
                             begin
