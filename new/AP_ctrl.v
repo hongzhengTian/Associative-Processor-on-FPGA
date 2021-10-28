@@ -18,9 +18,7 @@ module AP_controller
     input wire                              rst_STATE,
     input wire                              rst_clk,
     input wire                              int,            /* interupt signal input */
-    //input wire                              ret,            /* return signal input */
     output reg [5 : 0]                      st_cur,
-    //output reg                              int_valid,
     output reg                              clk_d,
 
     /* the interface of instruction cache */
@@ -41,7 +39,6 @@ module AP_controller
     output reg [2 : 0]                      data_cmd,
     output wire                             store_ddr_en,
     output reg                              store_ctxt_finish,
-    //output reg                              load_ctxt_finish,
 
     /* the interface of Program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
@@ -226,6 +223,7 @@ module AP_controller
     reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto_tmp;
     reg [1 : 0]                             matrix_cnt_tmp;
     reg [ADDR_WIDTH_MEM - 1 : 0]            data_addr_tmp;
+    reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_tmp;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -366,6 +364,7 @@ module AP_controller
         key_C_tmp       <= key_C;
         key_F_tmp       <= key_F;
         tmp_store_ddr_en <= store_ddr_en_reg;
+        addr_cam_tmp    <= addr_cam;
         if (!rst_STATE)
             begin
                 opt_cur         <= 0;
@@ -437,11 +436,6 @@ module AP_controller
                     end
                 LOAD_TMP:
                     begin
-                        /*if (ctxt_rdy == 1)
-                            begin
-                                bit_cnt <= tmp_bit_cnt_ret;
-                                mask <= tmp_mask_ret;
-                            end*/
                         if (ctxt_rdy == 1)
                         begin
                             bit_cnt     <= tmp_bit_cnt_ret;
@@ -462,11 +456,6 @@ module AP_controller
                     end
                 LOAD_CTXT:
                     begin
-                        /*if ((matrix_cnt == 0) && (op_code != RET))
-                            begin
-                                rst_InC <= 1;
-                                rst_InF <= 1;
-                            end*/
                         if (matrix_cnt == 3)
                             begin
                                 data_addr_tmp <= ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
@@ -642,8 +631,6 @@ module AP_controller
                     addr_mem_col        = 0;
                     data_cmd            = 0;
                     ret_valid           = 0;
-                    //store_ctxt_finish   = 0;
-                    //ret_addr_pc_rdy     = 0;
                     int_set             = 0;
                     addr_input_cbc_A    = 0;
                     addr_input_cbc_B    = 0;
@@ -667,8 +654,7 @@ module AP_controller
                     data_out_rbr        = data_out_rbr_tmp;
                     inout_mode          = 0;
                     data_addr           = 0;
-                  //  addr_cam_col        = addr_cam;
-                    //matrix_select_reg   = matrix_select;
+                    addr_cam_col        = addr_cam_tmp;
                     case (op_code_valid)
                         RESET:
                             begin
@@ -771,7 +757,7 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     int_set             = 0;
-                //    addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     case (matrix_select_reg)
                         M_A: 
                         begin
@@ -1049,7 +1035,7 @@ module AP_controller
                     int_set             = 0;
                     data_cmd            = 0;
                     data_addr           = 0;
-           //         addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -1167,7 +1153,7 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     int_set             = 0;
-         //           addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -1317,7 +1303,7 @@ module AP_controller
                     inout_mode          = 0;
                     data_cmd            = 0;
                     data_addr           = 0;
-                   // addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     st_next             = STORE_CTXT;
                 end
 
@@ -1441,7 +1427,7 @@ module AP_controller
                     inout_mode          = 0;
                     data_cmd            = 0;
                     data_addr       = data_addr_tmp;
-       //             addr_cam_col    = addr_cam_auto_tmp;
+                    addr_cam_col    = addr_cam_auto_tmp;
                     if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -1449,10 +1435,6 @@ module AP_controller
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
-                            /*if (matrix_cnt == 3)
-                            begin
-                                store_ctxt_finish = 1;
-                            end*/
                         end
                     
                     else begin
@@ -1498,11 +1480,14 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     int_set             = 1;
-       //             addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
                         end
+                    else begin
+                        st_next = GET_JMP_ADDR;
+                    end
                 end
 
             JMP_INS:
@@ -1543,7 +1528,7 @@ module AP_controller
                     int_set             = 1;
                     inout_mode          = 0;
                     data_addr           = 0;
-         //           addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     st_next         = START;
                 end
 
@@ -1580,7 +1565,7 @@ module AP_controller
                     inout_mode          = 0;
                     data_cmd            = 0;
                     data_addr           = 0;
-         //           addr_cam_col        = 0;
+                    addr_cam_col        = 0;
                     if (ctxt_rdy == 1)
                         begin
                             pass        = tmp_pass_ret;
@@ -1588,6 +1573,7 @@ module AP_controller
                             key_B       = tmp_key_B_ret;
                             key_C       = tmp_key_C_ret;
                             key_F       = tmp_key_F_ret;
+                            st_next     = LOAD_TMP;
                         end
                     else if (data_cache_rdy == 1)
                         begin
@@ -1611,7 +1597,6 @@ module AP_controller
             LOAD_CTXT:
                 begin
                     inout_mode      = ColxCol;
-                    //data_cmd        = ColxCol_load;
                     ins_inp_valid   = 0;
                     addr_cam_col    = addr_cam_auto;
                     pass            = pass_tmp;
@@ -1711,8 +1696,6 @@ module AP_controller
                         end
                     else if (matrix_cnt == 0)
                         begin
-                            //ret_addr_pc     = ret_addr_ret;
-                            //ret_addr_pc_rdy = 1;
                             data_cmd        = 0;
                             rst_InA         = 1;
                             rst_InB         = 1;
@@ -1730,7 +1713,6 @@ module AP_controller
                                 end
                             else begin
                                 st_next     = RET_STATE;
-                               // ret_valid   = 0;
                             end
                         end
                     else begin
