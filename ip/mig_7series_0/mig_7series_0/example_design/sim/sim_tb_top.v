@@ -18,7 +18,7 @@ module sim_tb_top;
 	parameter                       DDR_ADDR_WIDTH          = 28;
     parameter                       DATA_WIDTH              = 8;
     parameter                       DATA_DEPTH              = 16;
-    parameter                       ISA_DEPTH               = 132;
+    parameter                       ISA_DEPTH               = 135;
     parameter                       DATA_CACHE_DEPTH        = 16;
     parameter                       OPCODE_WIDTH            = 4;
     parameter                       ADDR_WIDTH_CAM          = 8;
@@ -32,7 +32,7 @@ module sim_tb_top;
     localparam                      MEM_WRITE_ISA           = 4'd1;
     localparam                      MEM_WRITE_DATA          = 4'd3;
 
-    localparam                      TOTAL_ISA_DEPTH         = 132;
+    localparam                      TOTAL_ISA_DEPTH         = 135;
     localparam                      CACHE_ISA_ADDR          = 10;
     localparam                      CACHE_DATA_ADDR         = 10;
     localparam                      TOTAL_DATA_DEPTH        = 128;
@@ -140,6 +140,8 @@ module sim_tb_top;
     reg                                 ISA_read_req;
 	reg [DDR_ADDR_WIDTH - 1 : 0]		ISA_read_addr;
     wire [ISA_WIDTH - 1 : 0]			instruction_to_cache;
+    wire [DATA_WIDTH - 1 : 0]           data_print;
+    wire                                data_print_rdy;
 
     reg                                 DATA_read_req;
     reg                                 DATA_store_req;
@@ -313,13 +315,13 @@ module sim_tb_top;
     assign Instruction = Instruction_reg;
     assign Data = Data_reg;
 
-    initial begin
+    /*initial begin
         int = 0;
         #57858500
         int = 1;
         #6000
         int = 0;
-    end
+    end*/
 
     // Reset Generation
     initial begin
@@ -472,6 +474,8 @@ module sim_tb_top;
         .Data                   (Data),
         .wr_burst_data_req      (wr_burst_data_req),
         .state_interface_module (state_interface_module),
+        .data_print             (data_print),
+        .data_print_rdy         (data_print_rdy),
         .ddr3_dq                (ddr3_dq_fpga),
         .ddr3_dqs_n             (ddr3_dqs_n_fpga),
         .ddr3_dqs_p             (ddr3_dqs_p_fpga),
