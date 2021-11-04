@@ -428,7 +428,7 @@ module AP_controller
                         //addr_cam_auto_tmp <= addr_cam_auto;
                         //matrix_cnt_tmp  <= matrix_cnt;
                         matrix_select_reg <= matrix_select;
-                        data_addr_tmp   <= 0;
+                        //data_addr_tmp   <= 0;
                         if ((op_code_valid == ADD) || (op_code_valid == SUB))
                             begin
                                 rst_InC <= 1;
@@ -488,6 +488,7 @@ module AP_controller
                     end
                 STORE_RBR:
                     begin
+                        data_addr_tmp <= data_addr;
                         case (matrix_select_reg)
                         M_A:
                         begin
@@ -509,6 +510,7 @@ module AP_controller
                     end
                 STORE_CBC:
                     begin
+                        data_addr_tmp <= data_addr;
                         case (matrix_select_reg)
                         M_A:
                         begin
@@ -663,7 +665,7 @@ module AP_controller
                     data_out_cbc        = data_out_cbc_tmp;
                     data_out_rbr        = data_out_rbr_tmp;
                     inout_mode          = 0;
-                    data_addr           = 0;
+                    data_addr           = data_addr_tmp;
                     addr_cam_col        = addr_cam_tmp;
                     case (op_code_valid)
                         RESET:
