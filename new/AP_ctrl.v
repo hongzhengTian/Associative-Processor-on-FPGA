@@ -20,6 +20,8 @@ module AP_controller
     input wire                              int,            /* interupt signal input */
     output reg [5 : 0]                      st_cur,
     output reg                              clk_d,
+    output reg [DATA_WIDTH - 1 : 0]         data_print,
+    output reg                              data_print_rdy,
 
     /* the interface of instruction cache */
     input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
@@ -46,6 +48,7 @@ module AP_controller
     output reg                              ins_inp_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
     output reg                              ret_addr_pc_rdy,
+    output reg                              print_data_finish,
 
     /* the interface of INT_STACK */
     /* temporary parameters from INT_STACK when RET signal set */
@@ -143,6 +146,7 @@ module AP_controller
     localparam                              SUB             = 4'd10;
     localparam                              TSC             = 4'd11;
     localparam                              ABS             = 4'd12;
+    localparam                              PRINT           = 4'd13;
 
     /* operand 2 */
     localparam                              M_A             = 2'd1;
@@ -192,6 +196,7 @@ module AP_controller
     localparam                              GET_JMP_ADDR    = 6'd33;
     localparam                              JMP_INS         = 6'd34;
     localparam                              RET_STATE       = 6'd35;
+    localparam                              PRINT_DATA      = 6'd36;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -250,24 +255,28 @@ module AP_controller
     assign  store_ddr_en = tmp_store_ddr_en & ~store_ddr_en_reg;
     
 
-    assign                                  op_code = instruction [OPCODE_WIDTH 
+    assign                                  op_code         = instruction [OPCODE_WIDTH 
                                                                 + ADDR_WIDTH_CAM
                                                                 + OPRAND_2_WIDTH 
                                                                 + ADDR_WIDTH_MEM - 1 :
                                                                 + ADDR_WIDTH_CAM
                                                                 + OPRAND_2_WIDTH 
                                                                 + ADDR_WIDTH_MEM];
-    assign                                  addr_cam = instruction [ADDR_WIDTH_CAM
+
+    assign                                  addr_cam        = instruction [ADDR_WIDTH_CAM
                                                                 + OPRAND_2_WIDTH 
                                                                 + ADDR_WIDTH_MEM - 1 :
                                                                 + OPRAND_2_WIDTH 
                                                                 + ADDR_WIDTH_MEM];
-    assign                                  matrix_select = instruction [OPRAND_2_WIDTH 
+
+    assign                                  matrix_select   = instruction [OPRAND_2_WIDTH 
                                                                 + ADDR_WIDTH_MEM - 1 : 
                                                                 + ADDR_WIDTH_MEM];
     assign                                  matrix_select_1 = addr_cam [OPRAND_2_WIDTH - 1 : 0];
-    assign                                  addr_mem = instruction [ADDR_WIDTH_MEM - 1 : 0];
-    assign                                  op_code_valid = op_code & ins_valid;                                         
+
+    assign                                  addr_mem        = instruction [ADDR_WIDTH_MEM - 1 : 0];
+
+    assign                                  op_code_valid   = op_code & ins_valid;                                         
     
     /* clock divider */
     always @(posedge clk or negedge rst_clk)
@@ -579,6 +588,12 @@ module AP_controller
                     begin
                         jmp_addr_pc     <= jmp_addr;
                     end
+                PRINT_DATA:
+                    begin
+                        //data_print      <= data_in_rbr;
+                        //data_print_rdy  <= 1;
+                        data_addr_tmp <= addr_mem; // TODO
+                    end
                 PASS_4_ADD:
                     begin
                         bit_cnt <= bit_cnt + 1;
@@ -667,6 +682,9 @@ module AP_controller
                     inout_mode          = 0;
                     data_addr           = data_addr_tmp;
                     addr_cam_col        = addr_cam_tmp;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (op_code_valid)
                         RESET:
                             begin
@@ -733,6 +751,11 @@ module AP_controller
                                 ins_inp_valid   = 0;
                                 st_next         = PASS_1_TSC;
                             end
+                        PRINT:
+                            begin
+                                ins_inp_valid   = 0;
+                                st_next         = PRINT_DATA;
+                            end
                         default: 
                             begin
                                 st_next        = START;
@@ -770,6 +793,9 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (matrix_select_reg)
                         M_A: 
                         begin
@@ -896,6 +922,9 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 0;
                     int_set             = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (matrix_select_reg)
                         M_A:
                         begin
@@ -1048,6 +1077,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (matrix_select_1)
                         M_A:
                         begin
@@ -1166,6 +1198,9 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (matrix_select_reg)
                         M_B:
                         begin
@@ -1239,6 +1274,9 @@ module AP_controller
                     data_out_rbr        = 0;
                     ret_valid           = 0;
                     int_set             = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case (matrix_select_reg)
                         M_A:
                         begin
@@ -1316,6 +1354,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     st_next             = STORE_CTXT;
                 end
 
@@ -1353,6 +1394,9 @@ module AP_controller
                     data_out_rbr        = 0;
                     ret_valid           = 0;
                     int_set             = 1;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if(matrix_cnt == 1)
                         begin
                             data_addr           = addr_cur_ctxt;
@@ -1454,8 +1498,11 @@ module AP_controller
                     int_set             = 1;
                     inout_mode          = 0;
                     data_cmd            = 0;
-                    data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto;
+                    data_addr           = data_addr_tmp;
+                    addr_cam_col        = addr_cam_auto;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     /*if(addr_cam_auto < DATA_WIDTH)
                         begin
                             st_next         = STORE_CTXT;
@@ -1513,6 +1560,9 @@ module AP_controller
                     ret_valid           = 0;
                     int_set             = 1;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if(jmp_addr_rdy == 1)
                         begin
                             st_next = JMP_INS;
@@ -1561,6 +1611,9 @@ module AP_controller
                     inout_mode          = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     st_next         = START;
                 end
 
@@ -1598,6 +1651,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if (ctxt_rdy == 1)
                         begin
                             pass        = tmp_pass_ret;
@@ -1654,6 +1710,9 @@ module AP_controller
                     data_out_cbc        = 0;
                     ret_valid           = 1;
                     int_set             = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if(matrix_cnt == 1)
                         begin
                             rst_InA             = 0;
@@ -1800,8 +1859,11 @@ module AP_controller
                     int_set             = 0;
                     inout_mode          = ColxCol;
                     data_cmd            = ColxCol_load;
-                    data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto;
+                    data_addr           = data_addr_tmp;
+                    addr_cam_col        = addr_cam_auto;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if(addr_cam_auto <= DATA_WIDTH)
                         begin
                             st_next         = LOAD_CTXT;
@@ -1848,8 +1910,11 @@ module AP_controller
                     int_set             = 0;
                     inout_mode          = 0;
                     data_cmd            = 0;
-                    data_addr       = data_addr_tmp;
-                    addr_cam_col    = addr_cam_auto;
+                    data_addr           = data_addr_tmp;
+                    addr_cam_col        = addr_cam_auto;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case(op_code)
                         ADD:
                             begin
@@ -1869,6 +1934,63 @@ module AP_controller
                             end
                         default: st_next = RET_STATE;
                     endcase
+                end
+
+            PRINT_DATA:
+                begin
+                    //TODO
+                    inout_mode      = RowxRow;
+                    data_addr       = addr_mem;
+                    data_cmd        = RowxRow_load;
+                    pass            = 0;
+                    key_A           = 0;
+                    key_B           = 0;
+                    key_C           = 0;
+                    key_F           = 0;
+                    rst_tag         = 0;
+                    ABS_opt         = 0;
+                    addr_input_cbc_A    = 0;
+                    addr_input_cbc_B    = 0;
+                    addr_input_cbc_R    = 0;
+                    input_A_cbc         = 0;
+                    input_B_cbc         = 0;
+                    input_R_cbc         = 0;
+                    rst_InA             = 1;
+                    rst_InB             = 1;
+                    rst_InR             = 1;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
+                    addr_output_rbr_A   = 0;
+                    addr_output_rbr_B   = 0;
+                    addr_output_rbr_R   = 0;
+                    addr_output_cbc_A   = 0;
+                    addr_output_cbc_B   = 0;
+                    addr_output_cbc_R   = 0;
+                    data_out_rbr        = 0;
+                    data_out_cbc        = 0;
+                    ret_valid           = 0;
+                    int_set             = 0;
+                    addr_cam_col        = 0;
+                    input_A_rbr         = 0;
+                    input_B_rbr         = 0;
+                    input_R_rbr         = 0;
+                    //ins_inp_valid       = 0;
+                    if (data_cache_rdy == 1)
+                        begin
+                            st_next         = START;
+                            ins_inp_valid   = 1;
+                            data_print_rdy  = 1;
+                            data_print      = data_in_rbr;
+                            print_data_finish = 1;
+                        end
+                    else begin
+                        st_next         = PRINT_DATA;
+                        ins_inp_valid   = 0;
+                        data_print_rdy  = 0;
+                        data_print      = 0;
+                        print_data_finish = 0;
+                    end
                 end
 
             /* pass of ADD */
@@ -1911,7 +2033,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ADD;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ADD;
                 end
                 
             PASS_2_ADD:
@@ -1953,7 +2078,10 @@ module AP_controller
                     data_addr           = 0;
                     data_cmd            = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ADD;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ADD;
                 end
                 
             PASS_3_ADD:
@@ -1995,7 +2123,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ADD;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ADD;
                 end
             
             PASS_4_ADD:
@@ -2037,7 +2168,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ADD;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ADD;
                 end
                 
             RSTTAG_ADD:
@@ -2079,6 +2213,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case(pass)
                     1: st_next      = PASS_2_ADD;
                     2: st_next      = PASS_3_ADD;
@@ -2128,7 +2265,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next = RSTTAG_SUB;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_SUB;
                 end
                 
             PASS_2_SUB:
@@ -2170,7 +2310,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_SUB;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_SUB;
                 end
                 
             PASS_3_SUB:
@@ -2212,7 +2355,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_SUB;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_SUB;
                 end
             
             PASS_4_SUB:
@@ -2254,7 +2400,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_SUB;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_SUB;
                 end
                 
             RSTTAG_SUB:
@@ -2296,6 +2445,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case(pass)
                     1: st_next      = PASS_2_SUB;
                     2: st_next      = PASS_3_SUB;
@@ -2345,7 +2497,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ABS;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ABS;
                 end
                 
             PASS_2_ABS:
@@ -2387,7 +2542,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ABS;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ABS;
                 end
                 
             PASS_3_ABS:
@@ -2429,7 +2587,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ABS;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ABS;
                 end
             
             PASS_4_ABS:
@@ -2471,7 +2632,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_ABS;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_ABS;
                 end
                 
             RSTTAG_ABS:
@@ -2513,6 +2677,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case(pass)
                     1: st_next      = PASS_2_ABS;
                     2: st_next      = PASS_3_ABS;
@@ -2562,7 +2729,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_TSC;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_TSC;
                 end
                 
             PASS_2_TSC:
@@ -2604,7 +2774,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_TSC;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_TSC;
                 end
                 
             PASS_3_TSC:
@@ -2646,7 +2819,10 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
-                    st_next         = RSTTAG_TSC;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                    st_next             = RSTTAG_TSC;
                 end
                 
             RSTTAG_TSC:
@@ -2688,6 +2864,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     case(pass)
                     1: st_next = PASS_2_TSC;
                     2: st_next = PASS_3_TSC;
@@ -2734,6 +2913,9 @@ module AP_controller
                     data_cmd            = 0;
                     data_addr           = 0;
                     addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if(bit_cnt < DATA_WIDTH)
                         begin
                             ins_inp_valid   = 0;
@@ -2790,6 +2972,9 @@ module AP_controller
                 data_cmd            = 0;
                 data_addr           = 0;
                 addr_cam_col        = 0;
+                print_data_finish   = 0;
+                data_print_rdy      = 0;
+                data_print          = 0;
                 end
 
         endcase

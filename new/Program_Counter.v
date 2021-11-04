@@ -18,6 +18,7 @@ module program_counter
     input wire                              ret_addr_pc_rdy,
     (* DONT_TOUCH = "1" *)input wire [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
+    input wire                              print_data_finish,
 
     /* the interface of instruction cache */
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
@@ -147,6 +148,16 @@ module program_counter
                     && (addr_ins < TOTAL_ISA_DEPTH) 
                     && (ins_cache_rdy == 1) 
                     &&(st_cur_ins_cache == SENT_INS)
+                    &&(addr_ins != ISA_DEPTH * load_times)
+                    )
+                    begin
+                        addr_ins <= addr_ins + 1;
+                        addr_cur_ins <= addr_ins + 1;
+                    end
+                    else if ((print_data_finish == 1) 
+                    && (ret_valid == 0)
+                    && (addr_ins < TOTAL_ISA_DEPTH) 
+                    && (ins_cache_rdy == 1) 
                     &&(addr_ins != ISA_DEPTH * load_times)
                     )
                     begin

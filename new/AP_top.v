@@ -28,6 +28,8 @@ module AP_top
     input			                    sys_rst,
     output                              wr_burst_data_req, 
     output [3:0]                        state_interface_module,
+    output [DATA_WIDTH - 1 : 0]         data_print,
+    output                              data_print_rdy,
     
     /* interface of DDR3 */
     inout [15:0]                        ddr3_dq,
@@ -132,6 +134,7 @@ module AP_top
     wire [3 : 0]                        st_cur_ins_cache;
     wire [9 : 0]                        load_times;
     wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
+    wire                                print_data_finish;
 
     wire [ISA_WIDTH - 1 : 0]            instruction;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
@@ -189,6 +192,8 @@ module AP_top
     .ins_valid              (ins_valid),
     .instruction            (instruction),
     .data_cache_rdy         (data_cache_rdy),
+    .data_print             (data_print),
+    .data_print_rdy         (data_print_rdy),
     .jmp_addr_rdy           (jmp_addr_rdy),
     .jmp_addr               (jmp_addr),
     .data_in_rbr            (data_in_rbr),
@@ -204,6 +209,7 @@ module AP_top
     //.load_ctxt_finish       (load_ctxt_finish),
     .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
+    .print_data_finish      (print_data_finish),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
@@ -402,7 +408,8 @@ module AP_top
     .addr_ins               (addr_ins),
     .ins_cache_rdy          (ins_cache_rdy),
     .st_cur_ins_cache       (st_cur_ins_cache),
-    .load_times             (load_times)
+    .load_times             (load_times),
+    .print_data_finish      (print_data_finish)
     );
 
     
