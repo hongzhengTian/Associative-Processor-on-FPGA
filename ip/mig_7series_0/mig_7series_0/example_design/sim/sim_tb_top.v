@@ -149,8 +149,8 @@ module sim_tb_top;
 	reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
 	reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
     wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
-    reg                                int;
-
+    reg                                 int;
+    wire                                ins_finish;
 
 
     reg [ISA_WIDTH - 1 : 0]             MEM_ISA     [0 : TOTAL_ISA_DEPTH - 1];
@@ -162,139 +162,16 @@ module sim_tb_top;
     reg [DATA_WIDTH - 1 : 0]            Data_reg;
     wire [DATA_WIDTH -1 : 0]            Data;
 
+    integer                             outputfile;
+
     initial 
     begin
         $readmemb("C:/Users/42207/OneDrive/UCI/Project/AP/program/dataGenandCompiler/ISA_Bin.txt", MEM_ISA);
         $readmemb("C:/Users/42207/OneDrive/UCI/Project/AP/program/dataGenandCompiler/DATA.txt", MEM_DATA);
-        /*MEM_ISA[0]      <= 0;
-        MEM_ISA[1]      <= {RESET, 8'd0, 2'd0, 16'd0};
-        MEM_ISA[2]      <= {LOADRBR, 8'd0, M_A, 16'h1000};
-        MEM_ISA[3]      <= {LOADRBR, 8'd1, M_A, 16'h1001};
-        MEM_ISA[4]      <= {LOADRBR, 8'd2, M_A, 16'h1002};
-        MEM_ISA[5]      <= {LOADRBR, 8'd3, M_A, 16'h1003};
-        MEM_ISA[6]      <= {LOADRBR, 8'd4, M_A, 16'h1004};
-        MEM_ISA[7]      <= {LOADRBR, 8'd5, M_A, 16'h1005};
-        MEM_ISA[8]      <= {LOADRBR, 8'd6, M_A, 16'h1006};
-        MEM_ISA[9]      <= {LOADRBR, 8'd7, M_A, 16'h1007};
-        MEM_ISA[10]     <= {LOADRBR, 8'd8, M_A, 16'h1008};
-        MEM_ISA[11]     <= {LOADRBR, 8'd9, M_A, 16'h1009};
-        MEM_ISA[12]     <= {LOADRBR, 8'd10, M_A, 16'h100A};
-        MEM_ISA[13]     <= {LOADRBR, 8'd11, M_A, 16'h100B};
-        MEM_ISA[14]     <= {LOADRBR, 8'd12, M_A, 16'h100C};
-        MEM_ISA[15]     <= {LOADRBR, 8'd13, M_A, 16'h100D};
-        MEM_ISA[16]     <= {LOADRBR, 8'd14, M_A, 16'h100E};
-        MEM_ISA[17]     <= {LOADRBR, 8'd15, M_A, 16'h100F};
-        MEM_ISA[18]     <= {LOADCBC, 8'd0, M_B, 16'h1010};
-        MEM_ISA[19]     <= {LOADCBC, 8'd1, M_B, 16'h1010};
-        MEM_ISA[20]     <= {LOADCBC, 8'd2, M_B, 16'h1010};
-        MEM_ISA[21]     <= {LOADCBC, 8'd3, M_B, 16'h1010};
-        MEM_ISA[22]     <= {LOADCBC, 8'd4, M_B, 16'h1010};
-        MEM_ISA[23]     <= {LOADCBC, 8'd5, M_B, 16'h1010};
-        MEM_ISA[24]     <= {LOADCBC, 8'd6, M_B, 16'h1010};
-        MEM_ISA[25]     <= {LOADCBC, 8'd7, M_B, 16'h1010};
-        MEM_ISA[26]     <= {ADD, 8'd0, 2'd0, 16'd0};
-        MEM_ISA[27]     <= {STORERBR, 8'd0, M_B, 16'h1020};
-        MEM_ISA[28]     <= {STORERBR, 8'd1, M_B, 16'h1021};
-        MEM_ISA[29]     <= {STORERBR, 8'd2, M_B, 16'h1022};
-        MEM_ISA[30]     <= {STORERBR, 8'd3, M_B, 16'h1023};
-        MEM_ISA[31]     <= {STORERBR, 8'd4, M_B, 16'h1024};
-        MEM_ISA[32]     <= {STORERBR, 8'd5, M_B, 16'h1025};
-        MEM_ISA[33]     <= {STORERBR, 8'd6, M_B, 16'h1026};
-        MEM_ISA[34]     <= {STORERBR, 8'd7, M_B, 16'h1027};
-        MEM_ISA[35]     <= {STORERBR, 8'd8, M_B, 16'h1028};
-        MEM_ISA[36]     <= {STORERBR, 8'd9, M_B, 16'h1029};
-        MEM_ISA[37]     <= {STORERBR, 8'd10, M_B, 16'h102A};
-        MEM_ISA[38]     <= {STORERBR, 8'd11, M_B, 16'h102B};
-        MEM_ISA[39]     <= {STORERBR, 8'd12, M_B, 16'h102C};
-        MEM_ISA[40]     <= {STORERBR, 8'd13, M_B, 16'h102D};
-        MEM_ISA[41]     <= {STORERBR, 8'd14, M_B, 16'h102E};
-        MEM_ISA[42]     <= {STORERBR, 8'd15, M_B, 16'h102F};
-        MEM_ISA[43]     <= {LOADRBR, 8'd0, M_A, 16'h1030};
-        MEM_ISA[44]     <= {LOADRBR, 8'd1, M_A, 16'h1031};
-        MEM_ISA[45]     <= {LOADRBR, 8'd2, M_A, 16'h1032};
-        MEM_ISA[46]     <= {LOADRBR, 8'd3, M_A, 16'h1033};
-        MEM_ISA[47]     <= {LOADRBR, 8'd4, M_A, 16'h1034};
-        MEM_ISA[48]     <= {LOADRBR, 8'd5, M_A, 16'h1035};
-        MEM_ISA[49]     <= {LOADRBR, 8'd6, M_A, 16'h1036};
-        MEM_ISA[50]     <= {LOADRBR, 8'd7, M_A, 16'h1037};
-        MEM_ISA[51]     <= {LOADRBR, 8'd8, M_A, 16'h1038};
-        MEM_ISA[52]     <= {LOADRBR, 8'd9, M_A, 16'h1039};
-        MEM_ISA[53]     <= {LOADRBR, 8'd10, M_A, 16'h103A};
-        MEM_ISA[54]     <= {LOADRBR, 8'd11, M_A, 16'h103B};
-        MEM_ISA[55]     <= {LOADRBR, 8'd12, M_A, 16'h103C};
-        MEM_ISA[56]     <= {LOADRBR, 8'd13, M_A, 16'h103D};
-        MEM_ISA[57]     <= {LOADRBR, 8'd14, M_A, 16'h103E};
-        MEM_ISA[58]     <= {LOADRBR, 8'd15, M_A, 16'h103F};
-        MEM_ISA[59]     <= {ADD, 8'd0, 2'd0, 16'd0};
-        MEM_ISA[60]     <= {COPY, 6'd0, M_A, M_B, 16'h0000};
-        MEM_ISA[61]     <= {ADD, 8'd0, 2'd0, 16'd0};
-        MEM_ISA[62]     <= {COPY, 6'd0, M_A, M_B, 16'h0000};
-        MEM_ISA[63]     <= {ADD, 8'd0, 2'd0, 16'd0};
-        MEM_ISA[64]     <= {STORECBC, 8'd0, M_B, 16'h1040};
-        MEM_ISA[65]     <= {STORECBC, 8'd1, M_B, 16'h1040};
-        MEM_ISA[66]     <= {STORECBC, 8'd2, M_B, 16'h1040};
-        MEM_ISA[67]     <= {STORECBC, 8'd3, M_B, 16'h1040};
-        MEM_ISA[68]     <= {STORECBC, 8'd4, M_B, 16'h1040};
-        MEM_ISA[69]     <= {STORECBC, 8'd5, M_B, 16'h1040};
-        MEM_ISA[70]     <= {STORECBC, 8'd6, M_B, 16'h1040};
-        MEM_ISA[71]     <= {STORECBC, 8'd7, M_B, 16'h1040};
-        MEM_ISA[72]     <= {LOADCBC, 8'd0, M_A, 16'h1020};
-        MEM_ISA[73]     <= {LOADCBC, 8'd1, M_A, 16'h1020};
-        MEM_ISA[74]     <= {LOADCBC, 8'd2, M_A, 16'h1020};
-        MEM_ISA[75]     <= {LOADCBC, 8'd3, M_A, 16'h1020};
-        MEM_ISA[76]     <= {LOADCBC, 8'd4, M_A, 16'h1020};
-        MEM_ISA[77]     <= {LOADCBC, 8'd5, M_A, 16'h1020};
-        MEM_ISA[78]     <= {LOADCBC, 8'd6, M_A, 16'h1020};
-        MEM_ISA[79]     <= {LOADCBC, 8'd7, M_A, 16'h1020};
-        MEM_ISA[80]     <= {SUB, 8'd0, 2'd0, 16'd0}; 
-        MEM_ISA[81]     <= {STORECBC, 8'd0, M_B, 16'h1050};
-        MEM_ISA[82]     <= {STORECBC, 8'd1, M_B, 16'h1050};
-        MEM_ISA[83]     <= {STORECBC, 8'd2, M_B, 16'h1050};
-        MEM_ISA[84]     <= {STORECBC, 8'd3, M_B, 16'h1050};
-        MEM_ISA[85]     <= {STORECBC, 8'd4, M_B, 16'h1050};
-        MEM_ISA[86]     <= {STORECBC, 8'd5, M_B, 16'h1050};
-        MEM_ISA[87]     <= {STORECBC, 8'd6, M_B, 16'h1050};
-        MEM_ISA[88]     <= {STORECBC, 8'd7, M_B, 16'h1050};
-        MEM_ISA[89]     <= {SUB, 8'd0, 2'd0, 16'd0}; 
-        MEM_ISA[90]     <= {STORECBC, 8'd0, M_B, 16'h1060};
-        MEM_ISA[91]     <= {STORECBC, 8'd1, M_B, 16'h1060};
-        MEM_ISA[92]     <= {STORECBC, 8'd2, M_B, 16'h1060};
-        MEM_ISA[93]     <= {STORECBC, 8'd3, M_B, 16'h1060};
-        MEM_ISA[94]     <= {STORECBC, 8'd4, M_B, 16'h1060};
-        MEM_ISA[95]     <= {STORECBC, 8'd5, M_B, 16'h1060};
-        MEM_ISA[96]     <= {STORECBC, 8'd6, M_B, 16'h1060};
-        MEM_ISA[97]     <= {STORECBC, 8'd7, M_B, 16'h1060};
-        MEM_ISA[98]     <= {LOADRBR, 8'd0, M_A, 16'h1040};
-        MEM_ISA[99]     <= {LOADRBR, 8'd1, M_A, 16'h1041};
-        MEM_ISA[100]     <= {LOADRBR, 8'd2, M_A, 16'h1042};
-        MEM_ISA[101]     <= {LOADRBR, 8'd3, M_A, 16'h1043};
-        MEM_ISA[102]     <= {LOADRBR, 8'd4, M_A, 16'h1044};
-        MEM_ISA[103]     <= {LOADRBR, 8'd5, M_A, 16'h1045};
-        MEM_ISA[104]     <= {LOADRBR, 8'd6, M_A, 16'h1046};
-        MEM_ISA[105]     <= {LOADRBR, 8'd7, M_A, 16'h1047};
-        MEM_ISA[106]     <= {LOADRBR, 8'd8, M_A, 16'h1048};
-        MEM_ISA[107]     <= {LOADRBR, 8'd9, M_A, 16'h1049};
-        MEM_ISA[108]     <= {LOADRBR, 8'd10, M_A, 16'h104A};
-        MEM_ISA[109]     <= {LOADRBR, 8'd11, M_A, 16'h104B};
-        MEM_ISA[110]     <= {LOADRBR, 8'd12, M_A, 16'h104C};
-        MEM_ISA[111]     <= {LOADRBR, 8'd13, M_A, 16'h104D};
-        MEM_ISA[112]     <= {LOADRBR, 8'd14, M_A, 16'h104E};
-        MEM_ISA[113]     <= {LOADRBR, 8'd15, M_A, 16'h104F};
-        MEM_ISA[114]     <= {ABS, 8'd0, 2'd0, 16'd0}; 
-        MEM_ISA[115]     <= {STORECBC, 8'd0, M_R, 16'h1080};
-        MEM_ISA[116]     <= {STORECBC, 8'd1, M_R, 16'h1080};
-        MEM_ISA[117]     <= {STORECBC, 8'd2, M_R, 16'h1080};
-        MEM_ISA[118]     <= {STORECBC, 8'd3, M_R, 16'h1080};
-        MEM_ISA[119]     <= {STORECBC, 8'd4, M_R, 16'h1080};
-        MEM_ISA[120]     <= {STORECBC, 8'd5, M_R, 16'h1080};
-        MEM_ISA[121]     <= {STORECBC, 8'd6, M_R, 16'h1080};
-        MEM_ISA[122]     <= {STORECBC, 8'd7, M_R, 16'h1080};
-        MEM_ISA[123]     <= {TSC, 8'd0, 2'd0, 16'd0}; 
-        MEM_ISA[124]     <= {STORERBR, 8'd0, M_R, 16'h102C};
-        MEM_ISA[125]     <= {STORERBR, 8'd1, M_R, 16'h102D};
-        MEM_ISA[126]     <= {STORERBR, 8'd2, M_R, 16'h102E};
-        MEM_ISA[127]     <= {STORERBR, 8'd3, M_R, 16'h102F};*/
-        
+        outputfile = $fopen("C:/Users/42207/OneDrive/UCI/Project/AP/program/dataGenandCompiler/AP_output.txt", "w");
+        wait (ins_finish);
+        $fclose(outputfile);
+        $finish;
     end
 
     always @(posedge sys_clk_i) 
@@ -309,6 +186,16 @@ module sim_tb_top;
         begin
           Data_reg = MEM_DATA[MEM_ADDR_DATA];
           MEM_ADDR_DATA = MEM_ADDR_DATA + 1;
+        end
+
+        else if(data_print_rdy)
+        begin
+            $fwrite(outputfile, "%b\n", data_print);
+            /*if (ins_finish)
+                begin
+                    $fclose(outputfile);
+                end*/
+           
         end
     end
 
@@ -472,6 +359,7 @@ module sim_tb_top;
         .sys_rst                (sys_rst),
         .Instruction            (Instruction),
         .Data                   (Data),
+        .ins_finish             (ins_finish),
         .wr_burst_data_req      (wr_burst_data_req),
         .state_interface_module (state_interface_module),
         .data_print             (data_print),
