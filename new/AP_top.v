@@ -30,6 +30,7 @@ module AP_top
     output [3:0]                        state_interface_module,
     output [DATA_WIDTH - 1 : 0]         data_print,
     output                              data_print_rdy,
+    output                              ins_finish,
     
     /* interface of DDR3 */
     inout [15:0]                        ddr3_dq,
@@ -401,6 +402,7 @@ module AP_top
     .ret_valid              (ret_valid),
     .int                    (int),
     .ins_inp_valid          (ins_inp_valid),
+    .ins_finish             (ins_finish),
     .ret_addr_pc            (ret_addr_pc),
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .addr_cur_ins           (addr_cur_ins),
