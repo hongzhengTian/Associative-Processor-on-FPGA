@@ -251,6 +251,7 @@ module AP_controller
                                                      /* 1 means C, 0 means F */
     reg [DATA_WIDTH - 1 : 0]                data_out_rbr_tmp;
     reg [DATA_DEPTH - 1 : 0]                data_out_cbc_tmp;
+    reg [3 : 0]                             cam_clk_cnt;
     
     assign  store_ddr_en = tmp_store_ddr_en & ~store_ddr_en_reg;
     
@@ -295,6 +296,44 @@ module AP_controller
             begin
                 clk_cnt <= 0;
                 clk_d <= ~clk_d;
+            end
+    end
+
+    always @(posedge clk or negedge rst_clk)
+    begin
+        if (!rst_clk)
+            begin
+                cam_clk_cnt <= 0;
+            end
+        else if(    st_cur == PASS_1_ADD
+                ||  st_cur == PASS_1_SUB
+                ||  st_cur == PASS_1_ABS
+                ||  st_cur == PASS_1_TSC
+                ||  st_cur == PASS_2_ADD
+                ||  st_cur == PASS_2_SUB
+                ||  st_cur == PASS_2_ABS
+                ||  st_cur == PASS_2_TSC
+                ||  st_cur == PASS_3_ADD
+                ||  st_cur == PASS_3_SUB
+                ||  st_cur == PASS_3_ABS
+                ||  st_cur == PASS_3_TSC
+                ||  st_cur == PASS_4_ADD
+                ||  st_cur == PASS_4_SUB
+                ||  st_cur == PASS_4_ABS)
+            begin
+                if (cam_clk_cnt < 7)
+                cam_clk_cnt <= cam_clk_cnt + 1;
+                else cam_clk_cnt <= 0;
+            end
+        else if(    st_cur == STORE_RBR)
+            begin
+                if (cam_clk_cnt < 7)
+                cam_clk_cnt <= cam_clk_cnt + 1;
+                else cam_clk_cnt <= 0;
+            end
+        else 
+            begin
+                cam_clk_cnt <= 0;
             end
     end
 
@@ -596,19 +635,31 @@ module AP_controller
                     end
                 PASS_4_ADD:
                     begin
-                        bit_cnt <= bit_cnt + 1;
+                        if (cam_clk_cnt == 7)
+                            begin
+                                bit_cnt <= bit_cnt + 1;
+                            end
                     end
                 PASS_4_SUB:
                     begin
-                        bit_cnt <= bit_cnt + 1;
+                        if (cam_clk_cnt == 7)
+                            begin
+                                bit_cnt <= bit_cnt + 1;
+                            end
                     end
                 PASS_4_ABS:
                     begin
-                        bit_cnt <= bit_cnt + 1;
+                        if (cam_clk_cnt == 7)
+                            begin
+                                bit_cnt <= bit_cnt + 1;
+                            end
                     end
                 PASS_3_TSC:
                     begin
-                        bit_cnt <= bit_cnt + 1;
+                        if (cam_clk_cnt == 7)
+                            begin
+                                bit_cnt <= bit_cnt + 1;
+                            end
                     end
                 RET_STATE:
                     begin
@@ -1208,7 +1259,13 @@ module AP_controller
                             addr_output_rbr_A   = 0;
                             addr_output_rbr_R   = 0;
                             data_out_rbr        = data_B_rbr;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = START;
+                                end
+                            else begin
+                                st_next         = STORE_RBR;
+                            end
                         end
 
                         M_R:
@@ -1217,7 +1274,13 @@ module AP_controller
                             addr_output_rbr_A   = 0;
                             addr_output_rbr_B   = 0;
                             data_out_rbr        = data_R_rbr;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = START;
+                                end
+                            else begin
+                                st_next         = STORE_RBR;
+                            end
                         end
 
                         M_A:
@@ -1226,7 +1289,13 @@ module AP_controller
                             addr_output_rbr_B   = 0;
                             addr_output_rbr_R   = 0;
                             data_out_rbr        = data_A_rbr;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = START;
+                                end
+                            else begin
+                                st_next         = STORE_RBR;
+                            end
                         end
 
                         default: begin
@@ -2036,7 +2105,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ADD;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ADD;
+                        end
+                    else begin
+                        st_next         = PASS_1_ADD;
+                    end
                 end
                 
             PASS_2_ADD:
@@ -2081,7 +2156,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ADD;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ADD;
+                        end
+                    else begin
+                        st_next         = PASS_2_ADD;
+                    end                
                 end
                 
             PASS_3_ADD:
@@ -2126,7 +2207,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ADD;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ADD;
+                        end
+                    else begin
+                        st_next         = PASS_3_ADD;
+                    end                  
                 end
             
             PASS_4_ADD:
@@ -2171,7 +2258,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ADD;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ADD;
+                        end
+                    else begin
+                        st_next         = PASS_4_ADD;
+                    end                  
                 end
                 
             RSTTAG_ADD:
@@ -2268,7 +2361,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_SUB;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_SUB;
+                        end
+                    else begin
+                        st_next         = PASS_1_SUB;
+                    end
                 end
                 
             PASS_2_SUB:
@@ -2313,7 +2412,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_SUB;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_SUB;
+                        end
+                    else begin
+                        st_next         = PASS_2_SUB;
+                    end
                 end
                 
             PASS_3_SUB:
@@ -2358,7 +2463,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_SUB;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_SUB;
+                        end
+                    else begin
+                        st_next         = PASS_3_SUB;
+                    end
                 end
             
             PASS_4_SUB:
@@ -2403,7 +2514,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_SUB;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_SUB;
+                        end
+                    else begin
+                        st_next         = PASS_4_SUB;
+                    end
                 end
                 
             RSTTAG_SUB:
@@ -2500,7 +2617,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ABS;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ABS;
+                        end
+                    else begin
+                        st_next         = PASS_1_ABS;
+                    end
                 end
                 
             PASS_2_ABS:
@@ -2545,7 +2668,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ABS;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ABS;
+                        end
+                    else begin
+                        st_next         = PASS_2_ABS;
+                    end
                 end
                 
             PASS_3_ABS:
@@ -2590,7 +2719,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ABS;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ABS;
+                        end
+                    else begin
+                        st_next         = PASS_3_ABS;
+                    end
                 end
             
             PASS_4_ABS:
@@ -2635,7 +2770,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_ABS;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_ABS;
+                        end
+                    else begin
+                        st_next         = PASS_4_ABS;
+                    end
                 end
                 
             RSTTAG_ABS:
@@ -2732,7 +2873,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_TSC;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_TSC;
+                        end
+                    else begin
+                        st_next         = PASS_1_TSC;
+                    end
                 end
                 
             PASS_2_TSC:
@@ -2777,7 +2924,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_TSC;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_TSC;
+                        end
+                    else begin
+                        st_next         = PASS_2_TSC;
+                    end
                 end
                 
             PASS_3_TSC:
@@ -2822,7 +2975,13 @@ module AP_controller
                     print_data_finish   = 0;
                     data_print_rdy      = 0;
                     data_print          = 0;
-                    st_next             = RSTTAG_TSC;
+                    if (cam_clk_cnt == 7)
+                        begin
+                            st_next     = RSTTAG_TSC;
+                        end
+                    else begin
+                        st_next         = PASS_3_TSC;
+                    end
                 end
                 
             RSTTAG_TSC:
