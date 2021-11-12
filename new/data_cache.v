@@ -246,7 +246,15 @@ begin
                         begin
                             st_next     = SENT_ADDR;
                         end
-                    default:st_next     = START;   
+                    default:begin
+                        if (store_ddr_en == 0)
+                            begin
+                                st_next     = START;
+                            end
+                        else begin
+                            st_next = STORE_DATA;
+                        end
+                    end
                 endcase
             end
         
