@@ -197,6 +197,7 @@ module AP_controller
     localparam                              JMP_INS         = 6'd34;
     localparam                              RET_STATE       = 6'd35;
     localparam                              PRINT_DATA      = 6'd36;
+    localparam                              STORE_END       = 6'd37;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -325,9 +326,21 @@ module AP_controller
                 cam_clk_cnt <= cam_clk_cnt + 1;
                 else cam_clk_cnt <= 0;
             end
-        else if(    st_cur == STORE_RBR)
+        else if( st_cur == STORE_RBR)
             begin
                 if (cam_clk_cnt < 7)
+                cam_clk_cnt <= cam_clk_cnt + 1;
+                else cam_clk_cnt <= 0;
+            end
+        else if( st_cur == STORE_CBC)
+            begin
+                if (cam_clk_cnt < 7)
+                cam_clk_cnt <= cam_clk_cnt + 1;
+                else cam_clk_cnt <= 0;
+            end
+        else if( st_cur == STORE_END)
+            begin
+                if (cam_clk_cnt < 1)
                 cam_clk_cnt <= cam_clk_cnt + 1;
                 else cam_clk_cnt <= 0;
             end
@@ -769,13 +782,13 @@ module AP_controller
 
                         STORERBR:
                             begin
-                                ins_inp_valid   = 1;
+                                ins_inp_valid   = 0;
                                 st_next         = STORE_RBR;
                             end
 
                         STORECBC:
                             begin
-                                ins_inp_valid   = 1;
+                                ins_inp_valid   = 0;
                                 st_next         = STORE_CBC;
                             end
 
@@ -1261,7 +1274,7 @@ module AP_controller
                             data_out_rbr        = data_B_rbr;
                             if (cam_clk_cnt == 7)
                                 begin
-                                    st_next     = START;
+                                    st_next     = STORE_END;
                                 end
                             else begin
                                 st_next         = STORE_RBR;
@@ -1276,7 +1289,7 @@ module AP_controller
                             data_out_rbr        = data_R_rbr;
                             if (cam_clk_cnt == 7)
                                 begin
-                                    st_next     = START;
+                                    st_next     = STORE_END;
                                 end
                             else begin
                                 st_next         = STORE_RBR;
@@ -1291,7 +1304,7 @@ module AP_controller
                             data_out_rbr        = data_A_rbr;
                             if (cam_clk_cnt == 7)
                                 begin
-                                    st_next     = START;
+                                    st_next     = STORE_END;
                                 end
                             else begin
                                 st_next         = STORE_RBR;
@@ -1353,7 +1366,13 @@ module AP_controller
                             addr_output_cbc_B   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_A_cbc;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = STORE_END;
+                                end
+                            else begin
+                                st_next         = STORE_CBC;
+                            end
                         end
 
                         M_B:
@@ -1362,7 +1381,13 @@ module AP_controller
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_B_cbc;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = STORE_END;
+                                end
+                            else begin
+                                st_next         = STORE_CBC;
+                            end
                         end
 
                         M_R:
@@ -1371,7 +1396,13 @@ module AP_controller
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_B   = 0;
                             data_out_cbc        = data_R_cbc;
-                            st_next             = START;
+                            if (cam_clk_cnt == 7)
+                                begin
+                                    st_next     = STORE_END;
+                                end
+                            else begin
+                                st_next         = STORE_CBC;
+                            end
                         end
 
                         default: begin
@@ -1382,6 +1413,19 @@ module AP_controller
                             data_out_cbc        = 0;
                         end
                     endcase
+                end
+            
+            STORE_END:
+                begin
+                    if (cam_clk_cnt == 1)
+                                begin
+                                    st_next     = START;
+                                    ins_inp_valid = 1;
+                                end
+                            else begin
+                                st_next         = STORE_END;
+                                ins_inp_valid = 0;
+                            end
                 end
 
             STORE_TMP:
