@@ -19,7 +19,6 @@ module AP_controller
     input wire                              rst_clk,
     input wire                              int,            /* interupt signal input */
     output reg [5 : 0]                      st_cur,
-    output reg                              clk_d,
     output reg [DATA_WIDTH - 1 : 0]         data_print,
     output reg                              data_print_rdy,
 
@@ -280,26 +279,6 @@ module AP_controller
 
     assign                                  op_code_valid   = op_code & ins_valid;                                         
     
-    /* clock divider */
-    always @(posedge clk or negedge rst_clk)
-    begin
-        if (!rst_clk)
-            begin
-                clk_cnt <= 0;
-                clk_d <= 0;
-            end
-        else if(clk_cnt < NUM_DIV / 2  - 1)
-            begin
-                clk_cnt <= clk_cnt + 1;
-                clk_d <= clk_d;
-            end
-        else 
-            begin
-                clk_cnt <= 0;
-                clk_d <= ~clk_d;
-            end
-    end
-
     always @(posedge clk or negedge rst_clk)
     begin
         if (!rst_clk)
@@ -320,13 +299,16 @@ module AP_controller
                 ||  st_cur == PASS_3_TSC
                 ||  st_cur == PASS_4_ADD
                 ||  st_cur == PASS_4_SUB
-                ||  st_cur == PASS_4_ABS)
+                ||  st_cur == PASS_4_ABS
+                ||  st_cur == STORE_RBR
+                ||  st_cur == STORE_CBC
+                ||  st_cur == STORE_CTXT)
             begin
                 if (cam_clk_cnt < 7)
                 cam_clk_cnt <= cam_clk_cnt + 1;
                 else cam_clk_cnt <= 0;
             end
-        else if( st_cur == STORE_RBR)
+       /* else if( st_cur == STORE_RBR)
             begin
                 if (cam_clk_cnt < 7)
                 cam_clk_cnt <= cam_clk_cnt + 1;
@@ -337,7 +319,7 @@ module AP_controller
                 if (cam_clk_cnt < 7)
                 cam_clk_cnt <= cam_clk_cnt + 1;
                 else cam_clk_cnt <= 0;
-            end
+            end*/
         else if( st_cur == STORE_END)
             begin
                 if (cam_clk_cnt < 1)
@@ -1417,6 +1399,45 @@ module AP_controller
             
             STORE_END:
                 begin
+                    pass            = pass_tmp;
+                    key_A           = key_A_tmp;
+                    key_B           = key_B_tmp;
+                    key_C           = key_C_tmp;
+                    key_F           = key_F_tmp;
+                    rst_tag         = 0;
+                    ABS_opt         = 1;
+                    rst_InA         = 1;
+                    rst_InB         = 1;
+                    rst_InR         = 1;
+                    addr_input_cbc_A    = 0;
+                    addr_input_cbc_B    = 0;
+                    addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
+                    input_A_rbr         = 0;
+                    input_B_rbr         = 0;
+                    input_R_rbr         = 0;
+                    input_A_cbc     = 0;
+                    input_B_cbc     = 0;
+                    input_R_cbc     = 0;
+                    addr_output_rbr_A   = 0;
+                    addr_output_rbr_B   = 0;
+                    addr_output_rbr_R   = 0;
+                    addr_output_cbc_A   = 0;
+                    addr_output_cbc_B   = 0;
+                    addr_output_cbc_R   = 0;
+                    data_out_rbr        = 0;
+                    data_out_cbc        = 0;
+                    ret_valid           = 0;
+                    int_set             = 0;
+                    inout_mode          = 0;
+                    data_cmd            = 0;
+                    data_addr           = 0;
+                    addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
                     if (cam_clk_cnt == 1)
                                 begin
                                     st_next     = START;
@@ -1517,7 +1538,7 @@ module AP_controller
                             addr_output_cbc_B   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_A_cbc;
-                            if (data_cache_rdy == 1)
+                            if (data_cache_rdy == 1 && cam_clk_cnt == 7)
                                 begin
                                     st_next = STORE_CTXT_FINISH_CHECK;
                                 end
@@ -1532,7 +1553,7 @@ module AP_controller
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_R   = 0;
                             data_out_cbc        = data_B_cbc;
-                            if (data_cache_rdy == 1)
+                            if (data_cache_rdy == 1 && cam_clk_cnt == 7)
                                 begin
                                     st_next = STORE_CTXT_FINISH_CHECK;
                                 end
@@ -1547,7 +1568,7 @@ module AP_controller
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_B   = 0;
                             data_out_cbc        = data_R_cbc;
-                            if (data_cache_rdy == 1)
+                            if (data_cache_rdy == 1 && cam_clk_cnt == 7)
                                 begin
                                     st_next = STORE_CTXT_FINISH_CHECK;
                                 end

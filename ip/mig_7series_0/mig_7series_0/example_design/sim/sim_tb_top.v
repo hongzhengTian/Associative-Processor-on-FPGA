@@ -97,7 +97,6 @@ module sim_tb_top;
     reg                                 sys_rst_n;
     wire                                sys_rst;
     reg                                 sys_clk_i;
-    reg                                 cam_clk_i;
     reg                                 clk_ref_i;
     wire                                ddr3_reset_n;
     wire [DQ_WIDTH-1:0]                 ddr3_dq_fpga;
@@ -224,11 +223,6 @@ module sim_tb_top;
     always
         sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
 
-    initial 
-        cam_clk_i = 1'b1;
-    always
-        cam_clk_i = #(CLKIN_CAM_PERIOD/2.0) ~cam_clk_i;
-
     initial
         clk_ref_i = 1'b0;
     always
@@ -353,7 +347,6 @@ module sim_tb_top;
       ) u_AP_top
         (
         .sys_clk_i              (sys_clk_i),
-        .cam_clk_i              (cam_clk_i),
         .int                    (int),
         .init_calib_complete    (init_calib_complete),
         .sys_rst                (sys_rst),

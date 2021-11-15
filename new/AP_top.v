@@ -20,7 +20,6 @@ module AP_top
     (
     /* interface of system */
     input                               sys_clk_i,
-    input                               cam_clk_i,
     input                               int,
     output                              init_calib_complete,
     input [ISA_WIDTH - 1 : 0]           Instruction,
@@ -55,7 +54,6 @@ module AP_top
     
     wire [5 : 0]                        st_cur;
     wire                                ui_clk;
-    wire                                clk_d; 
     wire [ADDR_WIDTH_CAM - 1 : 0]       addr_cam_col;
     wire [DATA_WIDTH - 1 : 0]           data_out_rbr;
     wire [DATA_DEPTH - 1 : 0]           data_out_cbc;
@@ -186,10 +184,7 @@ module AP_top
     .rst_STATE              (sys_rst),
     .rst_clk                (sys_rst),
     .int                    (int),
-    //.ret                    (ret),
     .st_cur                 (st_cur),
-    //.int_valid              (int_valid),
-    .clk_d                  (clk_d),
     .ins_valid              (ins_valid),
     .instruction            (instruction),
     .data_cache_rdy         (data_cache_rdy),
@@ -207,7 +202,6 @@ module AP_top
     .data_cmd               (data_cmd),
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finish      (store_ctxt_finish),
-    //.load_ctxt_finish       (load_ctxt_finish),
     .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .print_data_finish      (print_data_finish),
@@ -452,7 +446,6 @@ module AP_top
     )data_cache_u 
     (
     .clk                    (ui_clk),
-    .clk_d                  (clk_d),
     .rst                    (sys_rst),
     .int_set                (int_set),
     .data_out_rbr           (data_out_rbr),
