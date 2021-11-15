@@ -10,7 +10,6 @@ module data_cache
 (
     /* the interface of system signal */
     input wire                              clk,
-    (* DONT_TOUCH = "1" *)input wire                              clk_d,
     input wire                              rst,
     input wire                              int_set,
 
