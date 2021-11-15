@@ -42,7 +42,7 @@ module AP_controller
     output reg                              store_ctxt_finish,
 
     /* the interface of Program counter */
-    input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ins,
+    input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
     output reg [DDR_ADDR_WIDTH - 1 : 0]     jmp_addr_pc,
     output reg                              ins_inp_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
@@ -595,7 +595,7 @@ module AP_controller
                         tmp_key_B       <= key_B;
                         tmp_key_C       <= key_C;
                         tmp_key_F       <= key_F;
-                        ret_addr        <= addr_cur_ins;
+                        ret_addr        <= addr_ins;
                         ctxt_addr       <= addr_cur_ctxt;
                         if(opt_cur == ADD || opt_cur == SUB)
                             begin
