@@ -127,7 +127,6 @@ module AP_top
     wire [DATA_DEPTH - 1 : 0]           data_F;
     wire [DATA_DEPTH - 1 : 0]           data_C;
 
-    wire [ADDR_WIDTH_MEM - 1 : 0]       addr_cur_ins;
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_ins;
     wire                                ins_cache_rdy;
     wire [3 : 0]                        st_cur_ins_cache;
@@ -202,7 +201,7 @@ module AP_top
     .data_cmd               (data_cmd),
     .store_ddr_en           (store_ddr_en),
     .store_ctxt_finish      (store_ctxt_finish),
-    .addr_cur_ins           (addr_cur_ins),
+    .addr_ins               (addr_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .print_data_finish      (print_data_finish),
     .ins_inp_valid          (ins_inp_valid),
@@ -399,7 +398,6 @@ module AP_top
     .ins_finish             (ins_finish),
     .ret_addr_pc            (ret_addr_pc),
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
-    .addr_cur_ins           (addr_cur_ins),
     .jmp_addr_pc            (jmp_addr_pc),
     .addr_ins               (addr_ins),
     .ins_cache_rdy          (ins_cache_rdy),
