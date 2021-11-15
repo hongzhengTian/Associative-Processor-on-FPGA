@@ -19,8 +19,8 @@ module ins_cache
 
     /* the interface of program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
-    output reg                              ins_cache_rdy,
-    output  [3 : 0]                         st_cur_ins_cache,
+    output reg                              ins_cache_inited,
+    output                                  ins_cache_rdy,
     output reg [9 : 0]                      load_times,
 
     /* the interface of AP_ctrl */
@@ -76,7 +76,7 @@ module ins_cache
     reg [ISA_WIDTH - 1 : 0]                 instruction_tmp;
     reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
 
-    assign st_cur_ins_cache = st_cur;
+    assign ins_cache_rdy = (st_cur == SENT_INS? 1 : 0);
 
     /* state machine */
     always @(posedge clk or negedge rst)
@@ -95,7 +95,7 @@ module ins_cache
     begin
         if (!rst)
             begin
-                ins_cache_rdy   <= 0;
+                ins_cache_inited   <= 0;
                 rd_cnt_isa_reg  <= 0;
                 ins_cache_init  <= 0;
                 load_times      <= 0;
@@ -110,7 +110,7 @@ module ins_cache
                     begin
                         if (ins_cache_init == 1)
                             begin
-                                ins_cache_rdy <= 1;
+                                ins_cache_inited <= 1;
                                 //ins_valid <= 0;
                             end
                     end
@@ -119,7 +119,7 @@ module ins_cache
                         tag_ins <= addr_ins;
                         if (rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
                             begin
-                                ins_cache_rdy <= 0;
+                                ins_cache_inited <= 0;
                             end
                         if (rd_cnt_isa >= isa_read_len)
                             begin
