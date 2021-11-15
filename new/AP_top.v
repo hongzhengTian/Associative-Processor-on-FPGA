@@ -128,8 +128,8 @@ module AP_top
     wire [DATA_DEPTH - 1 : 0]           data_C;
 
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_ins;
+    wire                                ins_cache_inited;
     wire                                ins_cache_rdy;
-    wire [3 : 0]                        st_cur_ins_cache;
     wire [9 : 0]                        load_times;
     wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
     wire                                print_data_finish;
@@ -179,7 +179,7 @@ module AP_top
     DDR_ADDR_WIDTH
     )AP_controller_u 
     (
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .rst_STATE              (sys_rst),
     .rst_clk                (sys_rst),
     .int                    (int),
@@ -292,7 +292,7 @@ module AP_top
     .Input_A_col            (input_A_cbc),
     .Key_A                  (key_A),
     .Mask                   (mask),
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .addr_input_Row_B       (addr_input_rbr_B),
     .addr_input_Col_B       (addr_input_cbc_B),
     .rstInB                 (rst_InB),
@@ -390,7 +390,7 @@ module AP_top
     DDR_ADDR_WIDTH
     ) program_counter_u 
     (
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .rst                    (sys_rst),
     .ret_valid              (ret_valid),
     .int                    (int),
@@ -400,8 +400,8 @@ module AP_top
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .jmp_addr_pc            (jmp_addr_pc),
     .addr_ins               (addr_ins),
+    .ins_cache_inited       (ins_cache_inited),
     .ins_cache_rdy          (ins_cache_rdy),
-    .st_cur_ins_cache       (st_cur_ins_cache),
     .load_times             (load_times),
     .print_data_finish      (print_data_finish)
     );
@@ -417,11 +417,11 @@ module AP_top
     TOTAL_ISA_DEPTH
     )ins_cache_u 
     (
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .rst                    (sys_rst),
     .addr_ins               (addr_ins),
+    .ins_cache_inited       (ins_cache_inited),
     .ins_cache_rdy          (ins_cache_rdy),
-    .st_cur_ins_cache       (st_cur_ins_cache),
     .instruction            (instruction),
     .ins_valid              (ins_valid),
     .ISA_read_req           (ISA_read_req),
@@ -443,7 +443,7 @@ module AP_top
     ADDR_WIDTH_CAM
     )data_cache_u 
     (
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .rst                    (sys_rst),
     .int_set                (int_set),
     .data_out_rbr           (data_out_rbr),
@@ -478,7 +478,7 @@ module AP_top
     DATA_DEPTH,
     ADDR_WIDTH_MEM
     )int_stack_u (
-    .clk                    (ui_clk),
+    .clk                    (sys_clk_i),
     .rst                    (sys_rst),
     .int_set                (int_set),
     .ret_valid              (ret_valid),
