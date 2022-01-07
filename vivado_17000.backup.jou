@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# Vivado v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Tue Nov  9 12:14:50 2021
+# Process ID: 17000
+# Current directory: C:/FPGA/AP_5v_highFreqCAM
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent9372 C:\FPGA\AP_5v_highFreqCAM\AP_5v.xpr
+# Log file: C:/FPGA/AP_5v_highFreqCAM/vivado.log
+# Journal file: C:/FPGA/AP_5v_highFreqCAM\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/FPGA/AP_5v_highFreqCAM/AP_5v.xpr
+update_compile_order -fileset sources_1
+launch_simulation
+open_wave_config C:/FPGA/ddr_controller_3/sim_tb_top_behav.wcfg
+source sim_tb_top.tcl
+run 69 us
+save_wave_config {C:/FPGA/ddr_controller_3/sim_tb_top_behav.wcfg}
+close_sim
