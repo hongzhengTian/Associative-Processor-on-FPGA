@@ -146,6 +146,7 @@ module AP_controller
     localparam                              TSC             = 4'd11;
     localparam                              ABS             = 4'd12;
     localparam                              PRINT           = 4'd13;
+    localparam                              STOP            = 4'd14;
 
     /* operand 2 */
     localparam                              M_A             = 2'd1;
@@ -197,6 +198,7 @@ module AP_controller
     localparam                              RET_STATE       = 6'd35;
     localparam                              PRINT_DATA      = 6'd36;
     localparam                              STORE_END       = 6'd37;
+    localparam                              FINISH          = 6'd38;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -204,6 +206,7 @@ module AP_controller
     localparam                              COPY_B          = 3'd3;
     localparam                              COPY_R          = 3'd4;
     localparam                              COPY_A          = 3'd5;
+    localparam                              RST0            = 3'd6;
 
     /* data_cache command */
     localparam                              RowxRow_load    = 3'd1;
@@ -790,6 +793,7 @@ module AP_controller
                             begin
                                 ins_inp_valid   = 0;
                                 st_next         = PASS_1_ABS;
+                                inout_mode      = RST0;
                             end
 
                         TSC:
@@ -801,6 +805,11 @@ module AP_controller
                             begin
                                 ins_inp_valid   = 0;
                                 st_next         = PRINT_DATA;
+                            end
+                        STOP:
+                            begin
+                                ins_inp_valid   = 0;
+                                st_next         = FINISH;
                             end
                         default: 
                             begin
@@ -1405,7 +1414,7 @@ module AP_controller
                     key_C           = key_C_tmp;
                     key_F           = key_F_tmp;
                     rst_tag         = 0;
-                    ABS_opt         = 1;
+                    ABS_opt         = 0;
                     rst_InA         = 1;
                     rst_InB         = 1;
                     rst_InR         = 1;
@@ -2639,7 +2648,7 @@ module AP_controller
                     endcase
                 end
 
-            /* pass of ABS */          
+            /* pass of ABS */
             PASS_1_ABS:
                 begin
                     ins_inp_valid   = 0;
@@ -3058,7 +3067,7 @@ module AP_controller
                     key_B           = 0;
                     key_C           = 0;
                     key_F           = 0;
-                    ABS_opt         = 1;
+                    ABS_opt         = 0;
                     rst_InA         = 1;
                     rst_InB         = 1;
                     rst_InR         = 1;
@@ -3156,6 +3165,51 @@ module AP_controller
                         ins_inp_valid   = 1;
                         end
                 end
+
+            FINISH:
+                begin
+                    st_next             = FINISH;
+                    ins_inp_valid       = 0;
+                    pass                = 0;
+                    key_A               = 0;
+                    key_B               = 0;
+                    key_C               = 0;
+                    key_F               = 0;
+                    rst_tag             = 0;
+                    ABS_opt             = 0;
+                    rst_InA             = 1;
+                    rst_InB             = 1;
+                    rst_InR             = 1;
+                    addr_input_cbc_A    = 0;
+                    addr_input_cbc_B    = 0;
+                    addr_input_cbc_R    = 0;
+                    addr_input_rbr_A    = 0;
+                    addr_input_rbr_B    = 0;
+                    addr_input_rbr_R    = 0;
+                    input_A_rbr         = 0;
+                    input_B_rbr         = 0;
+                    input_R_rbr         = 0;
+                    input_A_cbc         = 0;
+                    input_B_cbc         = 0;
+                    input_R_cbc         = 0;
+                    addr_output_rbr_A   = 0;
+                    addr_output_rbr_B   = 0;
+                    addr_output_rbr_R   = 0;
+                    addr_output_cbc_A   = 0;
+                    addr_output_cbc_B   = 0;
+                    addr_output_cbc_R   = 0;
+                    data_out_rbr        = 0;
+                    data_out_cbc        = 0;
+                    ret_valid           = 0;
+                    int_set             = 0;
+                    inout_mode          = 0;
+                    data_cmd            = 0;
+                    data_addr           = 0;
+                    addr_cam_col        = 0;
+                    print_data_finish   = 0;
+                    data_print_rdy      = 0;
+                    data_print          = 0;
+                end
             
             default: begin
                 st_next         = START;
@@ -3166,7 +3220,7 @@ module AP_controller
                 key_C           = key_C_tmp;
                 key_F           = key_F_tmp;
                 rst_tag         = 0;
-                ABS_opt         = 1;
+                ABS_opt         = 0;
                 rst_InA         = 1;
                 rst_InB         = 1;
                 rst_InR         = 1;

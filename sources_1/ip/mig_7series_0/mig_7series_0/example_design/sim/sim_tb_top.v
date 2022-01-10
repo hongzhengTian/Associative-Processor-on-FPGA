@@ -18,7 +18,7 @@ module sim_tb_top;
 	parameter                       DDR_ADDR_WIDTH          = 28;
     parameter                       DATA_WIDTH              = 8;
     parameter                       DATA_DEPTH              = 16;
-    parameter                       ISA_DEPTH               = 135;
+    parameter                       ISA_DEPTH               = 128;
     parameter                       DATA_CACHE_DEPTH        = 16;
     parameter                       OPCODE_WIDTH            = 4;
     parameter                       ADDR_WIDTH_CAM          = 8;
@@ -32,7 +32,7 @@ module sim_tb_top;
     localparam                      MEM_WRITE_ISA           = 4'd1;
     localparam                      MEM_WRITE_DATA          = 4'd3;
 
-    localparam                      TOTAL_ISA_DEPTH         = 135;
+    localparam                      TOTAL_ISA_DEPTH         = 128;
     localparam                      CACHE_ISA_ADDR          = 10;
     localparam                      CACHE_DATA_ADDR         = 10;
     localparam                      TOTAL_DATA_DEPTH        = 128;

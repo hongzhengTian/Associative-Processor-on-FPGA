@@ -7,7 +7,8 @@ module cell_R
   parameter ColxCol = 3'd2,
   parameter COPY_B = 3'd3,
   parameter COPY_R = 3'd4,
-  parameter COPY_A = 3'd5
+  parameter COPY_A = 3'd5,
+  parameter RST0 = 3'd6
   )
     (
     input wire [ADDR_WIDTH_CAM - 1 : 0]addr_input_Row,
@@ -174,6 +175,13 @@ module cell_R
                 end
             end
         end
+
+        else if (input_mode == RST0)
+            begin
+                for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+                    D[i] = 0;
+                end
+            end
 
         else
         begin
