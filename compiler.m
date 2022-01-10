@@ -16,6 +16,7 @@ newStr = strrep(newStr, '1','0001');
 
 newStr = strrep(newStr, 'RESET','000100000000000000000000000000');
 newStr = strrep(newStr, 'RET','001000000000000000000000000000');
+newStr = strrep(newStr, 'STOP','111000000000000000000000000000');
 newStr = strrep(newStr, 'LOADRBR','0100');
 newStr = strrep(newStr, 'LOADCBC','0101');
 newStr = strrep(newStr, 'STORERBR','0110');
