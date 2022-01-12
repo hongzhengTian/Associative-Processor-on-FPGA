@@ -6,6 +6,7 @@ module ddr3_interface_top
     parameter DATA_WIDTH        = 16,
     parameter ISA_WIDTH         = 30,
     parameter ISA_DEPTH         = 72,
+    parameter INT_INS_DEPTH     = 27,
     parameter DATA_CACHE_DEPTH  = 16,
     parameter TOTAL_ISA_DEPTH   = 128,
     parameter TOTAL_DATA_DEPTH  = 128
@@ -18,7 +19,7 @@ module ddr3_interface_top
     input [DATA_WIDTH - 1 : 0]          Data,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
-    output [3:0]                        state_interface_module,
+    output [4:0]                        state_interface_module,
     output                              ui_clk,
 
     /* interface of ISA_cache */
@@ -99,7 +100,8 @@ module ddr3_interface_top
     ISA_DEPTH,
     DATA_CACHE_DEPTH,
     TOTAL_ISA_DEPTH, 
-    TOTAL_DATA_DEPTH
+    TOTAL_DATA_DEPTH,
+    INT_INS_DEPTH
     ) u_DDR_cache_interface
     (
         .mem_clk(ui_clk),

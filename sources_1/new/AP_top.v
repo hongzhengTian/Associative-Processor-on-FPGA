@@ -3,6 +3,7 @@ module AP_top
     parameter DATA_WIDTH        = 8,
     parameter DATA_DEPTH        = 16,
     parameter ISA_DEPTH         = 72,
+    parameter INT_INS_DEPTH     = 27,
     parameter TOTAL_ISA_DEPTH   = 128,
     parameter TOTAL_DATA_DEPTH  = 128,
     parameter DATA_CACHE_DEPTH  = 16,
@@ -26,7 +27,7 @@ module AP_top
     input [DATA_WIDTH - 1 : 0]          Data,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
-    output [3:0]                        state_interface_module,
+    output [4:0]                        state_interface_module,
     output [DATA_WIDTH - 1 : 0]         data_print,
     output                              data_print_rdy,
     output                              ins_finish,
@@ -336,6 +337,7 @@ module AP_top
     DATA_WIDTH,
     ISA_WIDTH,
     ISA_DEPTH,
+    INT_INS_DEPTH,
     DATA_CACHE_DEPTH,
     TOTAL_ISA_DEPTH, 
     TOTAL_DATA_DEPTH
@@ -409,6 +411,7 @@ module AP_top
     
     ins_cache #(
     ISA_DEPTH,
+    INT_INS_DEPTH,
     DDR_ADDR_WIDTH,
     OPCODE_WIDTH, 
     ADDR_WIDTH_CAM, 

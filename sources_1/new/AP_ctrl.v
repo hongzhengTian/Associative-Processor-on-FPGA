@@ -1099,7 +1099,7 @@ module AP_controller
             
             COPY_MT:
                 begin
-                    ins_inp_valid   = 0;
+                    ins_inp_valid   = 1;
                     pass            = 0;
                     key_A           = 0;
                     key_B           = 0;
