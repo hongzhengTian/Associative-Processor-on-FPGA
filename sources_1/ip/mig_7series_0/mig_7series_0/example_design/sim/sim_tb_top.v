@@ -29,13 +29,15 @@ module sim_tb_top;
                                                             + OPRAND_2_WIDTH 
                                                             + ADDR_WIDTH_MEM; 
     
-    localparam                      MEM_WRITE_ISA           = 4'd1;
-    localparam                      MEM_WRITE_DATA          = 4'd3;
+    localparam                      MEM_WRITE_ISA           = 5'd1;
+    localparam                      MEM_WRITE_DATA          = 5'd3;
+    localparam                      MEM_WRITE_INT_INS       = 5'd15;
 
     localparam                      TOTAL_ISA_DEPTH         = 128;
     localparam                      CACHE_ISA_ADDR          = 10;
     localparam                      CACHE_DATA_ADDR         = 10;
     localparam                      TOTAL_DATA_DEPTH        = 128;
+    localparam                      INT_INS_DEPTH           = 28;
     
     //The following parameters are mode register settings
     parameter                       BURST_MODE              = "8";// DDR3 SDRAM:Burst Length (Mode Register 0).
@@ -133,7 +135,7 @@ module sim_tb_top;
     reg [1-1:0]                         ddr3_ck_p_sdram;
     reg [1-1:0]                         ddr3_ck_n_sdram;
     wire                                app_rdy;
-    wire [3:0]                          state_interface_module;
+    wire [4:0]                          state_interface_module;
     wire                                wr_burst_data_req;
 
     reg                                 ISA_read_req;
@@ -154,7 +156,9 @@ module sim_tb_top;
 
     reg [ISA_WIDTH - 1 : 0]             MEM_ISA     [0 : TOTAL_ISA_DEPTH - 1];
     reg [DATA_WIDTH - 1 : 0]            MEM_DATA    [0 : TOTAL_DATA_DEPTH - 1];
+    reg [ISA_WIDTH - 1 : 0]             MEM_INT_INS [0 : INT_INS_DEPTH - 1];
     reg [CACHE_ISA_ADDR - 1 : 0]        MEM_ADDR    = 0;
+    reg [CACHE_ISA_ADDR - 1 : 0]        MEM_ADDR_INT = 0;
     reg [CACHE_DATA_ADDR - 1 : 0]       MEM_ADDR_DATA = 0;
     reg [ISA_WIDTH - 1 : 0]             Instruction_reg;
     wire [ISA_WIDTH - 1 : 0]            Instruction;
@@ -167,6 +171,7 @@ module sim_tb_top;
     begin
         $readmemb("ISA_Bin.txt", MEM_ISA);
         $readmemb("DATA.txt", MEM_DATA);
+        $readmemb("ISA_interrupt_Bin.txt", MEM_INT_INS);
         outputfile = $fopen("AP_output.txt", "w");
         wait (ins_finish);
         $fclose(outputfile);
@@ -187,6 +192,12 @@ module sim_tb_top;
           MEM_ADDR_DATA = MEM_ADDR_DATA + 1;
         end
 
+        else if(wr_burst_data_req & (state_interface_module == MEM_WRITE_INT_INS))
+        begin
+          Instruction_reg = MEM_INT_INS[MEM_ADDR_INT];
+          MEM_ADDR_INT = MEM_ADDR_INT + 1;
+        end
+
         else if(data_print_rdy)
         begin
             $fwrite(outputfile, "%b\n", data_print);
@@ -201,13 +212,13 @@ module sim_tb_top;
     assign Instruction = Instruction_reg;
     assign Data = Data_reg;
 
-    /*initial begin
+    initial begin
         int = 0;
         #57858500
         int = 1;
         #6000
         int = 0;
-    end*/
+    end
 
     // Reset Generation
     initial begin
@@ -335,6 +346,7 @@ module sim_tb_top;
      DATA_WIDTH,
      DATA_DEPTH,
      ISA_DEPTH,
+     INT_INS_DEPTH,
      TOTAL_ISA_DEPTH,
      TOTAL_DATA_DEPTH,
      DATA_CACHE_DEPTH,

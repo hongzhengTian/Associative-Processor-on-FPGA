@@ -132,7 +132,7 @@ module program_counter
                 end
             LOAD_RET_END:
                 begin
-                    if (ins_inp_valid == 1)
+                    if (ins_cache_rdy == 1)
                         begin
                             st_next = CNT_ADDR;
                         end
@@ -156,7 +156,7 @@ module program_counter
                 begin
                     if ((ins_inp_valid == 1) 
                     && (ret_valid == 0)
-                    && (addr_ins < TOTAL_ISA_DEPTH) 
+                    && ((addr_ins < TOTAL_ISA_DEPTH) || addr_ins >= 16'hc000)
                     && (ins_cache_rdy == 1) 
                     &&(addr_ins != ISA_DEPTH * load_times)
                     )
@@ -177,7 +177,7 @@ module program_counter
                 begin
                     if (ins_inp_valid == 1)
                         begin
-                            addr_ins <= jmp_addr_pc_short / 8;
+                            addr_ins <= jmp_addr_pc / 8;
                         end
                     else addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
                 end
@@ -185,12 +185,12 @@ module program_counter
                 begin
                     if (ret_addr_pc_rdy == 1)
                         begin
-                            addr_ins <= ret_addr_pc;
+                            addr_ins <= ret_addr_pc - 1;
                         end
                 end
             LOAD_RET_END:
                 begin
-                    if (ins_inp_valid == 1)
+                    if (ins_cache_rdy == 1)
                         begin
                             addr_ins <= addr_ins + 1;
                         end

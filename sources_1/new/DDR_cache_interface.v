@@ -8,7 +8,8 @@ module DDR_cache_interface
     parameter ISA_DEPTH         = 72,
     parameter DATA_CACHE_DEPTH  = 16,
 	parameter TOTAL_ISA_DEPTH   = 64,
-	parameter TOTAL_DATA_DEPTH  = 64
+	parameter TOTAL_DATA_DEPTH  = 64,
+	parameter INT_INS_DEPTH 	= 27
 )
 (
 	/*interface of system */
@@ -16,7 +17,7 @@ module DDR_cache_interface
 	input wire 								mem_clk,                /* interface clock*/
 	input wire [ISA_WIDTH - 1 : 0]			Instruction,
 	input wire [DATA_WIDTH - 1 : 0]			Data,
-	output reg [3 : 0] 						state,
+	output reg [4 : 0] 						state,
 
     /* interface of ISA_cache */
     input wire                              ISA_read_req,
@@ -53,39 +54,43 @@ module DDR_cache_interface
 	input wire 								wr_burst_finish        /* write burst finish*/
 );
 
-localparam START 							= 4'd0;               /*START=000; MEM_READ_ISA=001;MEM_WRITE=010;BURST_LEN_ISA=128*/
-localparam MEM_WRITE_ISA 					= 4'd1;
-localparam MEM_WRITE_ISA_END 				= 4'd2;
-localparam MEM_WRITE_DATA  					= 4'd3;
-localparam MEM_WRITE_DATA_END 				= 4'd4;
-localparam MEM_READ_ISA	 					= 4'd5;
-localparam MEM_READ_ISA_END 				= 4'd6;
-localparam MEM_READ_DATA 					= 4'd7;
-localparam MEM_READ_DATA_END 				= 4'd8;
-localparam MEM_WRITE_DATA_STORE 			= 4'd9;
-localparam MEM_WRITE_DATA_STORE_END 		= 4'd10;
-localparam MEM_WRITE_INT_ADDR 				= 4'd11;
-localparam MEM_READ_INT_ADDR 				= 4'd12;
-localparam MEM_WRITE_INT_ADDR_END		 	= 4'd13;
-localparam MEM_READ_INT_ADDR_END 			= 4'd14;
+localparam START 							= 5'd0;               /*START=000; MEM_READ_ISA=001;MEM_WRITE=010;BURST_LEN_ISA=128*/
+localparam MEM_WRITE_ISA 					= 5'd1;
+localparam MEM_WRITE_ISA_END 				= 5'd2;
+localparam MEM_WRITE_DATA  					= 5'd3;
+localparam MEM_WRITE_DATA_END 				= 5'd4;
+localparam MEM_READ_ISA	 					= 5'd5;
+localparam MEM_READ_ISA_END 				= 5'd6;
+localparam MEM_READ_DATA 					= 5'd7;
+localparam MEM_READ_DATA_END 				= 5'd8;
+localparam MEM_WRITE_DATA_STORE 			= 5'd9;
+localparam MEM_WRITE_DATA_STORE_END 		= 5'd10;
+localparam MEM_WRITE_INT_ADDR 				= 5'd11;
+localparam MEM_READ_INT_ADDR 				= 5'd12;
+localparam MEM_WRITE_INT_ADDR_END		 	= 5'd13;
+localparam MEM_READ_INT_ADDR_END 			= 5'd14;
+localparam MEM_WRITE_INT_INS  				= 5'd15;
+localparam MEM_WRITE_INT_INS_END 			= 5'd16;
 
-localparam W_ISA 							= 3'd1;
-localparam W_DATA 							= 3'd2;
-localparam R_ISA 							= 3'd3;
-localparam R_DATA 							= 3'd4;
-localparam W_DATA_STORE 					= 3'd5;
-localparam W_INT_ADDR						= 3'd6;
-localparam R_INT_ADDR 						= 3'd7;
+localparam W_ISA 							= 4'd1;
+localparam W_DATA 							= 4'd2;
+localparam R_ISA 							= 4'd3;
+localparam R_DATA 							= 4'd4;
+localparam W_DATA_STORE 					= 4'd5;
+localparam W_INT_ADDR						= 4'd6;
+localparam R_INT_ADDR 						= 4'd7;
+localparam W_INT_INS 						= 4'd8;
 
 assign finish_flag_w_isa				 	= (state == MEM_WRITE_ISA_END);
 assign finish_flag_w_data 					= (state == MEM_WRITE_DATA_END);
 assign finish_flag_w_int_addr				= (state == MEM_WRITE_INT_ADDR_END);
+assign finish_flag_w_int_ins				= (state == MEM_WRITE_INT_INS_END);
 
 assign finish_flag_r_isa 					= (state == MEM_READ_ISA_END);
 assign finish_flag_r_data 					= (state == MEM_READ_DATA_END);
 assign finish_flag_r_int_addr				= (state == MEM_READ_INT_ADDR_END);
 
-reg [2 : 0] CMD;
+reg [3 : 0] CMD;
 
 /* WRITE part */
 always@(posedge mem_clk or posedge rst)
@@ -116,7 +121,15 @@ begin
 	begin
 		if(wr_burst_data_req)                       
 			begin
-				wr_burst_data   <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h00001a8};  
+				wr_burst_data   <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
+			end
+	end
+
+	else if(state == MEM_WRITE_INT_INS)
+	begin
+		if(wr_burst_data_req)                       
+			begin
+				wr_burst_data   <= {{(DDR_DATA_WIDTH - 28){1'b0}}, {Instruction}};  
 			end
 	end
 
@@ -187,7 +200,7 @@ begin
 end
 
 /* finish part */
-always @(posedge mem_clk or posedge rst or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr) 
+always @(posedge mem_clk or posedge rst or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
 begin
 	if(rst)
 	begin
@@ -220,6 +233,15 @@ begin
 	end
 
 	else if(finish_flag_w_int_addr)
+	begin
+		CMD <= W_INT_INS;
+		wr_burst_len <= INT_INS_DEPTH + 1;
+		wr_burst_addr <= 28'h0060000;
+		wr_burst_req <= 1'b1;
+		rd_burst_req <= 1'b0;
+	end
+
+	else if(finish_flag_w_int_ins)
 	begin
 		ddr_rdy <= 1;
 		CMD <= R_ISA;
@@ -323,6 +345,11 @@ begin
 				  	state <= MEM_WRITE_INT_ADDR;
 				end
 
+				else if(CMD == W_INT_INS)
+				begin
+					state <= MEM_WRITE_INT_INS;
+				end
+
 				else if(CMD == R_INT_ADDR)
 				begin
 				  	state <= MEM_READ_INT_ADDR;
@@ -374,6 +401,19 @@ begin
 			end
 
 			MEM_WRITE_INT_ADDR_END:
+			begin
+			  	state <= START;
+			end
+
+			MEM_WRITE_INT_INS:
+			begin
+				if(wr_burst_finish)
+				begin
+					state <= MEM_WRITE_INT_INS_END;
+				end
+			end
+
+			MEM_WRITE_INT_INS_END:
 			begin
 			  	state <= START;
 			end
