@@ -143,6 +143,7 @@ module sim_tb_top;
     wire [ISA_WIDTH - 1 : 0]			instruction_to_cache;
     wire [DATA_WIDTH - 1 : 0]           data_print;
     wire                                data_print_rdy;
+    wire                                finish_flag;
 
     reg                                 DATA_read_req;
     reg                                 DATA_store_req;
@@ -151,7 +152,6 @@ module sim_tb_top;
 	reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
     wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
     reg                                 int;
-    wire                                ins_finish;
 
 
     reg [ISA_WIDTH - 1 : 0]             MEM_ISA     [0 : TOTAL_ISA_DEPTH - 1];
@@ -173,7 +173,7 @@ module sim_tb_top;
         $readmemb("DATA.txt", MEM_DATA);
         $readmemb("ISA_interrupt_Bin.txt", MEM_INT_INS);
         outputfile = $fopen("AP_output.txt", "w");
-        wait (ins_finish);
+        wait (finish_flag);
         $fclose(outputfile);
         $finish;
     end
@@ -201,11 +201,6 @@ module sim_tb_top;
         else if(data_print_rdy)
         begin
             $fwrite(outputfile, "%b\n", data_print);
-            /*if (ins_finish)
-                begin
-                    $fclose(outputfile);
-                end*/
-           
         end
     end
 
@@ -364,11 +359,12 @@ module sim_tb_top;
         .sys_rst                (sys_rst),
         .Instruction            (Instruction),
         .Data                   (Data),
-        .ins_finish             (ins_finish),
         .wr_burst_data_req      (wr_burst_data_req),
         .state_interface_module (state_interface_module),
         .data_print             (data_print),
         .data_print_rdy         (data_print_rdy),
+        .finish_flag            (finish_flag),
+
         .ddr3_dq                (ddr3_dq_fpga),
         .ddr3_dqs_n             (ddr3_dqs_n_fpga),
         .ddr3_dqs_p             (ddr3_dqs_p_fpga),

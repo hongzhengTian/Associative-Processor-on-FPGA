@@ -11,7 +11,6 @@ module program_counter
     input wire                              rst,
     input wire                              ret_valid,
     input wire                              int,
-    output reg                              ins_finish,
 
     /* the interface of AP_ctrl */
     input wire                              ins_inp_valid,
@@ -62,18 +61,6 @@ module program_counter
             begin
                 st_cur          <= st_next;
             end    
-    end
-
-    always @(negedge rst or posedge ins_inp_valid) 
-    begin
-        if(!rst)
-            begin
-                ins_finish      <= 0;
-            end    
-        else if (addr_ins == TOTAL_ISA_DEPTH)
-            begin
-                ins_finish      <= 1;
-            end
     end
 
     always @(posedge int or negedge rst or posedge ins_inp_valid)
@@ -158,15 +145,6 @@ module program_counter
                     && (ret_valid == 0)
                     && ((addr_ins < TOTAL_ISA_DEPTH) || addr_ins >= 16'hc000)
                     && (ins_cache_rdy == 1) 
-                    &&(addr_ins != ISA_DEPTH * load_times)
-                    )
-                    begin
-                        addr_ins <= addr_ins + 1;
-                    end
-                    else if ((print_data_finish == 1) 
-                    && (ret_valid == 0)
-                    && (addr_ins < TOTAL_ISA_DEPTH) 
-                    && (ins_cache_inited == 1) 
                     &&(addr_ins != ISA_DEPTH * load_times)
                     )
                     begin
