@@ -21,6 +21,7 @@ module AP_controller
     output reg [5 : 0]                      st_cur,
     output reg [DATA_WIDTH - 1 : 0]         data_print,
     output reg                              data_print_rdy,
+    output wire                             finish_flag,
 
     /* the interface of instruction cache */
     input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
@@ -257,7 +258,7 @@ module AP_controller
     reg [3 : 0]                             cam_clk_cnt;
     
     assign  store_ddr_en = tmp_store_ddr_en & ~store_ddr_en_reg;
-    
+    assign  finish_flag = (st_cur == FINISH)? 1 : 0;
 
     assign                                  op_code         = instruction [OPCODE_WIDTH 
                                                                 + ADDR_WIDTH_CAM
