@@ -196,7 +196,7 @@ module ins_cache
                 begin
                     ISA_read_req    = 0;
                     ISA_read_addr   = 0;
-                    if ((addr_ins - tag_ins) < ISA_DEPTH + 1 && addr_ins != {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
+                    if ((addr_ins - tag_ins) < ISA_DEPTH && addr_ins != {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})
                         begin
                             instruction     = ins_cache[addr_ins - tag_ins - 1];
                             ins_valid       = {OPCODE_WIDTH{1'b1}};

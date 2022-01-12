@@ -33,7 +33,7 @@ module sim_tb_top;
     localparam                      MEM_WRITE_DATA          = 5'd3;
     localparam                      MEM_WRITE_INT_INS       = 5'd15;
 
-    localparam                      TOTAL_ISA_DEPTH         = 128;
+    localparam                      TOTAL_ISA_DEPTH         = 234;
     localparam                      CACHE_ISA_ADDR          = 10;
     localparam                      CACHE_DATA_ADDR         = 10;
     localparam                      TOTAL_DATA_DEPTH        = 128;
@@ -197,8 +197,11 @@ module sim_tb_top;
           Instruction_reg = MEM_INT_INS[MEM_ADDR_INT];
           MEM_ADDR_INT = MEM_ADDR_INT + 1;
         end
+    end
 
-        else if(data_print_rdy)
+    always @(posedge data_print_rdy)
+    begin
+        if(data_print_rdy)
         begin
             $fwrite(outputfile, "%b\n", data_print);
         end
@@ -209,7 +212,7 @@ module sim_tb_top;
 
     initial begin
         int = 0;
-        #57858500
+        #59000000
         int = 1;
         #6000
         int = 0;

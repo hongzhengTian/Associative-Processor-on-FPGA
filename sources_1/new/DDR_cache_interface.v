@@ -7,7 +7,7 @@ module DDR_cache_interface
 	parameter ISA_WIDTH			= 30,
     parameter ISA_DEPTH         = 72,
     parameter DATA_CACHE_DEPTH  = 16,
-	parameter TOTAL_ISA_DEPTH   = 64,
+	parameter TOTAL_ISA_DEPTH   = 128,
 	parameter TOTAL_DATA_DEPTH  = 64,
 	parameter INT_INS_DEPTH 	= 27
 )
