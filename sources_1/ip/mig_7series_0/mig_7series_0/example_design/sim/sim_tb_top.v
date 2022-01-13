@@ -157,23 +157,32 @@ module sim_tb_top;
     reg [ISA_WIDTH - 1 : 0]             MEM_ISA     [0 : TOTAL_ISA_DEPTH - 1];
     reg [DATA_WIDTH - 1 : 0]            MEM_DATA    [0 : TOTAL_DATA_DEPTH - 1];
     reg [ISA_WIDTH - 1 : 0]             MEM_INT_INS [0 : INT_INS_DEPTH - 1];
+    reg [DATA_WIDTH - 1 : 0]            MEM_DATA_REF[0 : TOTAL_DATA_DEPTH - 1];
     reg [CACHE_ISA_ADDR - 1 : 0]        MEM_ADDR    = 0;
     reg [CACHE_ISA_ADDR - 1 : 0]        MEM_ADDR_INT = 0;
     reg [CACHE_DATA_ADDR - 1 : 0]       MEM_ADDR_DATA = 0;
+    reg [CACHE_DATA_ADDR - 1 : 0]       MEM_ADDR_DATA_REF = 0;
     reg [ISA_WIDTH - 1 : 0]             Instruction_reg;
     wire [ISA_WIDTH - 1 : 0]            Instruction;
     reg [DATA_WIDTH - 1 : 0]            Data_reg;
     wire [DATA_WIDTH -1 : 0]            Data;
 
     integer                             outputfile;
+    integer                             cnt_wrong;
 
     initial 
     begin
         $readmemb("ISA_Bin.txt", MEM_ISA);
         $readmemb("DATA.txt", MEM_DATA);
         $readmemb("ISA_interrupt_Bin.txt", MEM_INT_INS);
+        $readmemb("data_ref.txt", MEM_DATA_REF);
         outputfile = $fopen("AP_output.txt", "w");
         wait (finish_flag);
+        $display("total wrong line : total test number =%d:%d\n", cnt_wrong, MEM_ADDR_DATA_REF + 1);
+        if (cnt_wrong == 0)
+            begin
+                $display("simulation success\n");
+            end
         $fclose(outputfile);
         $finish;
     end
@@ -204,6 +213,14 @@ module sim_tb_top;
         if(data_print_rdy)
         begin
             $fwrite(outputfile, "%b\n", data_print);
+            MEM_ADDR_DATA_REF <= MEM_ADDR_DATA_REF + 1;
+                if (data_print != MEM_DATA_REF[MEM_ADDR_DATA_REF])
+                    begin
+                        $display("this line is wrong: %d\n", MEM_ADDR_DATA_REF + 1);
+                        $display("result: %d\n", data_print);
+                        $display("answer: %d\n", MEM_DATA_REF[MEM_ADDR_DATA_REF]);
+                        cnt_wrong <= cnt_wrong + 1;
+                    end
         end
     end
 
@@ -212,7 +229,8 @@ module sim_tb_top;
 
     initial begin
         int = 0;
-        #59000000
+        cnt_wrong = 0;
+        #58972900
         int = 1;
         #6000
         int = 0;

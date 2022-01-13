@@ -143,7 +143,7 @@ module program_counter
                 begin
                     if ((ins_inp_valid == 1) 
                     && (ret_valid == 0)
-                    && ((addr_ins < TOTAL_ISA_DEPTH) || addr_ins >= 16'hc000)
+                    && ((addr_ins < TOTAL_ISA_DEPTH + 1) || addr_ins >= 16'hc000)
                     && (ins_cache_rdy == 1) 
                     &&(addr_ins != ISA_DEPTH * load_times)
                     )
