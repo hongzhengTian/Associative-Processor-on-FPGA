@@ -22,7 +22,6 @@ module ins_cache
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
     output reg                              ins_cache_inited,
     output reg                              ins_cache_rdy,
-    output reg [9 : 0]                      load_times,
 
     /* the interface of AP_ctrl */
     output reg [ISA_WIDTH - 1 : 0]          instruction,
@@ -76,6 +75,7 @@ module ins_cache
     reg [ISA_WIDTH - 1 : 0]                 instruction_tmp;
     reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
     reg                                     rst_cache;
+    reg [9 : 0]                             load_times;
 
     //assign ins_cache_rdy = (st_cur == SENT_INS? 1 : 0);
     integer i;
