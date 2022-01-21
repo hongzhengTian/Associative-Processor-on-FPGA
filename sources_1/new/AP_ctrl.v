@@ -222,19 +222,14 @@ module AP_controller
     reg [OPCODE_WIDTH - 1 : 0]              opt_cur;
     
     reg [DATA_WIDTH - 1 : 0]                bit_cnt;
-    reg [2 : 0]                             clk_cnt;
 
     reg [2 : 0]                             pass_tmp;
     reg                                     key_A_tmp;
     reg                                     key_B_tmp;
     reg                                     key_C_tmp;
     reg                                     key_F_tmp;
-    reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto_tmp;
-    reg [1 : 0]                             matrix_cnt_tmp;
     reg [ADDR_WIDTH_MEM - 1 : 0]            data_addr_tmp;
     reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_tmp;
-   // reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto_tmp_2;
-  //  reg [1 : 0]                             matrix_cnt_tmp_2;
 
     /* op_code and operands */
     wire [OPCODE_WIDTH - 1 : 0]             op_code;
@@ -289,108 +284,132 @@ module AP_controller
             begin
                 cam_clk_cnt <= 0;
             end
-        else if(    st_cur == PASS_1_ADD
-                ||  st_cur == PASS_1_SUB
-                ||  st_cur == PASS_1_ABS
-                ||  st_cur == PASS_1_TSC
-                ||  st_cur == PASS_2_ADD
-                ||  st_cur == PASS_2_SUB
-                ||  st_cur == PASS_2_ABS
-                ||  st_cur == PASS_2_TSC
-                ||  st_cur == PASS_3_ADD
-                ||  st_cur == PASS_3_SUB
-                ||  st_cur == PASS_3_ABS
-                ||  st_cur == PASS_3_TSC
-                ||  st_cur == PASS_4_ADD
-                ||  st_cur == PASS_4_SUB
-                ||  st_cur == PASS_4_ABS
-                ||  st_cur == STORE_RBR
-                ||  st_cur == STORE_CBC
-                ||  st_cur == STORE_CTXT)
-            begin
-                if (cam_clk_cnt < 7)
-                cam_clk_cnt <= cam_clk_cnt + 1;
-                else cam_clk_cnt <= 0;
-            end
-       /* else if( st_cur == STORE_RBR)
-            begin
-                if (cam_clk_cnt < 7)
-                cam_clk_cnt <= cam_clk_cnt + 1;
-                else cam_clk_cnt <= 0;
-            end
-        else if( st_cur == STORE_CBC)
-            begin
-                if (cam_clk_cnt < 7)
-                cam_clk_cnt <= cam_clk_cnt + 1;
-                else cam_clk_cnt <= 0;
-            end*/
-        else if( st_cur == STORE_END)
-            begin
-                if (cam_clk_cnt < 1)
-                cam_clk_cnt <= cam_clk_cnt + 1;
-                else cam_clk_cnt <= 0;
-            end
-        else 
-            begin
-                cam_clk_cnt <= 0;
-            end
-    end
-
-    /*always @(clk)
-    begin
-        addr_cam_auto_tmp_2   = addr_cam_auto_tmp;
-        matrix_cnt_tmp_2      = matrix_cnt_tmp;
-    end*/
-
-    always@(posedge clk)
-    begin
-        if (st_cur == START)
-        begin
-            addr_cam_auto   <= 0;
-            matrix_cnt      <= 1;
-        end
-
-        else if(st_cur == STORE_CTXT_FINISH_CHECK)
-            begin
-                if (addr_cam_auto < DATA_WIDTH)
-                    begin
-                        addr_cam_auto <= addr_cam_auto + 1;
-                       // matrix_cnt = matrix_cnt_tmp_2;
-                    end
-                
-                else if (addr_cam_auto == DATA_WIDTH)
-                    begin
-                        addr_cam_auto <= 0;
-                        matrix_cnt <= matrix_cnt + 1;
-                    end
-                else begin
-                    //addr_cam_auto = addr_cam_auto_tmp_2;
-                   // matrix_cnt = matrix_cnt_tmp_2;
-                end
-            end
-        else if(st_cur == LOAD_CTXT_FINISH_CHECK)
-            begin
-                if (addr_cam_auto < DATA_WIDTH - 1)
-                    begin
-                        addr_cam_auto <= addr_cam_auto + 1;
-                     //   matrix_cnt = matrix_cnt_tmp_2;
-                    end
-                
-                else if (addr_cam_auto == DATA_WIDTH - 1)
-                    begin
-                        addr_cam_auto <= 0;
-                        matrix_cnt <= matrix_cnt + 1;
-                    end
-                else begin
-                    //addr_cam_auto = addr_cam_auto_tmp_2;
-                //    matrix_cnt = matrix_cnt_tmp_2;
-                end
-            end
         else begin
-            //addr_cam_auto = addr_cam_auto_tmp_2;
-           // matrix_cnt = matrix_cnt_tmp_2;
+            case({st_cur, cam_clk_cnt[3]}) // cam_clk_cnt[3] == 0 means cam_clk_cnt < 7
+                {PASS_1_ADD, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_1_SUB, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_1_ABS, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_1_TSC, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_2_ADD, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_2_SUB, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_2_ABS, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_2_TSC, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_3_ADD, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_3_SUB, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_3_ABS, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_3_TSC, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_4_ADD, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_4_SUB, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {PASS_4_ABS, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {STORE_RBR, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {STORE_CBC, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {STORE_CTXT, 1'b0}:
+                    begin
+                        cam_clk_cnt <= cam_clk_cnt + 1;
+                    end
+                {STORE_END, 1'b0}:
+                    begin
+                        if (cam_clk_cnt == 0)
+                            begin
+                                cam_clk_cnt <= cam_clk_cnt + 1;
+                            end
+                        else begin
+                            cam_clk_cnt <= 0;
+                        end
+                    end
+                default: begin
+                    cam_clk_cnt <= 0;
+                end
+            endcase
         end
     end
+
+    always @(posedge clk)
+    begin
+        case (st_cur)
+            START:
+                begin
+                    addr_cam_auto   <= 0;
+                    matrix_cnt      <= 1;
+                end
+            STORE_CTXT_FINISH_CHECK:
+                begin
+                    if (addr_cam_auto < DATA_WIDTH)
+                        begin
+                            addr_cam_auto <= addr_cam_auto + 1;
+                        end
+                    else if (addr_cam_auto == DATA_WIDTH)
+                        begin
+                            addr_cam_auto <= 0;
+                            matrix_cnt <= matrix_cnt + 1;
+                        end
+                end
+            LOAD_CTXT_FINISH_CHECK:
+                begin
+                    if (addr_cam_auto < DATA_WIDTH - 1)
+                        begin
+                            addr_cam_auto <= addr_cam_auto + 1;
+                        end
+                    else if (addr_cam_auto == DATA_WIDTH - 1)
+                        begin
+                            addr_cam_auto <= 0;
+                            matrix_cnt <= matrix_cnt + 1;
+                        end
+                end
+            default:;
+        endcase
+    end 
     
     /* state machine */
     always @(posedge clk or negedge rst_STATE or posedge int)
@@ -420,8 +439,6 @@ module AP_controller
         key_F_tmp       <= key_F;
         tmp_store_ddr_en <= store_ddr_en_reg;
         addr_cam_tmp    <= addr_cam;
-        //addr_cam_auto_tmp <= addr_cam_auto;
-        //matrix_cnt_tmp  <= matrix_cnt;
         if (!rst_STATE)
             begin
                 opt_cur         <= 0;
@@ -444,8 +461,6 @@ module AP_controller
                 input_F         <= 0;
                 data_out_cbc_tmp<= 0;
                 data_out_rbr_tmp<= 0;
-                //addr_cam_auto_tmp <= 0;
-                //matrix_cnt_tmp  <= 0;
                 matrix_select_reg <= 0;
                 ret_addr_pc     <= 0;
                 ret_addr_pc_rdy <= 0;
@@ -472,8 +487,6 @@ module AP_controller
                         ctxt_addr       <= 0;
                         ret_addr_pc_rdy <= 0;
                         store_ctxt_finish <= 0;
-                        //addr_cam_auto_tmp <= addr_cam_auto;
-                        //matrix_cnt_tmp  <= matrix_cnt;
                         matrix_select_reg <= matrix_select;
                         //data_addr_tmp   <= 0;
                         if ((op_code_valid == ADD) || (op_code_valid == SUB))
@@ -530,8 +543,6 @@ module AP_controller
                     end
                 LOAD_CTXT_FINISH_CHECK:
                     begin
-                        //addr_cam_auto_tmp <= addr_cam_auto;
-                        //matrix_cnt_tmp <= matrix_cnt;
                     end
                 STORE_RBR:
                     begin
@@ -615,8 +626,6 @@ module AP_controller
                     end
                 STORE_CTXT_FINISH_CHECK:
                     begin
-                       // addr_cam_auto_tmp <= addr_cam_auto;
-                       // matrix_cnt_tmp <= matrix_cnt;
                         if ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 0))
                         begin
                             store_ctxt_finish <= 1;
@@ -628,9 +637,7 @@ module AP_controller
                     end
                 PRINT_DATA:
                     begin
-                        //data_print      <= data_in_rbr;
-                        //data_print_rdy  <= 1;
-                        data_addr_tmp <= addr_mem; // TODO
+                        data_addr_tmp <= addr_mem;
                     end
                 PASS_4_ADD:
                     begin

@@ -131,7 +131,6 @@ module AP_top
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_ins;
     wire                                ins_cache_inited;
     wire                                ins_cache_rdy;
-    wire [9 : 0]                        load_times;
     wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
     wire                                print_data_finish;
 
@@ -404,7 +403,6 @@ module AP_top
     .addr_ins               (addr_ins),
     .ins_cache_inited       (ins_cache_inited),
     .ins_cache_rdy          (ins_cache_rdy),
-    .load_times             (load_times),
     .print_data_finish      (print_data_finish)
     );
 
@@ -432,7 +430,6 @@ module AP_top
     .instruction_to_cache   (instruction_to_cache),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .load_times             (load_times),
     .isa_read_len           (isa_read_len)
     );
 

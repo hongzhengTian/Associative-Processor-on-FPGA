@@ -22,10 +22,8 @@ module program_counter
     /* the interface of instruction cache */
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
     input wire                              ins_cache_inited,
-    input wire                              ins_cache_rdy,
-    input wire [9 : 0]                      load_times
+    input wire                              ins_cache_rdy
 );
-    integer i;
 
     localparam                              SENT_INS        = 4'd3;
 
@@ -145,7 +143,6 @@ module program_counter
                     && (ret_valid == 0)
                     && ((addr_ins < TOTAL_ISA_DEPTH + 1) || addr_ins >= 16'hc000)
                     && (ins_cache_rdy == 1) 
-                    &&(addr_ins != ISA_DEPTH * load_times)
                     )
                     begin
                         addr_ins <= addr_ins + 1;
@@ -155,7 +152,7 @@ module program_counter
                 begin
                     if (ins_inp_valid == 1)
                         begin
-                            addr_ins <= jmp_addr_pc / 8;
+                            addr_ins <= jmp_addr_pc >> 3;
                         end
                     else addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
                 end
