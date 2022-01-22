@@ -17,8 +17,7 @@ module AP_controller
     input wire                              clk,
     input wire                              rst_STATE,
     input wire                              rst_clk,
-    input wire                              int,            /* interupt signal input */
-    output reg [5 : 0]                      st_cur,
+    input wire                              int,
     output reg [DATA_WIDTH - 1 : 0]         data_print,
     output reg                              data_print_rdy,
     output wire                             finish_flag,
@@ -219,9 +218,11 @@ module AP_controller
     /* state variables */
     
     reg [5 : 0]                             st_next;
+    reg [5 : 0]                             st_cur;
     reg [OPCODE_WIDTH - 1 : 0]              opt_cur;
     
     reg [DATA_WIDTH - 1 : 0]                bit_cnt;
+    wire [DATA_WIDTH - 1 : 0]               bit_cnt_p1;
 
     reg [2 : 0]                             pass_tmp;
     reg                                     key_A_tmp;
@@ -242,15 +243,25 @@ module AP_controller
     
     reg [ADDR_WIDTH_MEM - 1 : 0]            addr_mem_col;
     reg [1 : 0]                             matrix_cnt;
+    wire [1 : 0]                            matrix_cnt_p1;
 
     reg                                     tmp_store_ddr_en;
     reg                                     store_ddr_en_reg;
     reg [ADDR_WIDTH_CAM - 1 : 0]            addr_cam_auto;
+    wire [ADDR_WIDTH_CAM - 1 : 0]           addr_cam_auto_p1;
     reg                                     tag_C_F; /* indicate which one do we store when interrupt*/
                                                      /* 1 means C, 0 means F */
     reg [DATA_WIDTH - 1 : 0]                data_out_rbr_tmp;
     reg [DATA_DEPTH - 1 : 0]                data_out_cbc_tmp;
     reg [3 : 0]                             cam_clk_cnt;
+    wire [3 : 0]                            cam_clk_cnt_p1;
+
+    wire [ADDR_WIDTH_MEM - 1 : 0]           ctxt_addr_ret_p_DataDepth;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           ctxt_addr_ret_p_2DataDepth;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           addr_cur_ctxt_p_DataDepth;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           addr_cur_ctxt_p_2DataDepth;
+    wire [DATA_WIDTH - 1 : 0]               mask_sh1;
+    
     
     assign  store_ddr_en = tmp_store_ddr_en & ~store_ddr_en_reg;
     assign  finish_flag = (st_cur == FINISH)? 1 : 0;
@@ -276,7 +287,20 @@ module AP_controller
 
     assign                                  addr_mem        = instruction [ADDR_WIDTH_MEM - 1 : 0];
 
-    assign                                  op_code_valid   = op_code & ins_valid;                                         
+    assign                                  op_code_valid   = op_code & ins_valid;     
+
+    /* ALU */
+    localparam  DATA_DEPTH_P3 = DATA_DEPTH + 3;
+    localparam  DATA_WIDTH_P3 = DATA_WIDTH + 3;
+    assign      cam_clk_cnt_p1 = cam_clk_cnt + 1;
+    assign      addr_cam_auto_p1 = addr_cam_auto + 1;
+    assign      matrix_cnt_p1 = matrix_cnt + 1;
+    assign      ctxt_addr_ret_p_2DataDepth = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+    assign      ctxt_addr_ret_p_DataDepth = ctxt_addr_ret + DATA_DEPTH;
+    assign      bit_cnt_p1 = bit_cnt + 1;
+    assign      addr_cur_ctxt_p_DataDepth = addr_cur_ctxt + DATA_DEPTH;
+    assign      addr_cur_ctxt_p_2DataDepth = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
+    assign      mask_sh1 = mask << 1;
     
     always @(posedge clk or negedge rst_clk)
     begin
@@ -288,81 +312,81 @@ module AP_controller
             case({st_cur, cam_clk_cnt[3]}) // cam_clk_cnt[3] == 0 means cam_clk_cnt < 7
                 {PASS_1_ADD, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_1_SUB, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_1_ABS, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_1_TSC, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_2_ADD, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_2_SUB, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_2_ABS, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_2_TSC, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_3_ADD, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_3_SUB, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_3_ABS, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_3_TSC, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_4_ADD, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_4_SUB, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {PASS_4_ABS, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {STORE_RBR, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {STORE_CBC, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {STORE_CTXT, 1'b0}:
                     begin
-                        cam_clk_cnt <= cam_clk_cnt + 1;
+                        cam_clk_cnt <= cam_clk_cnt_p1;
                     end
                 {STORE_END, 1'b0}:
                     begin
                         if (cam_clk_cnt == 0)
                             begin
-                                cam_clk_cnt <= cam_clk_cnt + 1;
+                                cam_clk_cnt <= cam_clk_cnt_p1;
                             end
                         else begin
                             cam_clk_cnt <= 0;
@@ -387,24 +411,24 @@ module AP_controller
                 begin
                     if (addr_cam_auto < DATA_WIDTH)
                         begin
-                            addr_cam_auto <= addr_cam_auto + 1;
+                            addr_cam_auto <= addr_cam_auto_p1;
                         end
                     else if (addr_cam_auto == DATA_WIDTH)
                         begin
                             addr_cam_auto <= 0;
-                            matrix_cnt <= matrix_cnt + 1;
+                            matrix_cnt <= matrix_cnt_p1;
                         end
                 end
             LOAD_CTXT_FINISH_CHECK:
                 begin
                     if (addr_cam_auto < DATA_WIDTH - 1)
                         begin
-                            addr_cam_auto <= addr_cam_auto + 1;
+                            addr_cam_auto <= addr_cam_auto_p1;
                         end
                     else if (addr_cam_auto == DATA_WIDTH - 1)
                         begin
                             addr_cam_auto <= 0;
-                            matrix_cnt <= matrix_cnt + 1;
+                            matrix_cnt <= matrix_cnt_p1;
                         end
                 end
             default:;
@@ -528,7 +552,7 @@ module AP_controller
                     begin
                         if (matrix_cnt == 3)
                             begin
-                                data_addr_tmp <= ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+                                data_addr_tmp <= ctxt_addr_ret_p_2DataDepth;
                             end
                         if (matrix_cnt == 0)
                         begin
@@ -598,7 +622,7 @@ module AP_controller
                         endcase
                         if (matrix_cnt == 3)
                             begin
-                                data_addr_tmp <= ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+                                data_addr_tmp <= ctxt_addr_ret_p_2DataDepth;
                             end
                     end
                 STORE_TMP:
@@ -643,28 +667,28 @@ module AP_controller
                     begin
                         if (cam_clk_cnt == 7)
                             begin
-                                bit_cnt <= bit_cnt + 1;
+                                bit_cnt <= bit_cnt_p1;
                             end
                     end
                 PASS_4_SUB:
                     begin
                         if (cam_clk_cnt == 7)
                             begin
-                                bit_cnt <= bit_cnt + 1;
+                                bit_cnt <= bit_cnt_p1;
                             end
                     end
                 PASS_4_ABS:
                     begin
                         if (cam_clk_cnt == 7)
                             begin
-                                bit_cnt <= bit_cnt + 1;
+                                bit_cnt <= bit_cnt_p1;
                             end
                     end
                 PASS_3_TSC:
                     begin
                         if (cam_clk_cnt == 7)
                             begin
-                                bit_cnt <= bit_cnt + 1;
+                                bit_cnt <= bit_cnt_p1;
                             end
                     end
                 RET_STATE:
@@ -675,7 +699,7 @@ module AP_controller
                     begin
                         if (bit_cnt < DATA_WIDTH)
                             begin
-                                mask <= mask << 1;
+                                mask <= mask_sh1;
                             end
                     end 
                 default:;
@@ -728,12 +752,12 @@ module AP_controller
                     input_A_cbc         = 0;
                     input_B_cbc         = 0;
                     input_R_cbc         = 0;
-                    addr_output_rbr_A   = DATA_DEPTH + 3;
-                    addr_output_rbr_B   = DATA_DEPTH + 3;
-                    addr_output_rbr_R   = DATA_DEPTH + 3;
-                    addr_output_cbc_A   = DATA_WIDTH + 3;
-                    addr_output_cbc_B   = DATA_WIDTH + 3;
-                    addr_output_cbc_R   = DATA_WIDTH + 3;
+                    addr_output_rbr_A   = DATA_DEPTH_P3;
+                    addr_output_rbr_B   = DATA_DEPTH_P3;
+                    addr_output_rbr_R   = DATA_DEPTH_P3;
+                    addr_output_cbc_A   = DATA_WIDTH_P3;
+                    addr_output_cbc_B   = DATA_WIDTH_P3;
+                    addr_output_cbc_R   = DATA_WIDTH_P3;
                     data_out_cbc        = data_out_cbc_tmp;
                     data_out_rbr        = data_out_rbr_tmp;
                     inout_mode          = 0;
@@ -1312,9 +1336,9 @@ module AP_controller
 
                         default: begin
                             st_next             = STORE_RBR;
-                            addr_output_rbr_A   = DATA_DEPTH + 3;
-                            addr_output_rbr_B   = DATA_DEPTH + 3;
-                            addr_output_rbr_R   = DATA_DEPTH + 3;
+                            addr_output_rbr_A   = DATA_DEPTH_P3;
+                            addr_output_rbr_B   = DATA_DEPTH_P3;
+                            addr_output_rbr_R   = DATA_DEPTH_P3;
                             data_out_rbr        = 0;
                         end
                     endcase
@@ -1406,9 +1430,9 @@ module AP_controller
 
                         default: begin
                             st_next             = STORE_CBC;
-                            addr_output_cbc_A   = DATA_WIDTH + 3;
-                            addr_output_cbc_B   = DATA_WIDTH + 3;
-                            addr_output_cbc_R   = DATA_WIDTH + 3;
+                            addr_output_cbc_A   = DATA_WIDTH_P3;
+                            addr_output_cbc_B   = DATA_WIDTH_P3;
+                            addr_output_cbc_R   = DATA_WIDTH_P3;
                             data_out_cbc        = 0;
                         end
                     endcase
@@ -1565,7 +1589,7 @@ module AP_controller
                         end
                     else if (matrix_cnt == 2)
                         begin
-                            data_addr           = addr_cur_ctxt + DATA_DEPTH;
+                            data_addr           = addr_cur_ctxt_p_DataDepth;
                             addr_output_cbc_B   = addr_cam_col;
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_R   = 0;
@@ -1580,7 +1604,7 @@ module AP_controller
                         end
                     else if (matrix_cnt == 3)
                         begin
-                            data_addr           = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
+                            data_addr           = addr_cur_ctxt_p_2DataDepth;
                             addr_output_cbc_R   = addr_cam_col;
                             addr_output_cbc_A   = 0;
                             addr_output_cbc_B   = 0;
@@ -1896,7 +1920,7 @@ module AP_controller
                             addr_input_cbc_B    = addr_cam_col;
                             addr_input_cbc_A    = 0;
                             addr_input_cbc_R    = 0;
-                            data_addr           = ctxt_addr_ret + DATA_DEPTH;
+                            data_addr           = ctxt_addr_ret_p_DataDepth;
                             data_cmd            = ColxCol_load;
                             if (data_cache_rdy)
                                 begin
@@ -1920,7 +1944,7 @@ module AP_controller
                             addr_input_cbc_R    = addr_cam_col;
                             addr_input_cbc_A    = 0;
                             addr_input_cbc_B    = 0;
-                            data_addr           = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+                            data_addr           = ctxt_addr_ret_p_2DataDepth;
                             data_cmd            = ColxCol_load;
                             if (data_cache_rdy)
                                 begin
@@ -2089,7 +2113,6 @@ module AP_controller
 
             PRINT_DATA:
                 begin
-                    //TODO
                     inout_mode      = RowxRow;
                     data_addr       = addr_mem;
                     data_cmd        = RowxRow_load;

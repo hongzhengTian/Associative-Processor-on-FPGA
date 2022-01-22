@@ -17,7 +17,9 @@ module DDR_cache_interface
 	input wire 								mem_clk,                /* interface clock*/
 	input wire [ISA_WIDTH - 1 : 0]			Instruction,
 	input wire [DATA_WIDTH - 1 : 0]			Data,
-	output reg [4 : 0] 						state,
+	output wire                             load_ins_ddr,
+	output wire                             load_data_ddr,
+	output wire                             load_int_ins_ddr,
 
     /* interface of ISA_cache */
     input wire                              ISA_read_req,
@@ -81,6 +83,18 @@ localparam W_INT_ADDR						= 4'd6;
 localparam R_INT_ADDR 						= 4'd7;
 localparam W_INT_INS 						= 4'd8;
 
+reg [3 : 0] CMD;
+reg [4 : 0] state;
+
+wire finish_flag_w_isa;
+wire finish_flag_w_data;
+wire finish_flag_w_int_addr;
+wire finish_flag_w_int_ins;
+
+wire finish_flag_r_isa;
+wire finish_flag_r_data;
+wire finish_flag_r_int_addr;
+
 assign finish_flag_w_isa				 	= (state == MEM_WRITE_ISA_END);
 assign finish_flag_w_data 					= (state == MEM_WRITE_DATA_END);
 assign finish_flag_w_int_addr				= (state == MEM_WRITE_INT_ADDR_END);
@@ -90,7 +104,9 @@ assign finish_flag_r_isa 					= (state == MEM_READ_ISA_END);
 assign finish_flag_r_data 					= (state == MEM_READ_DATA_END);
 assign finish_flag_r_int_addr				= (state == MEM_READ_INT_ADDR_END);
 
-reg [3 : 0] CMD;
+assign load_ins_ddr 						= (state == MEM_WRITE_ISA);
+assign load_data_ddr 						= (state == MEM_WRITE_DATA);
+assign load_int_ins_ddr 					= (state == MEM_WRITE_INT_INS);
 
 /* WRITE part */
 always@(posedge mem_clk or posedge rst)

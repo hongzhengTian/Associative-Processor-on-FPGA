@@ -28,10 +28,6 @@ module sim_tb_top;
                                                             + ADDR_WIDTH_CAM
                                                             + OPRAND_2_WIDTH 
                                                             + ADDR_WIDTH_MEM; 
-    
-    localparam                      MEM_WRITE_ISA           = 5'd1;
-    localparam                      MEM_WRITE_DATA          = 5'd3;
-    localparam                      MEM_WRITE_INT_INS       = 5'd15;
 
     localparam                      TOTAL_ISA_DEPTH         = 234;
     localparam                      CACHE_ISA_ADDR          = 10;
@@ -77,24 +73,6 @@ module sim_tb_top;
     localparam real                 REFCLK_PERIOD           = (1000000.0/(2*REFCLK_FREQ));
     localparam                      RESET_PERIOD            = 200000; //in pSec  
 
-     /* op code */
-    localparam                              RESET           = 4'd1;
-    localparam                              RET             = 4'd2;
-    localparam                              LOADRBR         = 4'd4;
-    localparam                              LOADCBC         = 4'd5;
-    localparam                              STORERBR        = 4'd6;
-    localparam                              STORECBC        = 4'd7;
-    localparam                              COPY            = 4'd8;
-    localparam                              ADD             = 4'd9;
-    localparam                              SUB             = 4'd10;
-    localparam                              TSC             = 4'd11;
-    localparam                              ABS             = 4'd12;
-
-    /* operand 2 */
-    localparam                              M_A             = 2'd1;
-    localparam                              M_B             = 2'd2;
-    localparam                              M_R             = 2'd3;
-
     // Wire Declarations
     reg                                 sys_rst_n;
     wire                                sys_rst;
@@ -135,7 +113,9 @@ module sim_tb_top;
     reg [1-1:0]                         ddr3_ck_p_sdram;
     reg [1-1:0]                         ddr3_ck_n_sdram;
     wire                                app_rdy;
-    wire [4:0]                          state_interface_module;
+    wire                                load_ins_ddr;
+	wire                                load_data_ddr;
+	wire                                load_int_ins_ddr;
     wire                                wr_burst_data_req;
 
     reg                                 ISA_read_req;
@@ -189,19 +169,19 @@ module sim_tb_top;
 
     always @(posedge sys_clk_i) 
     begin
-        if(wr_burst_data_req & (state_interface_module == MEM_WRITE_ISA))
+        if(wr_burst_data_req & load_ins_ddr)
         begin
           Instruction_reg = MEM_ISA[MEM_ADDR];
           MEM_ADDR = MEM_ADDR + 1;
         end
 
-        else if(wr_burst_data_req & (state_interface_module == MEM_WRITE_DATA))
+        else if(wr_burst_data_req & load_data_ddr)
         begin
           Data_reg = MEM_DATA[MEM_ADDR_DATA];
           MEM_ADDR_DATA = MEM_ADDR_DATA + 1;
         end
 
-        else if(wr_burst_data_req & (state_interface_module == MEM_WRITE_INT_INS))
+        else if(wr_burst_data_req & load_int_ins_ddr)
         begin
           Instruction_reg = MEM_INT_INS[MEM_ADDR_INT];
           MEM_ADDR_INT = MEM_ADDR_INT + 1;
@@ -381,7 +361,9 @@ module sim_tb_top;
         .Instruction            (Instruction),
         .Data                   (Data),
         .wr_burst_data_req      (wr_burst_data_req),
-        .state_interface_module (state_interface_module),
+        .load_ins_ddr           (load_ins_ddr),
+        .load_data_ddr          (load_data_ddr),
+        .load_int_ins_ddr       (load_int_ins_ddr),
         .data_print             (data_print),
         .data_print_rdy         (data_print_rdy),
         .finish_flag            (finish_flag),

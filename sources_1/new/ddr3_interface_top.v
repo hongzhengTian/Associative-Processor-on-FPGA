@@ -19,7 +19,9 @@ module ddr3_interface_top
     input [DATA_WIDTH - 1 : 0]          Data,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
-    output [4:0]                        state_interface_module,
+    output                              load_ins_ddr,
+	output                              load_data_ddr,
+	output                              load_int_ins_ddr,
     output                              ui_clk,
 
     /* interface of ISA_cache */
@@ -135,7 +137,9 @@ module ddr3_interface_top
         .wr_burst_data(wr_burst_data),
         .rd_burst_finish(rd_burst_finish),
         .wr_burst_finish(wr_burst_finish),
-        .state(state_interface_module),
+        .load_ins_ddr(load_ins_ddr),
+        .load_data_ddr(load_data_ddr),
+        .load_int_ins_ddr(load_int_ins_ddr),
         .isa_read_len(isa_read_len)
     );
 
