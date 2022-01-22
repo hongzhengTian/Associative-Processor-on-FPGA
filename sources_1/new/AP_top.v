@@ -27,7 +27,9 @@ module AP_top
     input [DATA_WIDTH - 1 : 0]          Data,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
-    output [4:0]                        state_interface_module,
+    output                              load_ins_ddr,
+	output                              load_data_ddr,
+	output                              load_int_ins_ddr,
     output [DATA_WIDTH - 1 : 0]         data_print,
     output                              data_print_rdy,
     output                              finish_flag,
@@ -53,7 +55,6 @@ module AP_top
     /*localparam                          ADDR_WIDTH_R = ADDR_WIDTH_CAM;
     localparam                          ADDR_WIDTH_C = ADDR_WIDTH_CAM;*/ 
     
-    wire [5 : 0]                        st_cur;
     wire                                ui_clk;
     wire [ADDR_WIDTH_CAM - 1 : 0]       addr_cam_col;
     wire [DATA_WIDTH - 1 : 0]           data_out_rbr;
@@ -183,7 +184,6 @@ module AP_top
     .rst_STATE              (sys_rst),
     .rst_clk                (sys_rst),
     .int                    (int),
-    .st_cur                 (st_cur),
     .ins_valid              (ins_valid),
     .instruction            (instruction),
     .data_cache_rdy         (data_cache_rdy),
@@ -365,7 +365,9 @@ module AP_top
     .Instruction            (Instruction),
     .Data                   (Data),
     .wr_burst_data_req      (wr_burst_data_req),
-    .state_interface_module (state_interface_module),
+    .load_ins_ddr           (load_ins_ddr),
+    .load_data_ddr          (load_data_ddr),
+    .load_int_ins_ddr       (load_int_ins_ddr),
     .ISA_read_req           (ISA_read_req),
     .ISA_read_addr          (ISA_read_addr),
     .instruction_to_cache   (instruction_to_cache),
