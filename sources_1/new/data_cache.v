@@ -72,7 +72,6 @@ reg [9 : 0]                                 data_store_cnt_tmp;
 
 reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
-reg                                         tag_store; /* indicate that the current tag is for store data */
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
 reg                                         rd_burst_data_valid_delay;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
@@ -105,7 +104,6 @@ end
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
-        tag_store <= 0;
         tag_data <= 16'hFFFF;
         jmp_addr_tmp <= 0;
         data_in_rbr_tmp <= 0;
@@ -120,25 +118,19 @@ always @(posedge clk or negedge rst) begin
                 data_store_cnt_tmp <= 0;
                 case (data_cmd)
                     RowxRow_store: begin
-                        if ((tag_store == 1) && (data_addr <= tag_data)) begin
+                        if ((data_addr <= tag_data)) begin
                             tag_data <= data_addr;
                         end
-                        else if((tag_store == 1) && (data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH)) begin
+                        else if((data_addr > tag_data) && (data_addr - tag_data <= DATA_CACHE_DEPTH)) begin
                             tag_data <= tag_data;
                         end
                         else begin
                             tag_data <= data_addr;
-                            tag_store <= 1;
                         end
                     end
                     ColxCol_store: begin
                         if (store_ddr_en == 0) begin
                             tag_data <= data_addr;
-                            tag_store <= 1;
-                        end
-                        else begin
-                            tag_data <= tag_data;
-                            tag_store <= tag_store;
                         end
                     end
                     default:;
