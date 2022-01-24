@@ -998,104 +998,93 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_reg, data_cache_rdy})
-                {M_A, 1'b1}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_rbr_A = addr_cam;
-                    addr_input_rbr_B = 0;
-                    addr_input_rbr_R = 0;
-                    ins_inp_valid = 1;
-                    input_A_rbr = data_in_rbr;
-                    input_B_rbr = 0;
-                    input_R_rbr = 0;
-                    //st_next =  START;
-                end
-                {M_A, 1'b0}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_rbr_A = addr_cam;
-                    addr_input_rbr_B = 0;
-                    addr_input_rbr_R = 0;
-                    ins_inp_valid = 0;
-                    input_A_rbr = 0;
-                    input_B_rbr = 0;
-                    input_R_rbr = 0;
-                    //st_next =  LOAD_RBR;
-                end
-                {M_B, 1'b1}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_rbr_B = addr_cam;
-                    addr_input_rbr_A = 0;
-                    addr_input_rbr_R = 0;
-                    ins_inp_valid = 1;
-                    input_B_rbr = data_in_rbr;
-                    input_A_rbr = 0;
-                    input_R_rbr = 0;
-                    //st_next =  START;
-                end
-                {M_B, 1'b0}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_rbr_B = addr_cam;
-                    addr_input_rbr_A = 0;
-                    addr_input_rbr_R = 0;
-                    ins_inp_valid = 0;
-                    input_A_rbr = 0;
-                    input_B_rbr = 0;
-                    input_R_rbr = 0;
-                    //st_next =  LOAD_RBR;
-                end
-                {M_R, 1'b1}: 
-                begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_rbr_R = addr_cam;
-                    addr_input_rbr_A = 0;
-                    addr_input_rbr_B = 0;
-                    ins_inp_valid = 1;
-                    input_R_rbr = data_in_rbr;
-                    input_A_rbr = 0;
-                    input_B_rbr = 0;
-                    //st_next =  START;
-                end
-                {M_R, 1'b0}: 
-                begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_rbr_R = addr_cam;
-                    addr_input_rbr_A = 0;
-                    addr_input_rbr_B = 0;
-                    ins_inp_valid = 0;
-                    input_A_rbr = 0;
-                    input_B_rbr = 0;
-                    input_R_rbr = 0;
-                    //st_next =  LOAD_RBR;
-                end
-                default: begin
-                    ins_inp_valid = 0;
-                    //st_next =  LOAD_RBR;
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_rbr_A = 0;
-                    addr_input_rbr_B = 0;
-                    addr_input_rbr_R = 0;
-                    input_A_rbr = 0;
-                    input_B_rbr = 0;
-                    input_R_rbr = 0;
-                end
+                    {M_A, 1'b1}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_rbr_A = addr_cam;
+                        addr_input_rbr_B = 0;
+                        addr_input_rbr_R = 0;
+                        ins_inp_valid = 1;
+                        input_A_rbr = data_in_rbr;
+                        input_B_rbr = 0;
+                        input_R_rbr = 0;
+                    end
+                    {M_A, 1'b0}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_rbr_A = addr_cam;
+                        addr_input_rbr_B = 0;
+                        addr_input_rbr_R = 0;
+                        ins_inp_valid = 0;
+                        input_A_rbr = 0;
+                        input_B_rbr = 0;
+                        input_R_rbr = 0;
+                    end
+                    {M_B, 1'b1}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_rbr_B = addr_cam;
+                        addr_input_rbr_A = 0;
+                        addr_input_rbr_R = 0;
+                        ins_inp_valid = 1;
+                        input_B_rbr = data_in_rbr;
+                        input_A_rbr = 0;
+                        input_R_rbr = 0;
+                    end
+                    {M_B, 1'b0}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_rbr_B = addr_cam;
+                        addr_input_rbr_A = 0;
+                        addr_input_rbr_R = 0;
+                        ins_inp_valid = 0;
+                        input_A_rbr = 0;
+                        input_B_rbr = 0;
+                        input_R_rbr = 0;
+                    end
+                    {M_R, 1'b1}: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_rbr_R = addr_cam;
+                        addr_input_rbr_A = 0;
+                        addr_input_rbr_B = 0;
+                        ins_inp_valid = 1;
+                        input_R_rbr = data_in_rbr;
+                        input_A_rbr = 0;
+                        input_B_rbr = 0;
+                    end
+                    {M_R, 1'b0}: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_rbr_R = addr_cam;
+                        addr_input_rbr_A = 0;
+                        addr_input_rbr_B = 0;
+                        ins_inp_valid = 0;
+                        input_A_rbr = 0;
+                        input_B_rbr = 0;
+                        input_R_rbr = 0;
+                    end
+                    default: begin
+                        ins_inp_valid = 0;
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_rbr_A = 0;
+                        addr_input_rbr_B = 0;
+                        addr_input_rbr_R = 0;
+                        input_A_rbr = 0;
+                        input_B_rbr = 0;
+                        input_R_rbr = 0;
+                    end
                 endcase
-                end
-
-            LOAD_CBC:
-                begin
+            end
+            LOAD_CBC: begin
                 inout_mode = ColxCol;
                 data_addr = addr_mem;
                 data_cmd = ColxCol_load;
@@ -1127,182 +1116,165 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_reg, data_cache_rdy, ret_valid})
-                {M_A, 1'b1, 1'b0}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_cbc_A = addr_cam;
-                    addr_input_cbc_B = 0;
-                    addr_input_cbc_R = 0;
-                    input_A_cbc = data_in_cbc;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                    //st_next =  START;
-                    ins_inp_valid = 1;
-                end
-                {M_A, 1'b1, 1'b1}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_cbc_A = addr_cam;
-                    addr_input_cbc_B = 0;
-                    addr_input_cbc_R = 0;
-                    input_A_cbc = data_in_cbc;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                    //st_next =  LOAD_CTXT;
-                    ins_inp_valid = 0;
-                end
-                {M_A, 1'b0, 1'b1}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_cbc_A = addr_cam;
-                    addr_input_cbc_B = 0;
-                    addr_input_cbc_R = 0;
-                    //st_next =  LOAD_CBC;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                    ins_inp_valid = 0;
-                end
-                {M_A, 1'b0, 1'b0}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_cbc_A = addr_cam;
-                    addr_input_cbc_B = 0;
-                    addr_input_cbc_R = 0;
-                    //st_next =  LOAD_CBC;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                    ins_inp_valid = 0;
-                end
-
-                {M_B, 1'b1, 1'b0}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_cbc_B = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_R = 0;
-                    input_B_cbc = data_in_cbc;
-                    input_A_cbc = 0;
-                    input_R_cbc = 0;
-                    //st_next =  START;
-                    ins_inp_valid = 1;
-                end
-                {M_B, 1'b1, 1'b1}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_cbc_B = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_R = 0;
-                    input_B_cbc = data_in_cbc;
-                    input_A_cbc = 0;
-                    input_R_cbc = 0;
-                    //st_next =  LOAD_CTXT;
-                    ins_inp_valid = 0;
-                end
-                {M_B, 1'b0, 1'b0}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_cbc_B = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_R = 0;
-                    //st_next =  LOAD_CBC;
-                    ins_inp_valid = 0;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                end
-                {M_B, 1'b0, 1'b1}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    addr_input_cbc_B = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_R = 0;
-                    //st_next =  LOAD_CBC;
-                    ins_inp_valid = 0;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                end
-
-                {M_R, 1'b1, 1'b0}:begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_cbc_R = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_B = 0;
-                    input_R_cbc = data_in_cbc;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    //st_next =  START;
-                    ins_inp_valid = 1;
-                end
-                {M_R, 1'b1, 1'b1}:begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_cbc_R = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_B = 0;
-                    input_R_cbc = data_in_cbc;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    //st_next =  LOAD_CTXT;
-                    ins_inp_valid = 0;
-                end
-                {M_R, 1'b0, 1'b0}:begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_cbc_R = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_B = 0;
-                    //st_next =  LOAD_CBC;
-                    ins_inp_valid = 0;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                end
-                {M_R, 1'b0, 1'b1}:begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    addr_input_cbc_R = addr_cam;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_B = 0;
-                    //st_next =  LOAD_CBC;
-                    ins_inp_valid = 0;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                end
-                default:begin    
-                    //st_next =  LOAD_CBC;
-                    ins_inp_valid = 0;
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    addr_input_cbc_A = 0;
-                    addr_input_cbc_B = 0;
-                    addr_input_cbc_R = 0;
-                    input_A_cbc = 0;
-                    input_B_cbc = 0;
-                    input_R_cbc = 0;
-                end
+                    {M_A, 1'b1, 1'b0}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = data_in_cbc;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 1;
+                    end
+                    {M_A, 1'b1, 1'b1}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = data_in_cbc;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 0;
+                    end
+                    {M_A, 1'b0, 1'b1}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 0;
+                    end
+                    {M_A, 1'b0, 1'b0}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 0;
+                    end
+                    {M_B, 1'b1, 1'b0}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        input_B_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 1;
+                    end
+                    {M_B, 1'b1, 1'b1}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        input_B_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_R_cbc = 0;
+                        ins_inp_valid = 0;
+                    end
+                    {M_B, 1'b0, 1'b0}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        ins_inp_valid = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    {M_B, 1'b0, 1'b1}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        ins_inp_valid = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    {M_R, 1'b1, 1'b0}:begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        input_R_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        ins_inp_valid = 1;
+                    end
+                    {M_R, 1'b1, 1'b1}:begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        input_R_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        ins_inp_valid = 0;
+                    end
+                    {M_R, 1'b0, 1'b0}:begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        ins_inp_valid = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    {M_R, 1'b0, 1'b1}:begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        ins_inp_valid = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    default:begin    
+                        ins_inp_valid = 0;
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
                 endcase
-                end
-            
-            COPY_MT:
-                begin
+            end
+            COPY_MT: begin
                 ins_inp_valid = 1;
                 pass = 0;
                 key_A = 0;
@@ -1340,62 +1312,53 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_1, matrix_select_reg})
-                {M_A, M_B}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    inout_mode = COPY_B;
-                    //st_next =  START;
-                end
-                {M_A, M_R}: begin
-                    rst_InA = 0;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    inout_mode = COPY_R;
-                    //st_next =  START;
-                end
+                    {M_A, M_B}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        inout_mode = COPY_B;
+                    end
+                    {M_A, M_R}: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        inout_mode = COPY_R;
+                    end
 
-                {M_B, M_A}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    inout_mode = COPY_A;
-                    //st_next =  START;
-                end
-                {M_B, M_R}: begin
-                    rst_InA = 1;
-                    rst_InB = 0;
-                    rst_InR = 1;
-                    inout_mode = COPY_R;
-                    //st_next =  START;
-                end
+                    {M_B, M_A}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        inout_mode = COPY_A;
+                    end
+                    {M_B, M_R}: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        inout_mode = COPY_R;
+                    end
 
-                {M_R, M_A}: begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    inout_mode = COPY_A;
-                    //st_next =  START;
-                end
-                {M_R, M_B}: begin
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 0;
-                    inout_mode = COPY_B;
-                    //st_next =  START;
-                end
-                default: begin
-                    //st_next =  COPY_MT;
-                    rst_InA = 1;
-                    rst_InB = 1;
-                    rst_InR = 1;
-                    inout_mode = 0;
-                end
+                    {M_R, M_A}: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        inout_mode = COPY_A;
+                    end
+                    {M_R, M_B}: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        inout_mode = COPY_B;
+                    end
+                    default: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        inout_mode = 0;
+                    end
                 endcase
-                end
-
-            STORE_RBR:
-                begin
+            end
+            STORE_RBR: begin
                 inout_mode = RowxRow;
                 data_addr = addr_mem;
                 data_cmd = RowxRow_store;
@@ -1433,63 +1396,33 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 case (matrix_select_reg)
-                M_B:
-                begin
-                    addr_output_rbr_B = addr_cam;
-                    addr_output_rbr_A = 0;
-                    addr_output_rbr_R = 0;
-                    data_out_rbr = data_B_rbr;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_RBR;
+                    M_B: begin
+                        addr_output_rbr_B = addr_cam;
+                        addr_output_rbr_A = 0;
+                        addr_output_rbr_R = 0;
+                        data_out_rbr = data_B_rbr;
                     end
-                end
-
-                M_R:
-                begin
-                    addr_output_rbr_R = addr_cam;
-                    addr_output_rbr_A = 0;
-                    addr_output_rbr_B = 0;
-                    data_out_rbr = data_R_rbr;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_RBR;
+                    M_R: begin
+                        addr_output_rbr_R = addr_cam;
+                        addr_output_rbr_A = 0;
+                        addr_output_rbr_B = 0;
+                        data_out_rbr = data_R_rbr;
                     end
-                end
-
-                M_A:
-                begin
-                    addr_output_rbr_A = addr_cam;
-                    addr_output_rbr_B = 0;
-                    addr_output_rbr_R = 0;
-                    data_out_rbr = data_A_rbr;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_RBR;
+                    M_A: begin
+                        addr_output_rbr_A = addr_cam;
+                        addr_output_rbr_B = 0;
+                        addr_output_rbr_R = 0;
+                        data_out_rbr = data_A_rbr;
                     end
-                end
-
-                default: begin
-                    //st_next =  STORE_RBR;
-                    addr_output_rbr_A = DATA_DEPTH_P_3;
-                    addr_output_rbr_B = DATA_DEPTH_P_3;
-                    addr_output_rbr_R = DATA_DEPTH_P_3;
-                    data_out_rbr = 0;
-                end
+                    default: begin
+                        addr_output_rbr_A = DATA_DEPTH_P_3;
+                        addr_output_rbr_B = DATA_DEPTH_P_3;
+                        addr_output_rbr_R = DATA_DEPTH_P_3;
+                        data_out_rbr = 0;
+                    end
                 endcase
-                end
-
-            STORE_CBC:
-                begin
+            end
+            STORE_CBC: begin
                 inout_mode = ColxCol;
                 data_addr = addr_mem;
                 data_cmd = ColxCol_store;
@@ -1527,63 +1460,33 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 case (matrix_select_reg)
-                M_A:
-                begin
-                    addr_output_cbc_A = addr_cam_col;
-                    addr_output_cbc_B = 0;
-                    addr_output_cbc_R = 0;
-                    data_out_cbc = data_A_cbc;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_CBC;
+                    M_A: begin
+                        addr_output_cbc_A = addr_cam_col;
+                        addr_output_cbc_B = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = data_A_cbc;
                     end
-                end
-
-                M_B:
-                begin
-                    addr_output_cbc_B = addr_cam_col;
-                    addr_output_cbc_A = 0;
-                    addr_output_cbc_R = 0;
-                    data_out_cbc = data_B_cbc;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_CBC;
+                    M_B: begin
+                        addr_output_cbc_B = addr_cam_col;
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = data_B_cbc;
                     end
-                end
-
-                M_R:
-                begin
-                    addr_output_cbc_R = addr_cam_col;
-                    addr_output_cbc_A = 0;
-                    addr_output_cbc_B = 0;
-                    data_out_cbc = data_R_cbc;
-                    if (cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_END;
-                        end
-                    else begin
-                        //st_next =  STORE_CBC;
+                    M_R: begin
+                        addr_output_cbc_R = addr_cam_col;
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_B = 0;
+                        data_out_cbc = data_R_cbc;
                     end
-                end
-
-                default: begin
-                    //st_next =  STORE_CBC;
-                    addr_output_cbc_A = DATA_WIDTH_P_3;
-                    addr_output_cbc_B = DATA_WIDTH_P_3;
-                    addr_output_cbc_R = DATA_WIDTH_P_3;
-                    data_out_cbc = 0;
-                end
+                    default: begin
+                        addr_output_cbc_A = DATA_WIDTH_P_3;
+                        addr_output_cbc_B = DATA_WIDTH_P_3;
+                        addr_output_cbc_R = DATA_WIDTH_P_3;
+                        data_out_cbc = 0;
+                    end
                 endcase
-                end
-            
-            STORE_END:
-                begin
+            end
+            STORE_END: begin
                 pass = pass_tmp;
                 key_A = key_A_tmp;
                 key_B = key_B_tmp;
@@ -1624,1759 +1527,1521 @@ module AP_controller
                 data_print_rdy = 0;
                 data_print = 0;
                 ins_inp_valid = cam_clk_cnt_e_1;
-                if (cam_clk_cnt_e_1)
-                begin
-                    //st_next =  START;
-                end
-                else begin
-                //st_next =  STORE_END;
-                end
-                end
-
-            STORE_TMP:
-                begin
-                pass            = pass_tmp;
-                key_A           = key_A_tmp;
-                key_B           = key_B_tmp;
-                key_C           = key_C_tmp;
-                key_F           = key_F_tmp;
-                ins_inp_valid   = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                int_set             = 1;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                //st_next             = STORE_CTXT;
-                end
-
-            STORE_CTXT:
-                begin
-                inout_mode      = ColxCol;
-                data_cmd        = ColxCol_store;
-                ins_inp_valid   = 0;
-                addr_cam_col    = addr_cam_auto;
-                pass            = 0;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                data_out_rbr        = 0;
-                ret_valid           = 0;
-                int_set             = 1;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if(matrix_cnt_e_1)
-                begin
-                    data_addr           = addr_cur_ctxt;
-                    addr_output_cbc_A   = addr_cam_col;
-                    addr_output_cbc_B   = 0;
-                    addr_output_cbc_R   = 0;
-                    data_out_cbc        = data_A_cbc;
-                    if (data_cache_rdy == 1 && cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next =  STORE_CTXT;
-                    end
-                end
-                else if (matrix_cnt_e_2)
-                begin
-                    data_addr           = addr_cur_ctxt_p_DataDepth;
-                    addr_output_cbc_B   = addr_cam_col;
-                    addr_output_cbc_A   = 0;
-                    addr_output_cbc_R   = 0;
-                    data_out_cbc        = data_B_cbc;
-                    if (data_cache_rdy == 1 && cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next =  STORE_CTXT;
-                    end
-                end
-                else if (matrix_cnt_e_3)
-                begin
-                    data_addr           = addr_cur_ctxt_p_2DataDepth;
-                    addr_output_cbc_R   = addr_cam_col;
-                    addr_output_cbc_A   = 0;
-                    addr_output_cbc_B   = 0;
-                    data_out_cbc        = data_R_cbc;
-                    if (data_cache_rdy == 1 && cam_clk_cnt_e_7)
-                        begin
-                            //st_next =  STORE_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next =  STORE_CTXT;
-                    end
-                end
-                else if (matrix_cnt_e_0)
-                begin
-                    //st_next             = GET_JMP_ADDR;
-                    addr_output_cbc_A   = 0;
-                    addr_output_cbc_B   = 0;
-                    addr_output_cbc_R   = 0;
-                    data_out_cbc        = 0;
-                    data_addr           = data_addr_tmp;
-                end
-                else begin
-                //st_next             = STORE_CTXT;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_cbc        = 0;
-                data_addr       = data_addr_tmp;
-                end
-                end
-
-            STORE_CTXT_FINISH_CHECK:
-                begin
-                ins_inp_valid   = 0;
-                pass            = 0;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = data_out_cbc_tmp;
-                ret_valid           = 0;
-                int_set             = 1;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = data_addr_tmp;
-                addr_cam_col        = addr_cam_auto;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                /*if(addr_cam_auto < DATA_WIDTH)
-                begin
-                    st_next         = STORE_CTXT;
-                end
-                else if (addr_cam_auto == DATA_WIDTH)
-                begin
-                    st_next         = STORE_CTXT;
-                end*/
-                if (addr_cam_auto_sm_e_DATA_WIDTH)
-                begin
-                    //st_next =  STORE_CTXT;
-                end
-                
-                else begin
-                //st_next         = START;
-                end
-                end
-
-            GET_JMP_ADDR:
-                begin
-                ins_inp_valid   = 0;
-                inout_mode      = RowxRow;
-                data_addr       = 16'he001;
-                data_cmd        = Addr_load;
-                pass            = 0;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 1;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if(jmp_addr_rdy == 1)
-                begin
-                    //st_next =  JMP_INS;
-                end
-                else begin
-                //st_next =  GET_JMP_ADDR;
-                end
-                end
-
-            JMP_INS:
-                begin
-                ins_inp_valid   = 0;
-                data_cmd        = 0;
-                pass            = 0;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 1;
-                inout_mode          = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                //st_next         = START;
-                end
-
-            LOAD_TMP:
-                begin
-                ins_inp_valid   = 0;
-                ret_valid       = 1;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (ctxt_rdy == 1)
-                begin
-                    pass        = tmp_pass_ret;
-                    key_A       = tmp_key_A_ret;
-                    key_B       = tmp_key_B_ret;
-                    key_C       = tmp_key_C_ret;
-                    key_F       = tmp_key_F_ret;
-                    //st_next     = LOAD_TMP;
-                end
-                else if (data_cache_rdy == 1)
-                begin
-                    //st_next     = LOAD_CTXT;
-                    pass = pass_tmp;
-                    key_A       = key_A_tmp;
-                    key_B       = key_B_tmp;
-                    key_C       = key_C_tmp;
-                    key_F       = key_F_tmp;
-                end
-                else begin
-                //st_next =  LOAD_TMP;
+            end
+            STORE_TMP: begin
                 pass = pass_tmp;
-                key_A       = key_A_tmp;
-                key_B       = key_B_tmp;
-                key_C       = key_C_tmp;
-                key_F       = key_F_tmp;
-                end
-                end
-
-            LOAD_CTXT:
-                begin
-                inout_mode      = ColxCol;
-                ins_inp_valid   = 0;
-                addr_cam_col    = addr_cam_auto;
-                pass            = pass_tmp;
-                key_A           = key_A_tmp;
-                key_B           = key_B_tmp;
-                key_C           = key_C_tmp;
-                key_F           = key_F_tmp;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 1;
-                int_set             = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if(matrix_cnt_e_1)
-                begin
-                    rst_InA             = 0;
-                    rst_InB             = 1;
-                    rst_InR             = 1;
-                    addr_input_cbc_A    = addr_cam_col;
-                    addr_input_cbc_B    = 0;
-                    addr_input_cbc_R    = 0;
-                    data_addr           = ctxt_addr_ret;
-                    data_cmd            = ColxCol_load;
-                    if (data_cache_rdy)
-                        begin
-                            input_A_cbc = data_in_cbc;
-                            input_B_cbc = 0;
-                            input_R_cbc = 0;
-                            //st_next     = LOAD_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next         = LOAD_CTXT;
-                        input_A_cbc     = 0;
-                        input_B_cbc     = 0;
-                        input_R_cbc     = 0;
-                    end
-                end
-                else if (matrix_cnt_e_2)
-                begin
-                    rst_InA             = 1;
-                    rst_InB             = 0;
-                    rst_InR             = 1;
-                    addr_input_cbc_B    = addr_cam_col;
-                    addr_input_cbc_A    = 0;
-                    addr_input_cbc_R    = 0;
-                    data_addr           = ctxt_addr_ret_p_DataDepth;
-                    data_cmd            = ColxCol_load;
-                    if (data_cache_rdy)
-                        begin
-                            input_B_cbc = data_in_cbc;
-                            input_A_cbc = 0;
-                            input_R_cbc = 0;
-                            //st_next     = LOAD_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next         = LOAD_CTXT;
-                        input_A_cbc     = 0;
-                        input_B_cbc     = 0;
-                        input_R_cbc     = 0;
-                    end
-                end
-                else if (matrix_cnt_e_3)
-                begin
-                    rst_InA             = 1;
-                    rst_InB             = 1;
-                    rst_InR             = 0;
-                    addr_input_cbc_R    = addr_cam_col;
-                    addr_input_cbc_A    = 0;
-                    addr_input_cbc_B    = 0;
-                    data_addr           = ctxt_addr_ret_p_2DataDepth;
-                    data_cmd            = ColxCol_load;
-                    if (data_cache_rdy)
-                        begin
-                            input_R_cbc = data_in_cbc;
-                            input_A_cbc     = 0;
-                            input_B_cbc     = 0;
-                            //st_next     = LOAD_CTXT_FINISH_CHECK;
-                        end
-                    else begin
-                        //st_next         = LOAD_CTXT;
-                        input_A_cbc     = 0;
-                        input_B_cbc     = 0;
-                        input_R_cbc     = 0;
-                    end
-                end
-                else if (matrix_cnt_e_0)
-                begin
-                    data_cmd        = 0;
-                    rst_InA         = 1;
-                    rst_InB         = 1;
-                    rst_InR         = 1;
-                    addr_input_cbc_A    = 0;
-                    addr_input_cbc_B    = 0;
-                    addr_input_cbc_R    = 0;
-                    input_A_cbc     = 0;
-                    input_B_cbc     = 0;
-                    input_R_cbc     = 0;
-                    data_addr       = data_addr_tmp;
-                    if (opcode_e_RET)
-                        begin
-                            //st_next =  LOAD_CTXT;
-                        end
-                    else begin
-                        //st_next     = RET_STATE;
-                    end
-                end
-                else begin
-                //st_next         = LOAD_CTXT;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                data_cmd        = ColxCol_load;
-                data_addr       = data_addr_tmp;
-                end
-                end
-
-            LOAD_CTXT_FINISH_CHECK:
-                begin
-                ins_inp_valid   = 0;
-                pass            = pass_tmp;
-                key_A           = key_A_tmp;
-                key_B           = key_B_tmp;
-                key_C           = key_C_tmp;
-                key_F           = key_F_tmp;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 1;
-                int_set             = 0;
-                inout_mode          = ColxCol;
-                data_cmd            = ColxCol_load;
-                data_addr           = data_addr_tmp;
-                addr_cam_col        = addr_cam_auto;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if(addr_cam_auto_sm_e_DATA_WIDTH)
-                begin
-                    //st_next         = LOAD_CTXT;
-                end
-                else begin
-                //st_next         = START;
-                end
-                end
-            
-            RET_STATE:
-                begin
-                ins_inp_valid   = 0;
-                pass            = pass_tmp;
-                key_A           = key_A_tmp;
-                key_B           = key_B_tmp;
-                key_C           = key_C_tmp;
-                key_F           = key_F_tmp;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = data_addr_tmp;
-                addr_cam_col        = addr_cam_auto;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end
-
-            PRINT_DATA:
-                begin
-                inout_mode      = RowxRow;
-                data_addr       = addr_mem;
-                data_cmd        = RowxRow_load;
-                pass            = 0;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                rst_InA             = 1;
-                rst_InB             = 1;
-                rst_InR             = 1;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                addr_cam_col        = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                //ins_inp_valid       = 0;
-                if (data_cache_rdy == 1)
-                begin
-                    //st_next         = START;
-                    ins_inp_valid   = 1;
-                    data_print_rdy  = 1;
-                    data_print      = data_in_rbr;
-                    print_data_finish = 1;
-                end
-                else begin
-                //st_next         = PRINT_DATA;
-                ins_inp_valid   = 0;
-                data_print_rdy  = 0;
-                data_print      = 0;
-                print_data_finish = 0;
-                end
-                end
-
-            /* pass of ADD */
-            PASS_1_ADD:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 1;
-                key_A           = 1;
-                key_B           = 1;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ADD;
-                end
-                else begin
-                //st_next         = PASS_1_ADD;
-                end
-                end
-                
-            PASS_2_ADD:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 2;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_addr           = 0;
-                data_cmd            = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ADD;
-                end
-                else begin
-                //st_next         = PASS_2_ADD;
-                end                
-                end
-                
-            PASS_3_ADD:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 3;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 1;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ADD;
-                end
-                else begin
-                //st_next         = PASS_3_ADD;
-                end                  
-                end
-            
-            PASS_4_ADD:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 4;
-                key_A           = 0;
-                key_B           = 1;
-                key_C           = 1;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ADD;
-                end
-                else begin
-                //st_next         = PASS_4_ADD;
-                end                  
-                end
-                
-            RSTTAG_ADD:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 0;
-                pass            = pass_tmp;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end       
-
-            /* pass of SUB */
-            PASS_1_SUB:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 1;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_SUB;
-                end
-                else begin
-                //st_next         = PASS_1_SUB;
-                end
-                end
-                
-            PASS_2_SUB:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 2;
-                key_A           = 1;
-                key_B           = 1;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                   // st_next     = RSTTAG_SUB;
-                end
-                else begin
-                //st_next         = PASS_2_SUB;
-                end
-                end
-                
-            PASS_3_SUB:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 3;
-                key_A           = 0;
-                key_B           = 1;
-                key_C           = 1;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_SUB;
-                end
-                else begin
-                //st_next         = PASS_3_SUB;
-                end
-                end
-            
-            PASS_4_SUB:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 4;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 1;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_SUB;
-                end
-                else begin
-                //st_next         = PASS_4_SUB;
-                end
-                end
-                
-            RSTTAG_SUB:
-                begin
-                rst_tag         = 0;
-                ins_inp_valid   = 0;
-                pass            = pass_tmp;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end
-
-            /* pass of ABS */
-            PASS_1_ABS:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 1;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 1;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ABS;
-                end
-                else begin
-                //st_next         = PASS_1_ABS;
-                end
-                end
-                
-            PASS_2_ABS:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 2;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 1;
-                ABS_opt         = 1;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ABS;
-                end
-                else begin
-                //st_next         = PASS_2_ABS;
-                end
-                end
-                
-            PASS_3_ABS:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 3;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 1;
-                ABS_opt         = 1;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ABS;
-                end
-                else begin
-                //st_next         = PASS_3_ABS;
-                end
-                end
-            
-            PASS_4_ABS:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 4;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 1;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_ABS;
-                end
-                else begin
-                //st_next         = PASS_4_ABS;
-                end
-                end
-                
-            RSTTAG_ABS:
-                begin
-                rst_tag         = 0; 
-                ins_inp_valid   = 0;
-                pass            = pass_tmp;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 1;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end
-
-            /* pass of TSC */        
-            PASS_1_TSC:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 1;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 1;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_TSC;
-                end
-                else begin
-                //st_next         = PASS_1_TSC;
-                end
-                end
-                
-            PASS_2_TSC:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 2;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 1;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_TSC;
-                end
-                else begin
-                //st_next         = PASS_2_TSC;
-                end
-                end
-                
-            PASS_3_TSC:
-                begin
-                ins_inp_valid   = 0;
-                rst_tag         = 1;
-                pass            = 3;
-                key_A           = 1;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if (cam_clk_cnt_e_7)
-                begin
-                    //st_next     = RSTTAG_TSC;
-                end
-                else begin
-                //st_next         = PASS_3_TSC;
-                end
-                end
-                
-            RSTTAG_TSC:
-                begin
-                rst_tag         = 0; 
-                ins_inp_valid   = 0; 
-                pass            = pass_tmp;
-                key_A           = 0;
-                key_B           = 0;
-                key_C           = 0;
-                key_F           = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end
-    
-            FINISH_CK:
-                begin
-                pass    = pass_tmp;
-                key_A   = key_A_tmp;
-                key_B   = key_B_tmp;
-                key_C   = key_C_tmp;
-                key_F   = key_F_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                ins_inp_valid = 0;
                 rst_tag = 0;
                 ABS_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                if(bit_cnt_sm_DATA_WIDTH)
-                begin
-                    ins_inp_valid   = 0;
-                    
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                int_set = 1;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            STORE_CTXT: begin
+                inout_mode = ColxCol;
+                data_cmd = ColxCol_store;
+                ins_inp_valid = 0;
+                addr_cam_col = addr_cam_auto;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                data_out_rbr = 0;
+                ret_valid = 0;
+                int_set = 1;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+                case ({matrix_cnt_e_0, matrix_cnt_e_1,
+                       matrix_cnt_e_2, matrix_cnt_e_3})
+                    4'b1000: begin
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_B = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = 0;
+                        data_addr = data_addr_tmp;
+                    end
+                    4'b0100: begin
+                        addr_output_cbc_A = addr_cam_col;
+                        addr_output_cbc_B = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = data_A_cbc;
+                        data_addr = addr_cur_ctxt;
+                    end
+                    4'b0010: begin
+                        addr_output_cbc_B = addr_cam_col;
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = data_B_cbc;
+                        data_addr = addr_cur_ctxt_p_DataDepth;
+                    end
+                    4'b0001: begin
+                        addr_output_cbc_R = addr_cam_col;
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_B = 0;
+                        data_out_cbc = data_R_cbc;
+                        data_addr = addr_cur_ctxt_p_2DataDepth;
+                    end
+                    default: begin
+                        addr_output_cbc_A = 0;
+                        addr_output_cbc_B = 0;
+                        addr_output_cbc_R = 0;
+                        data_out_cbc = 0;
+                        data_addr = data_addr_tmp;
+                    end
+                endcase
+            end
+            STORE_CTXT_FINISH_CHECK: begin
+                ins_inp_valid = 0;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = data_out_cbc_tmp;
+                ret_valid = 0;
+                int_set = 1;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = data_addr_tmp;
+                addr_cam_col = addr_cam_auto;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            GET_JMP_ADDR: begin
+                ins_inp_valid = 0;
+                inout_mode = RowxRow;
+                data_addr = 16'he001;
+                data_cmd = Addr_load;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 1;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            JMP_INS: begin
+                ins_inp_valid = 0;
+                data_cmd = 0;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 1;
+                inout_mode = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            LOAD_TMP: begin
+                ins_inp_valid = 0;
+                ret_valid = 1;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+                if (ctxt_rdy == 1) begin
+                    pass = tmp_pass_ret;
+                    key_A = tmp_key_A_ret;
+                    key_B = tmp_key_B_ret;
+                    key_C = tmp_key_C_ret;
+                    key_F = tmp_key_F_ret;
                 end
                 else begin
-                //st_next         = START;
-                ins_inp_valid   = 1;
+                    pass = pass_tmp;
+                    key_A = key_A_tmp;
+                    key_B = key_B_tmp;
+                    key_C = key_C_tmp;
+                    key_F = key_F_tmp;
                 end
-                end
-
-            FINISH:
+            end
+            LOAD_CTXT:
                 begin
-                //st_next             = FINISH;
-                ins_inp_valid       = 0;
-                pass                = 0;
-                key_A               = 0;
-                key_B               = 0;
-                key_C               = 0;
-                key_F               = 0;
-                rst_tag             = 0;
-                ABS_opt             = 0;
-                rst_InA             = 1;
-                rst_InB             = 1;
-                rst_InR             = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc         = 0;
-                input_B_cbc         = 0;
-                input_R_cbc         = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
+                inout_mode = ColxCol;
+                ins_inp_valid = 0;
+                addr_cam_col = addr_cam_auto;
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 1;
+                int_set = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+                case ({matrix_cnt_e_0, matrix_cnt_e_1,
+                       matrix_cnt_e_2, matrix_cnt_e_3,
+                       data_cache_rdy})
+                    5'b10000: begin
+                        data_cmd = 0;
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        data_addr = data_addr_tmp;
+                    end
+                    5'b10001: begin
+                        data_cmd = 0;
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        data_addr = data_addr_tmp;
+                    end
+                    5'b01000: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam_col;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        data_addr = ctxt_addr_ret;
+                        data_cmd = ColxCol_load;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    5'b01001: begin
+                        rst_InA = 0;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = addr_cam_col;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        data_addr = ctxt_addr_ret;
+                        data_cmd = ColxCol_load;
+                        input_A_cbc = data_in_cbc;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    5'b00100: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam_col;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        data_addr = ctxt_addr_ret_p_DataDepth;
+                        data_cmd = ColxCol_load;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    5'b00101: begin
+                        rst_InA = 1;
+                        rst_InB = 0;
+                        rst_InR = 1;
+                        addr_input_cbc_B = addr_cam_col;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_R = 0;
+                        data_addr = ctxt_addr_ret_p_DataDepth;
+                        data_cmd = ColxCol_load;
+                        input_B_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    5'b00010: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam_col;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        data_addr = ctxt_addr_ret_p_2DataDepth;
+                        data_cmd = ColxCol_load;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                    end
+                    5'b00011: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 0;
+                        addr_input_cbc_R = addr_cam_col;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        data_addr = ctxt_addr_ret_p_2DataDepth;
+                        data_cmd = ColxCol_load;
+                        input_R_cbc = data_in_cbc;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                    end
+                    default: begin
+                        rst_InA = 1;
+                        rst_InB = 1;
+                        rst_InR = 1;
+                        addr_input_cbc_A = 0;
+                        addr_input_cbc_B = 0;
+                        addr_input_cbc_R = 0;
+                        input_A_cbc = 0;
+                        input_B_cbc = 0;
+                        input_R_cbc = 0;
+                        data_cmd = ColxCol_load;
+                        data_addr = data_addr_tmp;
+                    end
+                endcase
+            end
+            LOAD_CTXT_FINISH_CHECK: begin
+                ins_inp_valid = 0;
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 1;
+                int_set = 0;
+                inout_mode = ColxCol;
+                data_cmd = ColxCol_load;
+                data_addr = data_addr_tmp;
+                addr_cam_col = addr_cam_auto;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            RET_STATE: begin
+                ins_inp_valid = 0;
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = data_addr_tmp;
+                addr_cam_col = addr_cam_auto;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PRINT_DATA: begin
+                inout_mode = RowxRow;
+                data_addr = addr_mem;
+                data_cmd = RowxRow_load;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                addr_cam_col = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                if (data_cache_rdy == 1) begin
+                    ins_inp_valid = 1;
+                    data_print_rdy = 1;
+                    data_print = data_in_rbr;
+                    print_data_finish = 1;
                 end
-            
+                else begin
+                    ins_inp_valid = 0;
+                    data_print_rdy = 0;
+                    data_print = 0;
+                    print_data_finish = 0;
+                end
+            end
+            /* pass of ADD */
+            PASS_1_ADD: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 1;
+                key_A = 1;
+                key_B = 1;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end    
+            PASS_2_ADD: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 2;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_addr = 0;
+                data_cmd = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_3_ADD: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 3;
+                key_A = 0;
+                key_B = 0;
+                key_C = 1;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_4_ADD: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 4;
+                key_A = 0;
+                key_B = 1;
+                key_C = 1;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            RSTTAG_ADD: begin
+                ins_inp_valid = 0;
+                rst_tag = 0;
+                pass = pass_tmp;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end       
+            /* pass of SUB */
+            PASS_1_SUB: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 1;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_2_SUB: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 2;
+                key_A = 1;
+                key_B = 1;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_3_SUB: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 3;
+                key_A = 0;
+                key_B = 1;
+                key_C = 1;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_4_SUB: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 4;
+                key_A = 0;
+                key_B = 0;
+                key_C = 1;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            RSTTAG_SUB: begin
+                rst_tag = 0;
+                ins_inp_valid = 0;
+                pass = pass_tmp;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            /* pass of ABS */
+            PASS_1_ABS: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 1;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 1;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_2_ABS: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 2;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 1;
+                ABS_opt = 1;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_3_ABS: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 3;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 1;
+                ABS_opt = 1;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_4_ABS: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 4;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 1;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            RSTTAG_ABS: begin
+                rst_tag = 0; 
+                ins_inp_valid = 0;
+                pass = pass_tmp;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 1;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            /* pass of TSC */        
+            PASS_1_TSC: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 1;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 1;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_2_TSC: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 2;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 1;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            PASS_3_TSC: begin
+                ins_inp_valid = 0;
+                rst_tag = 1;
+                pass = 3;
+                key_A = 1;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            RSTTAG_TSC: begin
+                rst_tag = 0; 
+                ins_inp_valid = 0; 
+                pass = pass_tmp;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
+            FINISH_CK: begin
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+                if(bit_cnt_sm_DATA_WIDTH) begin
+                    ins_inp_valid = 0;
+                end
+                else begin
+                    ins_inp_valid = 1;
+                end
+            end
+            FINISH: begin
+                ins_inp_valid = 0;
+                pass = 0;
+                key_A = 0;
+                key_B = 0;
+                key_C = 0;
+                key_F = 0;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
             default: begin
-                //st_next         = START;
-                ins_inp_valid   = 0;
-                pass            = pass_tmp;
-                key_A           = key_A_tmp;
-                key_B           = key_B_tmp;
-                key_C           = key_C_tmp;
-                key_F           = key_F_tmp;
-                rst_tag         = 0;
-                ABS_opt         = 0;
-                rst_InA         = 1;
-                rst_InB         = 1;
-                rst_InR         = 1;
-                addr_input_cbc_A    = 0;
-                addr_input_cbc_B    = 0;
-                addr_input_cbc_R    = 0;
-                addr_input_rbr_A    = 0;
-                addr_input_rbr_B    = 0;
-                addr_input_rbr_R    = 0;
-                input_A_rbr         = 0;
-                input_B_rbr         = 0;
-                input_R_rbr         = 0;
-                input_A_cbc     = 0;
-                input_B_cbc     = 0;
-                input_R_cbc     = 0;
-                addr_output_rbr_A   = 0;
-                addr_output_rbr_B   = 0;
-                addr_output_rbr_R   = 0;
-                addr_output_cbc_A   = 0;
-                addr_output_cbc_B   = 0;
-                addr_output_cbc_R   = 0;
-                data_out_rbr        = 0;
-                data_out_cbc        = 0;
-                ret_valid           = 0;
-                int_set             = 0;
-                inout_mode          = 0;
-                data_cmd            = 0;
-                data_addr           = 0;
-                addr_cam_col        = 0;
-                print_data_finish   = 0;
-                data_print_rdy      = 0;
-                data_print          = 0;
-                end
-
+                ins_inp_valid = 0;
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                print_data_finish = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+            end
         endcase
     end
 
