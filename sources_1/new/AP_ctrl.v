@@ -270,68 +270,68 @@ module AP_controller
     assign op_code_valid = op_code & ins_valid;     
 
     /* ALU */
-    wire [DATA_WIDTH - 1 : 0]               bit_cnt_p_1;
-    wire [1 : 0]                            matrix_cnt_p_1;
-    wire [ADDR_WIDTH_CAM - 1 : 0]           addr_cam_auto_p_1;
-    wire [3 : 0]                            cam_clk_cnt_p_1;
-    wire [ADDR_WIDTH_MEM - 1 : 0]           ctxt_addr_ret_p_DataDepth;
-    wire [ADDR_WIDTH_MEM - 1 : 0]           ctxt_addr_ret_p_2DataDepth;
-    wire [ADDR_WIDTH_MEM - 1 : 0]           addr_cur_ctxt_p_DataDepth;
-    wire [ADDR_WIDTH_MEM - 1 : 0]           addr_cur_ctxt_p_2DataDepth;
-    wire [DATA_WIDTH - 1 : 0]               mask_sh_1;
+    wire [DATA_WIDTH - 1 : 0]               arith_6;
+    wire [1 : 0]                            arith_3;
+    wire [ADDR_WIDTH_CAM - 1 : 0]           arith_2;
+    wire [3 : 0]                            arith_1;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           arith_5;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           arith_4;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           arith_7;
+    wire [ADDR_WIDTH_MEM - 1 : 0]           arith_8;
+    wire [DATA_WIDTH - 1 : 0]               arith_9;
 
-    wire                                    cam_clk_cnt_e_0;
-    wire                                    cam_clk_cnt_e_1;
-    wire                                    cam_clk_cnt_e_7;
-    wire                                    matrix_cnt_e_0;
-    wire                                    matrix_cnt_e_1;
-    wire                                    matrix_cnt_e_2;
-    wire                                    matrix_cnt_e_3;
-    wire                                    opcode_e_RET;
-    wire                                    bit_cnt_sm_DATA_WIDTH;
-    wire                                    exp_1;
-    wire                                    exp_2;
-    wire                                    exp_3;
+    wire                                    ctrl_exp_1;
+    wire                                    ctrl_exp_2;
+    wire                                    ctrl_exp_3;
+    wire                                    ctrl_exp_4;
+    wire                                    ctrl_exp_5;
+    wire                                    ctrl_exp_6;
+    wire                                    ctrl_exp_7;
+    wire                                    ctrl_exp_8;
+    wire                                    ctrl_exp_9;
+    wire                                    ctrl_exp_10;
+    wire                                    ctrl_exp_11;
+    wire                                    ctrl_exp_12;
 
-    wire                                    addr_cam_auto_sm_DATA_WIDTH;
-    wire                                    addr_cam_auto_sm_e_DATA_WIDTH;
-    wire                                    addr_cam_auto_sm_DATA_WIDTH_m_1;
-    wire                                    addr_cam_auto_e_DW_matx_cnt_e_0;
+    wire                                    ctrl_exp_13;
+    wire                                    ctrl_exp_14;
+    wire                                    ctrl_exp_15;
+    wire                                    ctrl_exp_16;
     
 
     localparam  DATA_DEPTH_P_3 = DATA_DEPTH + 3;
     localparam  DATA_WIDTH_P_3 = DATA_WIDTH + 3;
-    assign      cam_clk_cnt_p_1 = cam_clk_cnt + 1;
-    assign      addr_cam_auto_p_1 = addr_cam_auto + 1;
-    assign      matrix_cnt_p_1 = matrix_cnt + 1;
-    assign      ctxt_addr_ret_p_2DataDepth = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
-    assign      ctxt_addr_ret_p_DataDepth = ctxt_addr_ret + DATA_DEPTH;
-    assign      bit_cnt_p_1 = bit_cnt + 1;
-    assign      addr_cur_ctxt_p_DataDepth = addr_cur_ctxt + DATA_DEPTH;
-    assign      addr_cur_ctxt_p_2DataDepth = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
-    assign      mask_sh_1 = mask << 1;
+    assign      arith_1 = cam_clk_cnt + 1;
+    assign      arith_2 = addr_cam_auto + 1;
+    assign      arith_3 = matrix_cnt + 1;
+    assign      arith_4 = ctxt_addr_ret + DATA_DEPTH + DATA_DEPTH;
+    assign      arith_5 = ctxt_addr_ret + DATA_DEPTH;
+    assign      arith_6 = bit_cnt + 1;
+    assign      arith_7 = addr_cur_ctxt + DATA_DEPTH;
+    assign      arith_8 = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
+    assign      arith_9 = mask << 1;
 
-    assign      cam_clk_cnt_e_0 = (cam_clk_cnt == 0)? 1 : 0;
-    assign      cam_clk_cnt_e_1 = (cam_clk_cnt == 1)? 1 : 0;
-    assign      cam_clk_cnt_e_7 = (cam_clk_cnt == 7)? 1 : 0;
-    assign      matrix_cnt_e_0 = (matrix_cnt == 0)? 1 : 0;
-    assign      matrix_cnt_e_1 = (matrix_cnt == 1)? 1 : 0;
-    assign      matrix_cnt_e_2 = (matrix_cnt == 2)? 1 : 0;
-    assign      matrix_cnt_e_3 = (matrix_cnt == 3)? 1 : 0;
-    assign      opcode_e_RET = (op_code == RET)? 1 : 0;
-    assign      bit_cnt_sm_DATA_WIDTH = (bit_cnt < DATA_WIDTH)? 1 : 0;
-    assign      exp_1 = (matrix_cnt_e_0 && opcode_e_RET)? 1 : 0;
-    assign      exp_2 = (matrix_cnt_e_0 && !opcode_e_RET)? 1 : 0;
-    assign      exp_3 = (op_code == STORERBR 
+    assign      ctrl_exp_1 = (cam_clk_cnt == 0)? 1 : 0;
+    assign      ctrl_exp_2 = (cam_clk_cnt == 1)? 1 : 0;
+    assign      ctrl_exp_3 = (cam_clk_cnt == 7)? 1 : 0;
+    assign      ctrl_exp_4 = (matrix_cnt == 0)? 1 : 0;
+    assign      ctrl_exp_5 = (matrix_cnt == 1)? 1 : 0;
+    assign      ctrl_exp_6 = (matrix_cnt == 2)? 1 : 0;
+    assign      ctrl_exp_7 = (matrix_cnt == 3)? 1 : 0;
+    assign      ctrl_exp_8 = (op_code == RET)? 1 : 0;
+    assign      ctrl_exp_9 = (bit_cnt < DATA_WIDTH)? 1 : 0;
+    assign      ctrl_exp_10 = (ctrl_exp_4 && ctrl_exp_8)? 1 : 0;
+    assign      ctrl_exp_11 = (ctrl_exp_4 && !ctrl_exp_8)? 1 : 0;
+    assign      ctrl_exp_12 = (op_code == STORERBR 
                       || op_code == STORECBC 
                       || (addr_cam_auto == DATA_WIDTH - 1)&&(st_cur == STORE_CTXT_FINISH_CHECK))? 1 : 0;
     
-    assign      addr_cam_auto_sm_DATA_WIDTH = (addr_cam_auto < DATA_WIDTH)? 1 : 0;
-    assign      addr_cam_auto_sm_e_DATA_WIDTH = (addr_cam_auto <= DATA_WIDTH)? 1 : 0;
-    assign      addr_cam_auto_sm_DATA_WIDTH_m_1 = (addr_cam_auto < DATA_WIDTH - 1)? 1 : 0;
-    assign      addr_cam_auto_e_DW_matx_cnt_e_0 = ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 0))? 1 : 0;
+    assign      ctrl_exp_13 = (addr_cam_auto < DATA_WIDTH)? 1 : 0;
+    assign      ctrl_exp_14 = (addr_cam_auto <= DATA_WIDTH)? 1 : 0;
+    assign      ctrl_exp_15 = (addr_cam_auto < DATA_WIDTH - 1)? 1 : 0;
+    assign      ctrl_exp_16 = ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 0))? 1 : 0;
     
-    assign      store_ddr = (exp_3)? 1 : 0;
+    assign      store_ddr = (ctrl_exp_12)? 1 : 0;
     
     always @(posedge clk or negedge rst_clk) begin
         if (!rst_clk) begin
@@ -340,62 +340,62 @@ module AP_controller
         else begin
             case({st_cur, cam_clk_cnt[3]}) // cam_clk_cnt[3] == 0 means cam_clk_cnt < 7
                 {PASS_1_ADD, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_1_SUB, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_1_ABS, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_1_TSC, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_2_ADD, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_2_SUB, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_2_ABS, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_2_TSC, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_3_ADD, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_3_SUB, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_3_ABS, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_3_TSC, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_4_ADD, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_4_SUB, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {PASS_4_ABS, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {STORE_RBR, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {STORE_CBC, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {STORE_CTXT, 1'b0}: begin
-                    cam_clk_cnt <= cam_clk_cnt_p_1;
+                    cam_clk_cnt <= arith_1;
                 end
                 {STORE_END, 1'b0}: begin
-                    case (cam_clk_cnt_e_0)
-                        1'b1: cam_clk_cnt <= cam_clk_cnt_p_1;
+                    case (ctrl_exp_1)
+                        1'b1: cam_clk_cnt <= arith_1;
                         1'b0: cam_clk_cnt <= 0;
                         default:;
                     endcase
@@ -414,20 +414,20 @@ module AP_controller
                 matrix_cnt <= 1;
             end
             STORE_CTXT_FINISH_CHECK: begin
-                case (addr_cam_auto_sm_DATA_WIDTH)
-                    1: addr_cam_auto <= addr_cam_auto_p_1;
+                case (ctrl_exp_13)
+                    1: addr_cam_auto <= arith_2;
                     default:begin
                         addr_cam_auto <= 0;
-                        matrix_cnt <= matrix_cnt_p_1;
+                        matrix_cnt <= arith_3;
                     end
                 endcase
             end
             LOAD_CTXT_FINISH_CHECK: begin
-                case (addr_cam_auto_sm_DATA_WIDTH_m_1)
-                    1: addr_cam_auto <= addr_cam_auto_p_1;
+                case (ctrl_exp_15)
+                    1: addr_cam_auto <= arith_2;
                     default:begin
                         addr_cam_auto <= 0;
-                        matrix_cnt <= matrix_cnt_p_1;
+                        matrix_cnt <= arith_3;
                     end
                 endcase
             end
@@ -534,16 +534,16 @@ module AP_controller
                     endcase
                 end
                 LOAD_CTXT: begin
-                    if (matrix_cnt_e_3) begin
-                        data_addr_tmp <= ctxt_addr_ret_p_2DataDepth;
+                    if (ctrl_exp_7) begin
+                        data_addr_tmp <= arith_4;
                     end
-                    if (exp_1) begin
+                    if (ctrl_exp_10) begin
                         ret_addr_pc <= ret_addr_ret;
                         ret_addr_pc_rdy <= 1;
                         rst_InC <= 0;
                         rst_InF <= 0;
                     end
-                    if (exp_2) begin
+                    if (ctrl_exp_11) begin
                         ret_addr_pc <= ret_addr_ret;
                         ret_addr_pc_rdy <= 1;
                         rst_InC <= 1;
@@ -574,7 +574,7 @@ module AP_controller
                         2: data_out_cbc_tmp <= data_B_cbc;
                         3: begin
                             data_out_cbc_tmp <= data_R_cbc;
-                            data_addr_tmp <= ctxt_addr_ret_p_2DataDepth;
+                            data_addr_tmp <= arith_4;
                         end
                         default:;
                     endcase
@@ -610,7 +610,7 @@ module AP_controller
                     endcase
                 end
                 STORE_CTXT_FINISH_CHECK: begin
-                    if (addr_cam_auto_e_DW_matx_cnt_e_0) begin
+                    if (ctrl_exp_16) begin
                         store_ctxt_finish <= 1;
                     end
                 end
@@ -621,31 +621,31 @@ module AP_controller
                     data_addr_tmp <= addr_mem;
                 end
                 PASS_4_ADD: begin
-                    if (cam_clk_cnt_e_7) begin
-                        bit_cnt <= bit_cnt_p_1;
+                    if (ctrl_exp_3) begin
+                        bit_cnt <= arith_6;
                     end
                 end
                 PASS_4_SUB: begin
-                    if (cam_clk_cnt_e_7) begin
-                        bit_cnt <= bit_cnt_p_1;
+                    if (ctrl_exp_3) begin
+                        bit_cnt <= arith_6;
                     end
                 end
                 PASS_4_ABS: begin
-                    if (cam_clk_cnt_e_7) begin
-                        bit_cnt <= bit_cnt_p_1;
+                    if (ctrl_exp_3) begin
+                        bit_cnt <= arith_6;
                     end
                 end
                 PASS_3_TSC: begin
-                    if (cam_clk_cnt_e_7) begin
-                        bit_cnt <= bit_cnt_p_1;
+                    if (ctrl_exp_3) begin
+                        bit_cnt <= arith_6;
                     end
                 end
                 RET_STATE: begin
                     opt_cur <= op_code;
                 end
                 FINISH_CK: begin
-                    if (bit_cnt_sm_DATA_WIDTH) begin
-                        mask <= mask_sh_1;
+                    if (ctrl_exp_9) begin
+                        mask <= arith_9;
                     end
                 end 
                 default:;
@@ -714,7 +714,7 @@ module AP_controller
                 endcase
             end
             STORE_RBR: begin
-                case ({matrix_select_reg, cam_clk_cnt_e_7})
+                case ({matrix_select_reg, ctrl_exp_3})
                     {M_A, 1'b1}: st_next = STORE_END;
                     {M_A, 1'b0}: st_next = STORE_RBR;
                     {M_B, 1'b1}: st_next = STORE_END;
@@ -725,7 +725,7 @@ module AP_controller
                 endcase
             end
             STORE_CBC: begin
-                case ({matrix_select_reg, cam_clk_cnt_e_7})
+                case ({matrix_select_reg, ctrl_exp_3})
                     {M_A, 1'b1}: st_next = STORE_END;
                     {M_A, 1'b0}: st_next = STORE_CBC;
                     {M_B, 1'b1}: st_next = STORE_END;
@@ -736,14 +736,14 @@ module AP_controller
                 endcase
             end
             STORE_END: begin
-                st_next = cam_clk_cnt_e_1? START: STORE_END;
+                st_next = ctrl_exp_2? START: STORE_END;
             end
             STORE_TMP: begin
                 st_next = STORE_CTXT;
             end
             STORE_CTXT: begin
-                case ({matrix_cnt_e_0, matrix_cnt_e_1, matrix_cnt_e_2, 
-                matrix_cnt_e_3, data_cache_rdy, cam_clk_cnt_e_7})
+                case ({ctrl_exp_4, ctrl_exp_5, ctrl_exp_6, 
+                ctrl_exp_7, data_cache_rdy, ctrl_exp_3})
                     6'b100000: st_next = GET_JMP_ADDR;
                     6'b100001: st_next = GET_JMP_ADDR;
                     6'b100010: st_next = GET_JMP_ADDR;
@@ -755,7 +755,7 @@ module AP_controller
                 endcase
             end
             STORE_CTXT_FINISH_CHECK: begin 
-                st_next = addr_cam_auto_sm_e_DATA_WIDTH? STORE_CTXT : START;
+                st_next = ctrl_exp_14? STORE_CTXT : START;
             end
             GET_JMP_ADDR: begin
                 st_next = jmp_addr_rdy? JMP_INS : GET_JMP_ADDR;
@@ -767,8 +767,8 @@ module AP_controller
                 st_next = data_cache_rdy? LOAD_CTXT : LOAD_TMP;
             end
             LOAD_CTXT: begin
-                case ({matrix_cnt_e_0, matrix_cnt_e_1, matrix_cnt_e_2, 
-                matrix_cnt_e_3, data_cache_rdy, opcode_e_RET})
+                case ({ctrl_exp_4, ctrl_exp_5, ctrl_exp_6, 
+                ctrl_exp_7, data_cache_rdy, ctrl_exp_8})
                     6'b100000: st_next = RET_STATE;
                     6'b100010: st_next = RET_STATE;
                     6'b010010: st_next = LOAD_CTXT_FINISH_CHECK;
@@ -781,7 +781,7 @@ module AP_controller
                 endcase
             end
             LOAD_CTXT_FINISH_CHECK: begin
-                st_next = addr_cam_auto_sm_e_DATA_WIDTH? LOAD_CTXT : START;
+                st_next = ctrl_exp_14? LOAD_CTXT : START;
             end
             RET_STATE: begin
                 case(op_code)
@@ -797,17 +797,17 @@ module AP_controller
             end
             /* pass of ADD */
             PASS_1_ADD: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ADD : PASS_1_ADD;
+                st_next = ctrl_exp_3? RSTTAG_ADD : PASS_1_ADD;
             end
                 
             PASS_2_ADD: begin           
-                st_next = cam_clk_cnt_e_7? RSTTAG_ADD : PASS_2_ADD;
+                st_next = ctrl_exp_3? RSTTAG_ADD : PASS_2_ADD;
             end
             PASS_3_ADD: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ADD : PASS_3_ADD;
+                st_next = ctrl_exp_3? RSTTAG_ADD : PASS_3_ADD;
             end
             PASS_4_ADD: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ADD : PASS_4_ADD;
+                st_next = ctrl_exp_3? RSTTAG_ADD : PASS_4_ADD;
             end
             RSTTAG_ADD: begin
                 case(pass)
@@ -820,16 +820,16 @@ module AP_controller
             end       
             /* pass of SUB */
             PASS_1_SUB: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_SUB : PASS_1_SUB;
+                st_next = ctrl_exp_3? RSTTAG_SUB : PASS_1_SUB;
             end
             PASS_2_SUB: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_SUB : PASS_2_SUB;
+                st_next = ctrl_exp_3? RSTTAG_SUB : PASS_2_SUB;
             end
             PASS_3_SUB: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_SUB : PASS_3_SUB;
+                st_next = ctrl_exp_3? RSTTAG_SUB : PASS_3_SUB;
             end
             PASS_4_SUB: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_SUB : PASS_4_SUB;
+                st_next = ctrl_exp_3? RSTTAG_SUB : PASS_4_SUB;
             end
             RSTTAG_SUB: begin
                 case(pass)
@@ -842,16 +842,16 @@ module AP_controller
             end
             /* pass of ABS */
             PASS_1_ABS: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ABS : PASS_1_ABS;
+                st_next = ctrl_exp_3? RSTTAG_ABS : PASS_1_ABS;
             end
             PASS_2_ABS: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ABS : PASS_2_ABS;
+                st_next = ctrl_exp_3? RSTTAG_ABS : PASS_2_ABS;
             end
             PASS_3_ABS: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ABS : PASS_3_ABS;
+                st_next = ctrl_exp_3? RSTTAG_ABS : PASS_3_ABS;
             end
             PASS_4_ABS: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_ABS : PASS_4_ABS;
+                st_next = ctrl_exp_3? RSTTAG_ABS : PASS_4_ABS;
             end
             RSTTAG_ABS: begin
                 case(pass)
@@ -864,13 +864,13 @@ module AP_controller
             end
             /* pass of TSC */        
             PASS_1_TSC: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_TSC : PASS_1_TSC;
+                st_next = ctrl_exp_3? RSTTAG_TSC : PASS_1_TSC;
             end
             PASS_2_TSC: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_TSC : PASS_2_TSC;
+                st_next = ctrl_exp_3? RSTTAG_TSC : PASS_2_TSC;
             end
             PASS_3_TSC: begin
-                st_next = cam_clk_cnt_e_7? RSTTAG_TSC : PASS_3_TSC;
+                st_next = ctrl_exp_3? RSTTAG_TSC : PASS_3_TSC;
             end
             RSTTAG_TSC: begin
                 case(pass)
@@ -881,7 +881,7 @@ module AP_controller
                 endcase
             end
             FINISH_CK: begin
-                if(bit_cnt_sm_DATA_WIDTH) begin
+                if(ctrl_exp_9) begin
                     case(opt_cur)
                         ADD: st_next = PASS_1_ADD;
                         SUB: st_next = PASS_1_SUB;
@@ -1526,7 +1526,7 @@ module AP_controller
                 print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
-                ins_inp_valid = cam_clk_cnt_e_1;
+                ins_inp_valid = ctrl_exp_2;
             end
             STORE_TMP: begin
                 pass = pass_tmp;
@@ -1606,8 +1606,8 @@ module AP_controller
                 print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
-                case ({matrix_cnt_e_0, matrix_cnt_e_1,
-                       matrix_cnt_e_2, matrix_cnt_e_3})
+                case ({ctrl_exp_4, ctrl_exp_5,
+                       ctrl_exp_6, ctrl_exp_7})
                     4'b1000: begin
                         addr_output_cbc_A = 0;
                         addr_output_cbc_B = 0;
@@ -1627,14 +1627,14 @@ module AP_controller
                         addr_output_cbc_A = 0;
                         addr_output_cbc_R = 0;
                         data_out_cbc = data_B_cbc;
-                        data_addr = addr_cur_ctxt_p_DataDepth;
+                        data_addr = arith_7;
                     end
                     4'b0001: begin
                         addr_output_cbc_R = addr_cam_col;
                         addr_output_cbc_A = 0;
                         addr_output_cbc_B = 0;
                         data_out_cbc = data_R_cbc;
-                        data_addr = addr_cur_ctxt_p_2DataDepth;
+                        data_addr = arith_8;
                     end
                     default: begin
                         addr_output_cbc_A = 0;
@@ -1853,8 +1853,8 @@ module AP_controller
                 print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
-                case ({matrix_cnt_e_0, matrix_cnt_e_1,
-                       matrix_cnt_e_2, matrix_cnt_e_3,
+                case ({ctrl_exp_4, ctrl_exp_5,
+                       ctrl_exp_6, ctrl_exp_7,
                        data_cache_rdy})
                     5'b10000: begin
                         data_cmd = 0;
@@ -1915,7 +1915,7 @@ module AP_controller
                         addr_input_cbc_B = addr_cam_col;
                         addr_input_cbc_A = 0;
                         addr_input_cbc_R = 0;
-                        data_addr = ctxt_addr_ret_p_DataDepth;
+                        data_addr = arith_5;
                         data_cmd = ColxCol_load;
                         input_A_cbc = 0;
                         input_B_cbc = 0;
@@ -1928,7 +1928,7 @@ module AP_controller
                         addr_input_cbc_B = addr_cam_col;
                         addr_input_cbc_A = 0;
                         addr_input_cbc_R = 0;
-                        data_addr = ctxt_addr_ret_p_DataDepth;
+                        data_addr = arith_5;
                         data_cmd = ColxCol_load;
                         input_B_cbc = data_in_cbc;
                         input_A_cbc = 0;
@@ -1941,7 +1941,7 @@ module AP_controller
                         addr_input_cbc_R = addr_cam_col;
                         addr_input_cbc_A = 0;
                         addr_input_cbc_B = 0;
-                        data_addr = ctxt_addr_ret_p_2DataDepth;
+                        data_addr = arith_4;
                         data_cmd = ColxCol_load;
                         input_A_cbc = 0;
                         input_B_cbc = 0;
@@ -1954,7 +1954,7 @@ module AP_controller
                         addr_input_cbc_R = addr_cam_col;
                         addr_input_cbc_A = 0;
                         addr_input_cbc_B = 0;
-                        data_addr = ctxt_addr_ret_p_2DataDepth;
+                        data_addr = arith_4;
                         data_cmd = ColxCol_load;
                         input_R_cbc = data_in_cbc;
                         input_A_cbc = 0;
@@ -2951,7 +2951,7 @@ module AP_controller
                 print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
-                if(bit_cnt_sm_DATA_WIDTH) begin
+                if(ctrl_exp_9) begin
                     ins_inp_valid = 0;
                 end
                 else begin
