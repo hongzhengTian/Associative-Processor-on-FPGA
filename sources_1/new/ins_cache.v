@@ -20,7 +20,6 @@ module ins_cache
 
     /* the interface of program counter */
     input wire [ADDR_WIDTH_MEM - 1 : 0]     addr_ins,
-    output reg                              ins_cache_inited,
     output reg                              ins_cache_rdy,
 
     /* the interface of AP_ctrl */
@@ -97,7 +96,6 @@ module ins_cache
     begin
         if (!rst)
             begin
-                ins_cache_inited   <= 0;
                 rd_cnt_isa_reg  <= 0;
                 ins_cache_init  <= 0;
                 load_times      <= 0;
@@ -110,19 +108,10 @@ module ins_cache
             case (st_cur)
                 START:
                     begin
-                        if (ins_cache_init == 1)
-                            begin
-                                ins_cache_inited <= 1;
-                                //ins_valid <= 0;
-                            end
                     end
                 LOAD_INS:
                     begin
                         tag_ins <= addr_ins;
-                        if (rd_burst_data_valid_delay == 1 && rd_cnt_isa >= 1)
-                            begin
-                                ins_cache_inited <= 0;
-                            end
                         if (rd_cnt_isa >= isa_read_len)
                             begin
                                 rd_cnt_isa_reg  <= rd_cnt_isa;

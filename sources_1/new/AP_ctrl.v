@@ -47,7 +47,6 @@ module AP_controller
     output reg                              ins_inp_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_pc,
     output reg                              ret_addr_pc_rdy,
-    output reg                              print_data_finish,
 
     /* the interface of INT_STACK */
     /* temporary parameters from INT_STACK when RET signal set */
@@ -943,7 +942,6 @@ module AP_controller
                 inout_mode = 0;
                 data_addr = data_addr_tmp;
                 addr_cam_col = addr_cam_tmp;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case (op_code_valid)
@@ -994,7 +992,6 @@ module AP_controller
                 ret_valid = 0;
                 int_set = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_reg, data_cache_rdy})
@@ -1112,7 +1109,6 @@ module AP_controller
                 data_out_cbc = 0;
                 ret_valid = 0;
                 int_set = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_reg, data_cache_rdy, ret_valid})
@@ -1308,7 +1304,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({matrix_select_1, matrix_select_reg})
@@ -1392,7 +1387,6 @@ module AP_controller
                 ret_valid = 0;
                 int_set = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case (matrix_select_reg)
@@ -1456,7 +1450,6 @@ module AP_controller
                 data_out_rbr = 0;
                 ret_valid = 0;
                 int_set = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case (matrix_select_reg)
@@ -1523,7 +1516,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 ins_inp_valid = ctrl_exp_2;
@@ -1566,7 +1558,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -1603,7 +1594,6 @@ module AP_controller
                 data_out_rbr = 0;
                 ret_valid = 0;
                 int_set = 1;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({ctrl_exp_4, ctrl_exp_5,
@@ -1683,7 +1673,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = data_addr_tmp;
                 addr_cam_col = addr_cam_auto;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -1725,7 +1714,6 @@ module AP_controller
                 ret_valid = 0;
                 int_set = 1;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -1767,7 +1755,6 @@ module AP_controller
                 inout_mode = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -1804,7 +1791,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 if (ctxt_rdy == 1) begin
@@ -1850,7 +1836,6 @@ module AP_controller
                 data_out_cbc = 0;
                 ret_valid = 1;
                 int_set = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 case ({ctrl_exp_4, ctrl_exp_5,
@@ -2013,7 +1998,6 @@ module AP_controller
                 data_cmd = ColxCol_load;
                 data_addr = data_addr_tmp;
                 addr_cam_col = addr_cam_auto;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2055,7 +2039,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = data_addr_tmp;
                 addr_cam_col = addr_cam_auto;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2100,13 +2083,11 @@ module AP_controller
                     ins_inp_valid = 1;
                     data_print_rdy = 1;
                     data_print = data_in_rbr;
-                    print_data_finish = 1;
                 end
                 else begin
                     ins_inp_valid = 0;
                     data_print_rdy = 0;
                     data_print = 0;
-                    print_data_finish = 0;
                 end
             end
             /* pass of ADD */
@@ -2148,7 +2129,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end    
@@ -2190,7 +2170,6 @@ module AP_controller
                 data_addr = 0;
                 data_cmd = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2232,7 +2211,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2274,7 +2252,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2316,7 +2293,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end       
@@ -2359,7 +2335,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2401,7 +2376,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2443,7 +2417,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2485,7 +2458,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2527,7 +2499,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2570,7 +2541,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2612,7 +2582,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2654,7 +2623,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2696,7 +2664,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2738,7 +2705,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2781,7 +2747,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2823,7 +2788,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2865,7 +2829,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2907,7 +2870,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -2948,7 +2910,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
                 if(ctrl_exp_9) begin
@@ -2996,7 +2957,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end
@@ -3038,7 +2998,6 @@ module AP_controller
                 data_cmd = 0;
                 data_addr = 0;
                 addr_cam_col = 0;
-                print_data_finish = 0;
                 data_print_rdy = 0;
                 data_print = 0;
             end

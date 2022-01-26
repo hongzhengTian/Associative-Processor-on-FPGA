@@ -65,7 +65,6 @@ localparam                                  Addr_load       = 3'd5;
 reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
 reg [9 : 0]                                 data_store_cnt;
-reg [9 : 0]                                 data_store_cnt_tmp;
 
 reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
@@ -115,7 +114,7 @@ assign dc_exp_7 = (data_store_cnt < DATA_CACHE_DEPTH)? 1 : 0;
 assign dc_exp_8 = (data_cmd == RowxRow_load || 
                    data_cmd == ColxCol_load || 
                    data_cmd == Addr_load)? 1 : 0;
-assign dc_exp_9 = (st_cur == LOAD_DATA && rd_burst_data_valid_delay && rd_cnt_data >= 2)? 1 : 0;
+assign dc_exp_9 = (rd_burst_data_valid_delay && rd_cnt_data >= 2)? 1 : 0;
 
 always @(posedge store_ctxt_finish or negedge rst) begin
     if (!rst) begin
@@ -124,6 +123,10 @@ always @(posedge store_ctxt_finish or negedge rst) begin
     else if (store_ctxt_finish) begin
         addr_cur_ctxt <= arith_1;
     end
+end
+
+always @(posedge clk) begin
+    rd_burst_data_valid_delay <= rd_burst_data_valid;
 end
 
 /* state machine */
@@ -140,16 +143,23 @@ always @(posedge clk or negedge rst) begin
     if (!rst) begin
         tag_data <= 16'hFFFF;
         jmp_addr_tmp <= 0;
+        DATA_to_ddr <= 0;
+        data_to_ddr_rdy <= 0;
+        data_store_cnt <= 0;
         data_in_rbr_tmp <= 0;
         data_in_cbc_tmp <= 0;
         DATA_read_addr_tmp <= 0;
         DATA_write_addr_tmp <= 0;
-        data_store_cnt_tmp <= 0;
+        for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
+            data_cache[j][addr_cam_col] <= 0;
+        end
     end
     else begin
         case (st_cur)
             START:begin
-                data_store_cnt_tmp <= 0;
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
                 case (data_cmd)
                     RowxRow_store: begin
                         if (dc_exp_1) begin
@@ -167,17 +177,26 @@ always @(posedge clk or negedge rst) begin
             SENT_ADDR: begin
                 tag_data <= data_addr;
                 DATA_read_addr_tmp <= arith_2;
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
                 case (dc_exp_2)
                     1'b1:jmp_addr_tmp <= JMP_ADDR_to_cache; 
                     default: jmp_addr_tmp <= 0;
                 endcase
             end
             SENT_DATA_RBR: begin
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
                 if(dc_exp_3) begin
                     data_in_rbr_tmp <= data_cache[arith_3];
                 end
             end
             SENT_DATA_CBC: begin
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
                 if(dc_exp_3) begin
                     for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
                         data_in_cbc_tmp[j] <= data_cache[j][addr_cam_col];
@@ -187,11 +206,36 @@ always @(posedge clk or negedge rst) begin
             LOAD_DATA: begin
                 tag_data <= data_addr;
                 DATA_read_addr_tmp <= arith_2;
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
+                if(dc_exp_9) begin
+                    data_cache[arith_5] <= DATA_to_cache;
+                end
             end
             STORE_DATA: begin
                 DATA_write_addr_tmp <= arith_4; 
+                DATA_to_ddr <= data_cache[data_store_cnt];
+                data_to_ddr_rdy <= 1;
+                if(data_to_ddr_rdy) begin
+                    data_store_cnt <= arith_6;
+                end
             end
-            default:;
+            GET_DATA_RBR: begin
+                data_cache[arith_3] <= data_out_rbr;
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
+            end
+            GET_DATA_CBC: begin
+                DATA_to_ddr <= 0;
+                data_to_ddr_rdy <= 0;
+                data_store_cnt <= 0;
+                for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
+                    data_cache[j][addr_cam_col] <= data_out_cbc[j];
+                end
+            end
+            default:DATA_to_ddr <= 0;// check
         endcase
     end
 end
@@ -225,9 +269,7 @@ always @(*) begin
         SENT_DATA_RBR: begin 
             case ({dc_exp_6, dc_exp_3, int_set})
                 3'b100: st_next = LOAD_DATA;
-                3'b101: st_next = LOAD_DATA;
                 3'b110: st_next = LOAD_DATA;
-                3'b111: st_next = LOAD_DATA;
                 3'b010: st_next = START;
                 3'b000: st_next = LOAD_DATA;
                 3'b001: st_next = GET_DATA_CBC;
@@ -240,9 +282,7 @@ always @(*) begin
         SENT_DATA_CBC: begin
             case ({dc_exp_6, dc_exp_3, int_set})
                 3'b100: st_next = LOAD_DATA;
-                3'b101: st_next = LOAD_DATA;
                 3'b110: st_next = LOAD_DATA;
-                3'b111: st_next = LOAD_DATA;
                 3'b010: st_next = START;
                 3'b000: st_next = LOAD_DATA;
                 3'b001: st_next = GET_DATA_CBC;
@@ -418,43 +458,4 @@ always @(*) begin
         end
     endcase
 end
-
-always @(posedge clk) begin
-    rd_burst_data_valid_delay <= rd_burst_data_valid;
-end
-
-always @(posedge clk) begin
-    if(dc_exp_9) begin
-        data_cache[arith_5] <= DATA_to_cache;
-    end    
-    if (st_cur == GET_DATA_RBR) begin
-        data_cache[arith_3] <= data_out_rbr;
-    end
-    if (st_cur == GET_DATA_CBC) begin
-        for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
-            data_cache[j][addr_cam_col] <= data_out_cbc[j];
-        end
-    end
-end
-
-always @(posedge clk) begin
-    if((st_cur == STORE_DATA) && data_to_ddr_rdy) begin
-        data_store_cnt <= arith_6;
-    end
-    else begin
-        data_store_cnt <= 0;
-    end
-end
-
-always @(posedge clk) begin
-    if(st_cur == STORE_DATA) begin
-        DATA_to_ddr <= data_cache[data_store_cnt];
-        data_to_ddr_rdy <= 1;
-    end
-    else begin
-        DATA_to_ddr <= 0;
-        data_to_ddr_rdy <= 0;
-    end
-end 
-
 endmodule
