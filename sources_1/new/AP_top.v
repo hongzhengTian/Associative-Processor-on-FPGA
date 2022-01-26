@@ -130,10 +130,8 @@ module AP_top
     wire [DATA_DEPTH - 1 : 0]           data_C;
 
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_ins;
-    wire                                ins_cache_inited;
     wire                                ins_cache_rdy;
     wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
-    wire                                print_data_finish;
 
     wire [ISA_WIDTH - 1 : 0]            instruction;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
@@ -204,7 +202,6 @@ module AP_top
     .store_ctxt_finish      (store_ctxt_finish),
     .addr_ins               (addr_ins),
     .jmp_addr_pc            (jmp_addr_pc),
-    .print_data_finish      (print_data_finish),
     .ins_inp_valid          (ins_inp_valid),
     .ret_addr_pc            (ret_addr_pc),
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
@@ -403,9 +400,7 @@ module AP_top
     .ret_addr_pc_rdy        (ret_addr_pc_rdy),
     .jmp_addr_pc            (jmp_addr_pc),
     .addr_ins               (addr_ins),
-    .ins_cache_inited       (ins_cache_inited),
-    .ins_cache_rdy          (ins_cache_rdy),
-    .print_data_finish      (print_data_finish)
+    .ins_cache_rdy          (ins_cache_rdy)
     );
 
     
@@ -423,7 +418,6 @@ module AP_top
     .clk                    (sys_clk_i),
     .rst                    (sys_rst),
     .addr_ins               (addr_ins),
-    .ins_cache_inited       (ins_cache_inited),
     .ins_cache_rdy          (ins_cache_rdy),
     .instruction            (instruction),
     .ins_valid              (ins_valid),
