@@ -44,6 +44,16 @@ begin
 end
 
 assign ret_finish = tmp_ret_valid & ~ret_valid;
+/* ALU */
+wire [ADDR_WIDTH_MEM - 1 : 0]           arith_1;
+wire [ADDR_WIDTH_MEM - 1 : 0]           arith_2;
+wire [ADDR_WIDTH_MEM - 1 : 0]           arith_3;
+wire [ADDR_WIDTH_MEM - 1 : 0]           arith_4;
+
+assign arith_1 = addr_ins + 1;
+assign arith_2 = jmp_addr_pc >> 3;
+assign arith_3 = {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
+assign arith_4 = ret_addr_pc - 1;
 
 /* state machine */
 always @(posedge clk or negedge rst) begin
@@ -61,33 +71,30 @@ always @(*) begin
             st_next = CNT_ADDR;
         end
         CNT_ADDR: begin
-            if (int == 1) begin
-                st_next = LOAD_JMP_ADDR;
-            end
-            else if (ret_valid == 1) begin
-                st_next = LOAD_RET_ADDR;
-            end
-            else begin
-                st_next = CNT_ADDR;
-            end
+            case ({int, ret_valid})
+                2'b10: st_next = LOAD_JMP_ADDR;
+                2'b11: st_next = LOAD_JMP_ADDR;
+                2'b01: st_next = LOAD_RET_ADDR;
+                default: st_next = CNT_ADDR;
+            endcase
         end
         LOAD_JMP_ADDR: begin
-            if (ins_inp_valid == 1) begin
-                st_next = CNT_ADDR;
-            end
-            else st_next = LOAD_JMP_ADDR;
+            case (ins_inp_valid)
+                1'b1: st_next = CNT_ADDR;
+                default: st_next = LOAD_JMP_ADDR;
+            endcase
         end
         LOAD_RET_ADDR: begin
-            if (ret_finish == 1) begin
-                st_next = LOAD_RET_END;
-            end
-            else st_next = LOAD_RET_ADDR;
+            case (ret_finish)
+                1'b1: st_next = LOAD_RET_END;
+                default: st_next = LOAD_RET_ADDR;
+            endcase
         end
         LOAD_RET_END: begin
-            if (ins_cache_rdy == 1) begin
-                st_next = CNT_ADDR;
-            end
-            else st_next = LOAD_RET_END;
+            case (ins_cache_rdy)
+                1'b1: st_next = CNT_ADDR;
+                default: st_next = LOAD_RET_END;
+            endcase
         end
         default: st_next = START;
     endcase
@@ -101,29 +108,28 @@ always @(posedge clk or negedge rst) begin
     else begin
         case (st_cur)
             CNT_ADDR: begin
-                if ((ins_inp_valid == 1) 
-                && (ret_valid == 0)
-                //&& ((addr_ins < TOTAL_ISA_DEPTH + 1) || addr_ins >= 16'hc000)
-                && (ins_cache_rdy == 1) 
-                ) begin
-                    addr_ins <= addr_ins + 1;
-                end
+                case ({ins_inp_valid, ret_valid, ins_cache_rdy})
+                    3'b101: addr_ins <= arith_1;
+                    default: ;
+                endcase
             end
             LOAD_JMP_ADDR: begin
-                if (ins_inp_valid == 1) begin
-                    addr_ins <= jmp_addr_pc >> 3;
-                end
-                else addr_ins <= {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
+                case (ins_inp_valid)
+                    1'b1: addr_ins <= arith_2;
+                    default: addr_ins <= arith_3;
+                endcase
             end
             LOAD_RET_ADDR: begin
-                if (ret_addr_pc_rdy == 1) begin
-                    addr_ins <= ret_addr_pc - 1;
-                end
+                case (ret_addr_pc_rdy)
+                    1'b1: addr_ins <= arith_4;
+                    default: ;
+                endcase
             end
             LOAD_RET_END: begin
-                if (ins_cache_rdy == 1) begin
-                    addr_ins <= addr_ins + 1;
-                end
+                case (ins_cache_rdy)
+                    1'b1: addr_ins <= arith_1;
+                    default: ;
+                endcase
             end 
             default:;
         endcase
