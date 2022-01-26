@@ -45,6 +45,7 @@ localparam                                  STACK_CNT_WIDTH = 10;
 reg [2 : 0]                                 st_cur;
 reg [2 : 0]                                 st_next;
 reg [STACK_CNT_WIDTH : 0]                   stack_cnt = 0;
+reg [STACK_CNT_WIDTH : 0]                   stack_cnt_reg = 0;
 
 reg [ADDR_WIDTH_MEM - 1 : 0]                stack_ret_addr      [0 : STACK_DEPTH - 1];
 reg [ADDR_WIDTH_MEM - 1 : 0]                stack_ctxt_addr     [0 : STACK_DEPTH - 1];
@@ -66,7 +67,8 @@ integer i;
 
 always @(posedge clk) begin
     temp_int_set <= int_set;  
-    temp_ret_set <= ret_valid;  
+    temp_ret_set <= ret_valid;
+    stack_cnt_reg <= stack_cnt;
 end
 
 assign int_set_pause = ~temp_int_set & int_set;
@@ -74,8 +76,8 @@ assign ret_set_pause = ~temp_ret_set & ret_valid;
 
 wire [STACK_CNT_WIDTH : 0]                   arith_1;
 wire [STACK_CNT_WIDTH : 0]                   arith_2;
-assign arith_1 = stack_cnt + 1;
-assign arith_2 = stack_cnt - 1;
+assign arith_1 = stack_cnt_reg + 1;
+assign arith_2 = stack_cnt_reg - 1;
 
 always @(posedge clk or negedge rst) begin
     if(!rst) begin
@@ -182,16 +184,12 @@ always @(posedge clk or negedge rst) begin
     end    
 end
 
-always @(negedge rst or posedge int_set_pause or posedge ret_set_pause) begin
-    if (!rst)
-        stack_cnt <= 0;
-    else begin
-        case ({int_set_pause, ret_set_pause})
-            2'b10: stack_cnt <= arith_1;
-            2'b01: stack_cnt <= arith_2; 
-            default: ;
-        endcase
-    end
+always @(*) begin
+    case ({int_set_pause, ret_set_pause})
+        2'b10: stack_cnt = arith_1;
+        2'b01: stack_cnt = arith_2; 
+        default: stack_cnt = stack_cnt_reg;
+    endcase
 end
 
 always @(*) begin
