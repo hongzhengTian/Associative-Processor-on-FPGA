@@ -138,7 +138,6 @@ module AP_top
     wire                                ISA_read_req;
     wire [DDR_ADDR_WIDTH -1 : 0]        ISA_read_addr;
     wire [ISA_WIDTH - 1 : 0]            instruction_to_cache;
-    wire                                ddr_rdy;
     wire [9 : 0]                        rd_cnt_isa;
     wire                                rd_burst_data_valid;
     wire [9 : 0]                        isa_read_len;
@@ -154,7 +153,6 @@ module AP_top
     wire                                JMP_ADDR_read_req;
     wire [DDR_ADDR_WIDTH - 1 : 0]       JMP_ADDR_to_cache;
     wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
-    wire                                data_to_ddr_rdy;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
 	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
     wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
@@ -368,7 +366,6 @@ module AP_top
     .ISA_read_req           (ISA_read_req),
     .ISA_read_addr          (ISA_read_addr),
     .instruction_to_cache   (instruction_to_cache),
-    .ddr_rdy                (ddr_rdy),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
     .DATA_read_req          (DATA_read_req),
@@ -376,7 +373,6 @@ module AP_top
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
     .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
-    .data_to_ddr_rdy        (data_to_ddr_rdy),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
     .DATA_to_cache          (DATA_to_cache),
@@ -460,7 +456,6 @@ module AP_top
     .JMP_ADDR_read_req      (JMP_ADDR_read_req),
     .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
     .DATA_to_ddr            (DATA_to_ddr),
-    .data_to_ddr_rdy        (data_to_ddr_rdy),
     .DATA_read_addr         (DATA_read_addr),
     .DATA_write_addr        (DATA_write_addr),
     .DATA_to_cache          (DATA_to_cache),

@@ -35,7 +35,6 @@ module data_cache
     output reg                              JMP_ADDR_read_req,
     input wire [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
-    output reg                              data_to_ddr_rdy,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
     input wire [DATA_WIDTH - 1 : 0]			DATA_to_cache,
@@ -65,6 +64,7 @@ localparam                                  Addr_load       = 3'd5;
 reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
 reg [9 : 0]                                 data_store_cnt;
+reg                                         data_to_ddr_rdy;
 
 reg [3 : 0]                                 st_next;
 reg [3 : 0]                                 st_cur;
