@@ -57,8 +57,10 @@ module DDR_cache_interface
 localparam START 							= 5'd0;               /*START=000; MEM_READ_ISA=001;MEM_WRITE=010;BURST_LEN_ISA=128*/
 localparam MEM_WRITE_ISA 					= 5'd1;
 localparam MEM_WRITE_ISA_END 				= 5'd2;
+localparam MEM_WRITE_ISA_END_2 				= 5'd17;
 localparam MEM_WRITE_DATA  					= 5'd3;
 localparam MEM_WRITE_DATA_END 				= 5'd4;
+localparam MEM_WRITE_DATA_END_2 			= 5'd18;
 localparam MEM_READ_ISA	 					= 5'd5;
 localparam MEM_READ_ISA_END 				= 5'd6;
 localparam MEM_READ_DATA 					= 5'd7;
@@ -68,9 +70,11 @@ localparam MEM_WRITE_DATA_STORE_END 		= 5'd10;
 localparam MEM_WRITE_INT_ADDR 				= 5'd11;
 localparam MEM_READ_INT_ADDR 				= 5'd12;
 localparam MEM_WRITE_INT_ADDR_END		 	= 5'd13;
+localparam MEM_WRITE_INT_ADDR_END_2	 		= 5'd19;
 localparam MEM_READ_INT_ADDR_END 			= 5'd14;
 localparam MEM_WRITE_INT_INS  				= 5'd15;
 localparam MEM_WRITE_INT_INS_END 			= 5'd16;
+localparam MEM_WRITE_INT_INS_END_2 			= 5'd20;
 
 localparam W_ISA 							= 4'd1;
 localparam W_DATA 							= 4'd2;
@@ -85,20 +89,15 @@ reg [3 : 0] CMD;
 reg [4 : 0] state;
 reg			ddr_rdy;
 
-reg finish_flag_w_isa_reg;
-reg finish_flag_w_data_reg;
-reg finish_flag_w_int_addr_reg;
-reg finish_flag_w_int_ins_reg;
-
 wire finish_flag_w_isa;
 wire finish_flag_w_data;
 wire finish_flag_w_int_addr;
 wire finish_flag_w_int_ins;
 
-assign finish_flag_w_isa				 	= (state == MEM_WRITE_ISA_END);
-assign finish_flag_w_data 					= (state == MEM_WRITE_DATA_END);
-assign finish_flag_w_int_addr				= (state == MEM_WRITE_INT_ADDR_END);
-assign finish_flag_w_int_ins				= (state == MEM_WRITE_INT_INS_END);
+assign finish_flag_w_isa				 	= ((state == MEM_WRITE_ISA_END) || (state == MEM_WRITE_ISA_END_2))? 1 : 0;
+assign finish_flag_w_data 					= ((state == MEM_WRITE_DATA_END) || (state == MEM_WRITE_DATA_END_2))? 1 : 0;
+assign finish_flag_w_int_addr				= ((state == MEM_WRITE_INT_ADDR_END) || (state == MEM_WRITE_INT_ADDR_END_2))? 1 : 0;
+assign finish_flag_w_int_ins				= ((state == MEM_WRITE_INT_INS_END) || (state == MEM_WRITE_INT_INS_END_2))? 1 : 0;
 
 assign load_ins_ddr 						= (state == MEM_WRITE_ISA);
 assign load_data_ddr 						= (state == MEM_WRITE_DATA);
@@ -117,20 +116,10 @@ assign burst_finish = rd_burst_finish || wr_burst_finish;
 always @(posedge mem_clk or posedge rst) begin
 	if (rst) begin
 		ddr_rdy <= 0;
-		finish_flag_w_isa_reg <= 0;
-		finish_flag_w_data_reg <= 0;
-		finish_flag_w_int_addr_reg <= 0;
-		finish_flag_w_int_ins_reg <= 0;
 	end
 	else begin
-		case ({state, wr_burst_finish})
-			{MEM_WRITE_ISA, 1'b1}: finish_flag_w_isa_reg <= 1;
-			{MEM_WRITE_DATA, 1'b1}: finish_flag_w_data_reg <= 1;
-			{MEM_WRITE_INT_ADDR, 1'b1}: finish_flag_w_int_addr_reg <= 1;
-			{MEM_WRITE_INT_INS, 1'b1}: begin
-				finish_flag_w_int_ins_reg <= 1;
-				ddr_rdy <= 1;
-			end
+		case (state)
+			MEM_WRITE_INT_INS_END_2: ddr_rdy <= 1;
 			default: ;
 		endcase
 	end
@@ -195,7 +184,7 @@ always @(posedge mem_clk or posedge rst) begin
 end
 
 /* finish part */
-always @(posedge mem_clk or posedge rst or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
+always @(posedge mem_clk or posedge rst)// or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
 begin
 	if(rst)
 	begin
@@ -207,7 +196,101 @@ begin
 		rd_burst_addr <= 0;
 		rd_burst_len <= 0;
 	end
-	else if(finish_flag_w_isa)
+
+	else if(burst_finish) begin
+		rd_burst_req <= 0;
+		wr_burst_req <= 0;
+	end
+
+	else begin
+		case (ddr_rdy)
+			1'b0: begin
+				case ({finish_flag_w_isa, finish_flag_w_data, finish_flag_w_int_addr, finish_flag_w_int_ins})
+					4'b1000: begin
+						CMD <= W_DATA;
+						wr_burst_len <= TOTAL_DATA_DEPTH + 1;
+						wr_burst_addr <= 28'h0008000;
+						wr_burst_req <= 1'b1;
+						rd_burst_req <= 1'b0;
+						rd_burst_addr <= 0;
+						rd_burst_len <= 0;
+					end
+					4'b0100: begin
+						CMD <= W_INT_ADDR;
+						wr_burst_len <= 1 + 1;
+						wr_burst_addr <= 28'h0070000;
+						wr_burst_req <= 1'b1;
+						rd_burst_req <= 1'b0;
+						rd_burst_addr <= 0;
+						rd_burst_len <= 0;
+					end
+					4'b0010: begin
+						CMD <= W_INT_INS;
+						wr_burst_len <= INT_INS_DEPTH + 1;
+						wr_burst_addr <= 28'h0060000;
+						wr_burst_req <= 1'b1;
+						rd_burst_req <= 1'b0;
+						rd_burst_addr <= 0;
+						rd_burst_len <= 0;
+					end
+					4'b0001: begin
+						CMD <= R_ISA;
+						wr_burst_len <= 0;
+						wr_burst_addr <= 0;
+						wr_burst_req <= 1'b0;
+						rd_burst_req <= 1'b1; 
+						rd_burst_addr <= ISA_read_addr;
+						rd_burst_len <= isa_read_len;
+					end
+					default: CMD <= 0;
+				endcase
+			end
+			1'b1: begin
+				case ({DATA_read_req, JMP_ADDR_read_req, DATA_store_req, ISA_read_req})
+					4'b1000: begin
+						CMD <= R_DATA;
+						wr_burst_len <= 0;
+						wr_burst_addr <= 0;
+						wr_burst_req <= 1'b0;
+						rd_burst_req <= 1'b1; 
+						rd_burst_addr <= DATA_read_addr;
+						rd_burst_len <= DATA_CACHE_DEPTH + 1;
+					end 
+					4'b0100: begin
+						CMD <= R_INT_ADDR;
+						wr_burst_len <= 0;
+						wr_burst_addr <= 0;
+						wr_burst_req <= 1'b0;
+						rd_burst_req <= 1'b1; 
+						rd_burst_addr <= DATA_read_addr;
+						rd_burst_len <= 1;
+					end
+					4'b0010: begin
+						CMD <= W_DATA_STORE;
+						rd_burst_len <= 0;
+						rd_burst_addr <= 0;
+						wr_burst_req <= 1'b1;
+						rd_burst_req <= 1'b0; 
+						wr_burst_addr <= DATA_write_addr + 8;
+						wr_burst_len <= DATA_CACHE_DEPTH;
+					end
+					4'b0001: begin
+						CMD <= R_ISA;
+						wr_burst_len <= 0;
+						wr_burst_addr <= 0;
+						wr_burst_req <= 1'b0;
+						rd_burst_req <= 1'b1; 
+						rd_burst_addr <= ISA_read_addr;
+						rd_burst_len <= isa_read_len;
+					end
+					default: CMD <= 0;
+				endcase
+			end
+			default: ;
+		endcase
+	end
+
+	/*else if(finish_flag_w_isa)
 	begin
 	  	CMD <= W_DATA;
 		wr_burst_len <= TOTAL_DATA_DEPTH + 1;
@@ -249,10 +332,6 @@ begin
 		rd_burst_req <= 1'b1; 
 		rd_burst_addr <= ISA_read_addr;
 		rd_burst_len <= isa_read_len;
-	end
-    else if(burst_finish) begin
-		rd_burst_req <= 0;
-		wr_burst_req <= 0;
 	end
 
 	else if(ddr_rdy == 1 && DATA_read_req == 1)
@@ -301,13 +380,7 @@ begin
 	
 	else begin
 		CMD <= 0;
-		/*wr_burst_len <= 0;
-		wr_burst_addr <= 0;
-		wr_burst_req <= 0;
-		rd_burst_req <= 0; 
-		rd_burst_addr <= 0;
-		rd_burst_len <= 0;*/
-	end
+	end*/
 end
 
 /* state machine part */
@@ -336,6 +409,9 @@ always@(posedge mem_clk or posedge rst) begin
 				end
 			end
 			MEM_WRITE_ISA_END: begin
+				state <= MEM_WRITE_ISA_END_2;
+			end
+			MEM_WRITE_ISA_END_2: begin
 				state <= START;
 			end
 			MEM_WRITE_DATA: begin
@@ -344,6 +420,9 @@ always@(posedge mem_clk or posedge rst) begin
 				end
 			end
 			MEM_WRITE_DATA_END: begin
+				state <= MEM_WRITE_DATA_END_2;
+			end
+			MEM_WRITE_DATA_END_2: begin
 				state <= START;
 			end
 			MEM_WRITE_INT_ADDR: begin
@@ -352,6 +431,9 @@ always@(posedge mem_clk or posedge rst) begin
 				end
 			end
 			MEM_WRITE_INT_ADDR_END: begin
+			  	state <= MEM_WRITE_INT_ADDR_END_2;
+			end
+			MEM_WRITE_INT_ADDR_END_2: begin
 			  	state <= START;
 			end
 			MEM_WRITE_INT_INS: begin
@@ -360,6 +442,9 @@ always@(posedge mem_clk or posedge rst) begin
 				end
 			end
 			MEM_WRITE_INT_INS_END: begin
+			  	state <= MEM_WRITE_INT_INS_END_2;
+			end
+			MEM_WRITE_INT_INS_END_2: begin
 			  	state <= START;
 			end
 			MEM_WRITE_DATA_STORE: begin
