@@ -103,6 +103,7 @@ always @(posedge clk or negedge rst) begin
             tmp_key_B_ret <= 0;
             tmp_key_C_ret <= 0;
             tmp_key_F_ret <= 0;
+            ctxt_rdy <= 0;
     end
     else begin
         case (st_cur)
