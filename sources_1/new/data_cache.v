@@ -66,8 +66,7 @@ reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1
 reg [9 : 0]                                 data_store_cnt;
 reg                                         data_to_ddr_rdy;
 
-reg [3 : 0]                                 st_next;
-reg [3 : 0]                                 st_cur;
+wire [3 : 0]                                st_cur;
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
 reg                                         rd_burst_data_valid_delay;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
@@ -75,7 +74,6 @@ reg [DATA_WIDTH - 1 : 0]                    data_in_rbr_tmp;
 reg [DATA_DEPTH - 1 : 0]                    data_in_cbc_tmp;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_read_addr_tmp;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_write_addr_tmp;
-
 
 integer j ;
 
@@ -103,7 +101,7 @@ ALU_data_cache #(
     ADDR_WIDTH_MEM,
     ADDR_WIDTH_CAM
 )
-u_ALU_data_cache(
+ALU_data_cache_u(
     .addr_cur_ctxt              (addr_cur_ctxt),
     .data_addr                  (data_addr),
     .tag_data                   (tag_data),
@@ -128,6 +126,27 @@ u_ALU_data_cache(
     .dc_exp_9                   (dc_exp_9)
 );
 
+sm_data_cache #(
+    DATA_CACHE_DEPTH,
+    DATA_WIDTH,
+    DATA_DEPTH,
+    DDR_ADDR_WIDTH,
+    ADDR_WIDTH_MEM,
+    ADDR_WIDTH_CAM
+)
+sm_data_cache_u(
+    .clk                        (clk),
+    .rst                        (rst),
+    .int_set                    (int_set),
+    .data_cmd                   (data_cmd),
+    .store_ddr_en               (store_ddr_en),
+    .dc_exp_2                   (dc_exp_2),
+    .dc_exp_3                   (dc_exp_3),
+    .dc_exp_5                   (dc_exp_5),
+    .dc_exp_7                   (dc_exp_7),
+    .st_cur                     (st_cur)
+);
+
 always @(posedge store_ctxt_finish or negedge rst) begin
     if (!rst) begin
         addr_cur_ctxt <= addr_init_ctxt;
@@ -139,16 +158,6 @@ end
 
 always @(posedge clk) begin
     rd_burst_data_valid_delay <= rd_burst_data_valid;
-end
-
-/* state machine */
-always @(posedge clk or negedge rst) begin
-    if (!rst) begin
-        st_cur <= START;
-    end
-    else begin
-        st_cur <= st_next;
-    end    
 end
 
 always @(posedge clk or negedge rst) begin
@@ -252,85 +261,6 @@ always @(posedge clk or negedge rst) begin
     end
 end
 
-/* state machine */
-always @(*) begin
-    case (st_cur)
-        START: begin
-            case ({data_cmd, store_ddr_en})
-                {RowxRow_load, 1'b1}: st_next = SENT_DATA_RBR;
-                {RowxRow_load, 1'b0}: st_next = SENT_DATA_RBR;
-                {RowxRow_store, 1'b1}: st_next = GET_DATA_RBR;
-                {RowxRow_store, 1'b0}: st_next = GET_DATA_RBR;
-                {ColxCol_load, 1'b1}: st_next = SENT_DATA_CBC;
-                {ColxCol_load, 1'b0}: st_next = SENT_DATA_CBC;
-                {Addr_load, 1'b1}: st_next = SENT_ADDR;
-                {Addr_load, 1'b0}: st_next = SENT_ADDR;
-                {ColxCol_store, 1'b1}: st_next = STORE_DATA;
-                {ColxCol_store, 1'b0}: st_next = GET_DATA_CBC;
-                2'b01: st_next = STORE_DATA;
-                2'b00: st_next = START;
-                default: st_next = START;
-            endcase
-        end
-        SENT_ADDR: begin
-            case (dc_exp_2)
-                1'b1: st_next = START; 
-                default: st_next = SENT_ADDR;
-            endcase
-        end
-        SENT_DATA_RBR: begin 
-            case ({dc_exp_3, int_set})
-                2'b10: st_next = START;
-                2'b00: st_next = LOAD_DATA;
-                2'b01: st_next = GET_DATA_CBC;
-                2'b11: st_next = GET_DATA_CBC;
-                default: st_next = SENT_DATA_RBR;
-            endcase
-        end
-        SENT_DATA_CBC: begin
-            case ({dc_exp_3, int_set})
-                2'b10: st_next = START;
-                2'b00: st_next = LOAD_DATA;
-                2'b01: st_next = GET_DATA_CBC;
-                2'b11: st_next = GET_DATA_CBC;
-                default: st_next = SENT_DATA_CBC;
-            endcase
-        end
-        LOAD_DATA: begin
-            case (dc_exp_5)
-                1'b1: st_next = LOAD_DATA; 
-                default: st_next = START;
-            endcase
-        end
-        GET_DATA_RBR: begin
-            case (store_ddr_en)
-                1'b0: st_next = START;
-                1'b1: st_next = STORE_DATA;
-                default: st_next = GET_DATA_RBR;
-            endcase
-        end
-        GET_DATA_CBC: begin
-            case (store_ddr_en)
-                1'b0: st_next = START;
-                1'b1: st_next = STORE_DATA;
-                default: st_next = GET_DATA_CBC;
-            endcase
-        end
-        STORE_DATA: begin
-            case (dc_exp_7)
-                1'b1: st_next = STORE_DATA; 
-                default: st_next = STORE_DATA_END;
-            endcase
-        end
-        STORE_DATA_END: begin
-            st_next = START;
-        end
-        default: begin
-            st_next = START;
-        end
-    endcase
-end
-
 always @(*) begin
     case (st_cur)
         START: begin
@@ -410,7 +340,7 @@ always @(*) begin
             JMP_ADDR_read_req = 0;
             DATA_read_addr = DATA_read_addr_tmp;
             DATA_write_addr = DATA_write_addr_tmp;
-            data_cache_rdy = !store_ddr_en;
+            data_cache_rdy = dc_exp_4;
         end
         GET_DATA_CBC: begin
             jmp_addr_rdy = 0;
@@ -422,7 +352,7 @@ always @(*) begin
             JMP_ADDR_read_req = 0;
             DATA_read_addr = DATA_read_addr_tmp;
             DATA_write_addr = DATA_write_addr_tmp;
-            data_cache_rdy = !store_ddr_en;
+            data_cache_rdy = dc_exp_4;
         end
         STORE_DATA: begin
             jmp_addr_rdy = 0;
