@@ -91,30 +91,42 @@ wire                                        dc_exp_2;
 wire                                        dc_exp_3;
 wire                                        dc_exp_4;
 wire                                        dc_exp_5;
-wire                                        dc_exp_6;
 wire                                        dc_exp_7;
 wire                                        dc_exp_8;
 wire                                        dc_exp_9;
-wire                                        dc_exp_10;
 
-assign arith_1 = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH + DATA_DEPTH;
-assign arith_2 = data_addr << 3;
-assign arith_3 = data_addr - tag_data;
-assign arith_4 = tag_data << 3; 
-assign arith_5 = rd_cnt_data - 2;
-assign arith_6 = data_store_cnt + 1;
-
-assign dc_exp_1 = ((data_addr <= tag_data) || (data_addr > DATA_CACHE_DEPTH + tag_data))? 1 : 0;
-assign dc_exp_2 = (rd_burst_data_valid_delay && rd_cnt_data == 1)? 1 : 0;
-assign dc_exp_3 = ((data_addr - tag_data) < DATA_CACHE_DEPTH)? 1 : 0;
-assign dc_exp_4 = ((data_addr - tag_data) >= DATA_CACHE_DEPTH && int_set == 0)? 1 : 0;
-assign dc_exp_5 = (rd_cnt_data <= DATA_CACHE_DEPTH)? 1 : 0;
-assign dc_exp_6 = (tag_data == 16'hFFFF)? 1 : 0;
-assign dc_exp_7 = (data_store_cnt < DATA_CACHE_DEPTH)? 1 : 0;
-assign dc_exp_8 = (data_cmd == RowxRow_load || 
-                   data_cmd == ColxCol_load || 
-                   data_cmd == Addr_load)? 1 : 0;
-assign dc_exp_9 = (rd_burst_data_valid_delay && rd_cnt_data >= 2)? 1 : 0;
+ALU_data_cache #(
+    DATA_CACHE_DEPTH,
+    DATA_WIDTH,
+    DATA_DEPTH,
+    DDR_ADDR_WIDTH,
+    ADDR_WIDTH_MEM,
+    ADDR_WIDTH_CAM
+)
+u_ALU_data_cache(
+    .addr_cur_ctxt              (addr_cur_ctxt),
+    .data_addr                  (data_addr),
+    .tag_data                   (tag_data),
+    .rd_cnt_data                (rd_cnt_data),
+    .data_store_cnt             (data_store_cnt),
+    .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
+    .data_cmd_0                 (data_cmd[0]),
+    .store_ddr_en               (store_ddr_en),
+    .arith_1                    (arith_1),
+    .arith_2                    (arith_2),
+    .arith_3                    (arith_3),
+    .arith_4                    (arith_4),
+    .arith_5                    (arith_5),
+    .arith_6                    (arith_6),
+    .dc_exp_1                   (dc_exp_1),
+    .dc_exp_2                   (dc_exp_2),
+    .dc_exp_3                   (dc_exp_3),
+    .dc_exp_4                   (dc_exp_4),
+    .dc_exp_5                   (dc_exp_5),
+    .dc_exp_7                   (dc_exp_7),
+    .dc_exp_8                   (dc_exp_8),
+    .dc_exp_9                   (dc_exp_9)
+);
 
 always @(posedge store_ctxt_finish or negedge rst) begin
     if (!rst) begin
@@ -141,7 +153,7 @@ end
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
-        tag_data <= 16'hFFFF;
+        tag_data <= 0;//16'hFFFF;
         jmp_addr_tmp <= 0;
         DATA_to_ddr <= 0;
         data_to_ddr_rdy <= 0;
@@ -167,7 +179,7 @@ always @(posedge clk or negedge rst) begin
                         end
                     end
                     ColxCol_store: begin
-                        if (!store_ddr_en) begin
+                        if (dc_exp_4) begin
                             tag_data <= data_addr;
                         end
                     end
@@ -267,28 +279,20 @@ always @(*) begin
             endcase
         end
         SENT_DATA_RBR: begin 
-            case ({dc_exp_6, dc_exp_3, int_set})
-                3'b100: st_next = LOAD_DATA;
-                3'b110: st_next = LOAD_DATA;
-                3'b010: st_next = START;
-                3'b000: st_next = LOAD_DATA;
-                3'b001: st_next = GET_DATA_CBC;
-                3'b011: st_next = GET_DATA_CBC;
-                3'b101: st_next = GET_DATA_CBC;
-                3'b111: st_next = GET_DATA_CBC;
+            case ({dc_exp_3, int_set})
+                2'b10: st_next = START;
+                2'b00: st_next = LOAD_DATA;
+                2'b01: st_next = GET_DATA_CBC;
+                2'b11: st_next = GET_DATA_CBC;
                 default: st_next = SENT_DATA_RBR;
             endcase
         end
         SENT_DATA_CBC: begin
-            case ({dc_exp_6, dc_exp_3, int_set})
-                3'b100: st_next = LOAD_DATA;
-                3'b110: st_next = LOAD_DATA;
-                3'b010: st_next = START;
-                3'b000: st_next = LOAD_DATA;
-                3'b001: st_next = GET_DATA_CBC;
-                3'b011: st_next = GET_DATA_CBC;
-                3'b101: st_next = GET_DATA_CBC;
-                3'b111: st_next = GET_DATA_CBC;
+            case ({dc_exp_3, int_set})
+                2'b10: st_next = START;
+                2'b00: st_next = LOAD_DATA;
+                2'b01: st_next = GET_DATA_CBC;
+                2'b11: st_next = GET_DATA_CBC;
                 default: st_next = SENT_DATA_CBC;
             endcase
         end
@@ -442,7 +446,7 @@ always @(*) begin
             JMP_ADDR_read_req = 0;
             DATA_read_addr = DATA_read_addr_tmp;
             DATA_write_addr = DATA_write_addr_tmp;
-            data_cache_rdy = !dc_exp_8;
+            data_cache_rdy = dc_exp_8;
         end
         default: begin
             data_cache_rdy = 0;
