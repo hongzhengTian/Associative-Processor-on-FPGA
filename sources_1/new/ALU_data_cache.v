@@ -40,9 +40,10 @@ assign arith_4 = tag_data << 3;
 assign arith_5 = rd_cnt_data - 2;
 assign arith_6 = data_store_cnt + 1;
 
-assign dc_exp_1 = ((data_addr <= tag_data) || (data_addr > DATA_CACHE_DEPTH + tag_data))? 1 : 0;//!dc_exp_3;
+assign dc_exp_1 = ((data_addr < tag_data) || (data_addr >= DATA_CACHE_DEPTH + tag_data))? 1 : 0;//!dc_exp_3;
 assign dc_exp_2 = (rd_burst_data_valid_delay && rd_cnt_data == 1)? 1 : 0;
-assign dc_exp_3 = ((data_addr - tag_data) < DATA_CACHE_DEPTH)? 1 : 0; //todo
+//assign dc_exp_3 = ((data_addr - tag_data) < DATA_CACHE_DEPTH)? 1 : 0; //todo
+assign dc_exp_3 = ((data_addr >= tag_data) && (data_addr < DATA_CACHE_DEPTH + tag_data))? 1 : 0;
 assign dc_exp_4 = !store_ddr_en;
 assign dc_exp_5 = (rd_cnt_data <= DATA_CACHE_DEPTH)? 1 : 0;
 assign dc_exp_7 = (data_store_cnt < DATA_CACHE_DEPTH)? 1 : 0;
