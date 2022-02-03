@@ -27,6 +27,7 @@ module sm_data_cache
 
 );
 /* states */
+localparam                                  START_PRE       = 4'd11;    
 localparam                                  START           = 4'd1;
 localparam                                  LOAD_DATA       = 4'd2;
 localparam                                  STORE_DATA      = 4'd3;
@@ -50,7 +51,7 @@ reg [3 : 0]                                 st_next;
 /* state machine */
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
-        st_cur <= START;
+        st_cur <= START_PRE;
     end
     else begin
         st_cur <= st_next;
@@ -60,32 +61,35 @@ end
 /* state machine */
 always @(*) begin
     case (st_cur)
+        START_PRE: begin
+            st_next = START;
+        end
         START: begin
             case ({data_cmd, store_ddr_en})
-                {RowxRow_load, 1'b1}: st_next = SENT_DATA_RBR;
+                {RowxRow_load, 1'b1}: st_next = STORE_DATA;
                 {RowxRow_load, 1'b0}: st_next = SENT_DATA_RBR;
-                {RowxRow_store, 1'b1}: st_next = GET_DATA_RBR;
+                {RowxRow_store, 1'b1}: st_next = STORE_DATA;
                 {RowxRow_store, 1'b0}: st_next = GET_DATA_RBR;
-                {ColxCol_load, 1'b1}: st_next = SENT_DATA_CBC;
+                {ColxCol_load, 1'b1}: st_next = STORE_DATA;
                 {ColxCol_load, 1'b0}: st_next = SENT_DATA_CBC;
-                {Addr_load, 1'b1}: st_next = SENT_ADDR;
+                {Addr_load, 1'b1}: st_next = STORE_DATA;
                 {Addr_load, 1'b0}: st_next = SENT_ADDR;
                 {ColxCol_store, 1'b1}: st_next = STORE_DATA;
                 {ColxCol_store, 1'b0}: st_next = GET_DATA_CBC;
                 2'b01: st_next = STORE_DATA;
-                2'b00: st_next = START;
-                default: st_next = START;
+                2'b00: st_next = START_PRE;
+                default: st_next = START_PRE;
             endcase
         end
         SENT_ADDR: begin
             case (dc_exp_2)
-                1'b1: st_next = START; 
+                1'b1: st_next = START_PRE; 
                 default: st_next = SENT_ADDR;
             endcase
         end
         SENT_DATA_RBR: begin 
             case ({dc_exp_3, int_set})
-                2'b10: st_next = START;
+                2'b10: st_next = START_PRE;
                 2'b00: st_next = LOAD_DATA;
                 2'b01: st_next = GET_DATA_CBC;
                 2'b11: st_next = GET_DATA_CBC;
@@ -94,7 +98,7 @@ always @(*) begin
         end
         SENT_DATA_CBC: begin
             case ({dc_exp_3, int_set})
-                2'b10: st_next = START;
+                2'b10: st_next = START_PRE;
                 2'b00: st_next = LOAD_DATA;
                 2'b01: st_next = GET_DATA_CBC;
                 2'b11: st_next = GET_DATA_CBC;
@@ -104,19 +108,19 @@ always @(*) begin
         LOAD_DATA: begin
             case (dc_exp_5)
                 1'b1: st_next = LOAD_DATA; 
-                default: st_next = START;
+                default: st_next = START_PRE;
             endcase
         end
         GET_DATA_RBR: begin
             case (store_ddr_en)
-                1'b0: st_next = START;
+                1'b0: st_next = START_PRE;
                 1'b1: st_next = STORE_DATA;
                 default: st_next = GET_DATA_RBR;
             endcase
         end
         GET_DATA_CBC: begin
             case (store_ddr_en)
-                1'b0: st_next = START;
+                1'b0: st_next = START_PRE;
                 1'b1: st_next = STORE_DATA;
                 default: st_next = GET_DATA_CBC;
             endcase
@@ -128,10 +132,10 @@ always @(*) begin
             endcase
         end
         STORE_DATA_END: begin
-            st_next = START;
+            st_next = START_PRE;
         end
         default: begin
-            st_next = START;
+            st_next = START_PRE;
         end
     endcase
 end

@@ -102,6 +102,8 @@ ALU_data_cache #(
     ADDR_WIDTH_CAM
 )
 ALU_data_cache_u(
+    .clk                        (clk),
+    .rst                        (rst),
     .addr_cur_ctxt              (addr_cur_ctxt),
     .data_addr                  (data_addr),
     .tag_data                   (tag_data),
@@ -285,7 +287,12 @@ always @(*) begin
             DATA_write_addr = DATA_write_addr_tmp;
             data_cache_rdy = dc_exp_2;
             jmp_addr_rdy = dc_exp_2;
-            jmp_addr = (dc_exp_2)? JMP_ADDR_to_cache : 0;
+            //jmp_addr = (dc_exp_2)? JMP_ADDR_to_cache : 0;
+            case (dc_exp_2)
+                1'b1: jmp_addr = JMP_ADDR_to_cache;
+                1'b0: jmp_addr = 0;
+                default: jmp_addr = 0;
+            endcase
         end
         SENT_DATA_RBR: begin
             jmp_addr_rdy = 0;
@@ -297,7 +304,12 @@ always @(*) begin
             DATA_read_addr = DATA_read_addr_tmp;
             DATA_write_addr = DATA_write_addr_tmp;
             data_cache_rdy = dc_exp_3;
-            data_in_rbr = (dc_exp_3)? data_cache[arith_3] : data_in_rbr_tmp;
+            //data_in_rbr = (dc_exp_3)? data_cache[arith_3] : data_in_rbr_tmp;
+            case (dc_exp_3)
+                1'b1: data_in_rbr = data_cache[arith_3];
+                1'b0: data_in_rbr = data_in_rbr_tmp; 
+                default: data_in_rbr = data_in_rbr_tmp;
+            endcase
         end
         SENT_DATA_CBC: begin
             jmp_addr_rdy = 0;
