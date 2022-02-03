@@ -197,7 +197,8 @@ module AP_controller
     localparam                              RET_STATE       = 6'd35;
     localparam                              PRINT_DATA      = 6'd36;
     localparam                              STORE_END       = 6'd37;
-    localparam                              FINISH          = 6'd38;
+    localparam                              STORE_END_2       = 6'd38;
+    localparam                              FINISH          = 6'd39;
 
     /* inout_mode */
     localparam                              RowxRow         = 3'd1;
@@ -250,7 +251,9 @@ module AP_controller
     reg [DATA_DEPTH - 1 : 0]                data_out_cbc_tmp;
     reg [3 : 0]                             cam_clk_cnt;
     
-    assign store_ddr_en = store_ddr_delay & ~store_ddr;
+    reg store_ddr_en_delay;
+    assign store_ddr_en_1 = store_ddr_delay & ~store_ddr;
+    assign store_ddr_en = store_ddr_en_1 | store_ddr_en_delay;
     assign finish_flag = (st_cur == FINISH)? 1 : 0;
 
     assign op_code = instruction [OPCODE_WIDTH + ADDR_WIDTH_CAM
@@ -456,6 +459,7 @@ module AP_controller
         key_C_tmp <= key_C;
         key_F_tmp <= key_F;
         store_ddr_delay <= store_ddr;
+        store_ddr_en_delay <= store_ddr_en_1;
         addr_cam_tmp <= addr_cam;
         if (!rst_STATE) begin
             opt_cur <= 0;
@@ -735,6 +739,9 @@ module AP_controller
                 endcase
             end
             STORE_END: begin
+                st_next = STORE_END_2;
+            end
+            STORE_END_2: begin
                 st_next = ctrl_exp_2? START: STORE_END;
             end
             STORE_TMP: begin
@@ -1480,6 +1487,47 @@ module AP_controller
                 endcase
             end
             STORE_END: begin
+                pass = pass_tmp;
+                key_A = key_A_tmp;
+                key_B = key_B_tmp;
+                key_C = key_C_tmp;
+                key_F = key_F_tmp;
+                rst_tag = 0;
+                ABS_opt = 0;
+                rst_InA = 1;
+                rst_InB = 1;
+                rst_InR = 1;
+                addr_input_cbc_A = 0;
+                addr_input_cbc_B = 0;
+                addr_input_cbc_R = 0;
+                addr_input_rbr_A = 0;
+                addr_input_rbr_B = 0;
+                addr_input_rbr_R = 0;
+                input_A_rbr = 0;
+                input_B_rbr = 0;
+                input_R_rbr = 0;
+                input_A_cbc = 0;
+                input_B_cbc = 0;
+                input_R_cbc = 0;
+                addr_output_rbr_A = 0;
+                addr_output_rbr_B = 0;
+                addr_output_rbr_R = 0;
+                addr_output_cbc_A = 0;
+                addr_output_cbc_B = 0;
+                addr_output_cbc_R = 0;
+                data_out_rbr = 0;
+                data_out_cbc = 0;
+                ret_valid = 0;
+                int_set = 0;
+                inout_mode = 0;
+                data_cmd = 0;
+                data_addr = 0;
+                addr_cam_col = 0;
+                data_print_rdy = 0;
+                data_print = 0;
+                ins_inp_valid = 0;//ctrl_exp_2;
+            end
+            STORE_END_2: begin
                 pass = pass_tmp;
                 key_A = key_A_tmp;
                 key_B = key_B_tmp;

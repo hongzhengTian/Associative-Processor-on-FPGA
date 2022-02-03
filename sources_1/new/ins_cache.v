@@ -32,7 +32,7 @@ module ins_cache
     input wire [ISA_WIDTH - 1 : 0]      instruction_to_cache,
     input wire [9 : 0]                  rd_cnt_isa,
     input wire                          rd_burst_data_valid,
-    output wire [9 : 0]                  isa_read_len
+    output wire [9 : 0]                 isa_read_len
 );
 
 /* states */
@@ -44,8 +44,7 @@ reg [15 : 0]                            tag_ins;
 reg [ISA_WIDTH - 1 : 0]                 ins_cache [0 : ISA_DEPTH -1];
 reg [ISA_WIDTH - 1 : 0]                 int_serve;
 
-reg [3 : 0]                             st_next;
-reg [3 : 0]                             st_cur;
+wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
 reg [9 : 0]                             ins_load_cnt;
 reg [9 : 0]                             rd_cnt_isa_reg;
@@ -55,6 +54,7 @@ reg [ISA_WIDTH - 1 : 0]                 instruction_tmp;
 reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
 reg                                     rst_cache;
 reg [9 : 0]                             load_times;
+wire                                    st_cur_e_LI;
 
 integer i;
 
@@ -73,31 +73,62 @@ wire                                    ic_exp_4;
 wire                                    ic_exp_5;
 wire                                    ic_exp_6;
 
-assign arith_1 = load_times + 1;
-assign arith_2 = addr_ins - tag_ins - 1;
-assign arith_3 = INT_INS_DEPTH + 1;
-assign arith_4 = TOTAL_ISA_DEPTH - rd_cnt_isa_reg;
-assign arith_5 = addr_ins << 3;
-assign arith_6 = (addr_ins - 1) << 3;
-assign arith_7 = rd_cnt_isa - 1;
-
-assign ic_exp_1= (rd_cnt_isa >= isa_read_len)? 1 : 0;
-assign ic_exp_2= ((addr_ins - tag_ins) < ISA_DEPTH + 1)? 1 : 0;
-assign ic_exp_3= (addr_ins == {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
-assign ic_exp_4= (addr_ins > {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
-assign ic_exp_5= (load_times <= 2)? 1 : 0;
-assign ic_exp_6= (st_cur == LOAD_INS && rd_burst_data_valid_delay && rd_cnt_isa >= 1)? 1 : 0;
 assign isa_read_len = (ic_exp_4)? arith_3 : ISA_DEPTH;
+assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
 
-/* state machine */
-always @(posedge clk or negedge rst) begin
-    if (!rst) begin
-        st_cur <= START;
-    end
-    else begin
-        st_cur <= st_next;
-    end    
-end
+ ALU_ins_cache #(
+    ISA_DEPTH,
+    INT_INS_DEPTH,
+    DDR_ADDR_WIDTH,
+    OPCODE_WIDTH, 
+    ADDR_WIDTH_CAM, 
+    OPRAND_2_WIDTH,
+    ADDR_WIDTH_MEM,
+    TOTAL_ISA_DEPTH
+)ALU_ins_cache_u
+(
+    .load_times                 (load_times),
+    .addr_ins                   (addr_ins),
+    .tag_ins                    (tag_ins),
+    .rd_cnt_isa_reg             (rd_cnt_isa_reg),
+    .rd_cnt_isa                 (rd_cnt_isa),
+    .isa_read_len               (isa_read_len),
+    .st_cur_e_LI                (st_cur_e_LI),
+    .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
+    .arith_1                    (arith_1),
+    .arith_2                    (arith_2),
+    .arith_3                    (arith_3),
+    .arith_4                    (arith_4),
+    .arith_5                    (arith_5),
+    .arith_6                    (arith_6),
+    .arith_7                    (arith_7),
+    .ic_exp_1                   (ic_exp_1),
+    .ic_exp_2                   (ic_exp_2),
+    .ic_exp_3                   (ic_exp_3),
+    .ic_exp_4                   (ic_exp_4),
+    .ic_exp_5                   (ic_exp_5),
+    .ic_exp_6                   (ic_exp_6)
+);
+
+sm_ins_cache #(
+    ISA_DEPTH,
+    INT_INS_DEPTH,
+    DDR_ADDR_WIDTH,
+    OPCODE_WIDTH, 
+    ADDR_WIDTH_CAM, 
+    OPRAND_2_WIDTH,
+    ADDR_WIDTH_MEM,
+    TOTAL_ISA_DEPTH
+)sm_ins_cache_u
+(
+    .clk                        (clk),
+    .rst                        (rst),
+    .ins_cache_init             (ins_cache_init),
+    .ic_exp_2                   (ic_exp_2),
+    .ic_exp_3                   (ic_exp_3),
+    .ic_exp_1                   (ic_exp_1),
+    .st_cur                     (st_cur)
+);
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
@@ -142,32 +173,6 @@ always @(posedge clk or negedge rst) begin
             default:;
         endcase
     end
-end
-
-always @(*) begin
-    case (st_cur)
-        START: begin
-            case (ins_cache_init)
-                1'b1: st_next = SENT_INS; 
-                default: st_next = LOAD_INS;
-            endcase
-        end
-        SENT_INS: begin
-            case ({ic_exp_2, ic_exp_3})
-                2'b10: st_next = START;
-                2'b01: st_next = SENT_INS;
-                2'b11: st_next = SENT_INS;
-                default: st_next = LOAD_INS;
-            endcase
-        end 
-        LOAD_INS: begin
-            case (ic_exp_1)
-                1'b1: st_next = START; 
-                default: st_next = LOAD_INS;
-            endcase
-        end
-        default: st_next = START;
-    endcase
 end
 
 always @(*) begin
