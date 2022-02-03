@@ -49,7 +49,7 @@ assign arith_6 = (addr_ins - 1) << 3;
 assign arith_7 = rd_cnt_isa - 1;
 
 assign ic_exp_1= (rd_cnt_isa >= isa_read_len)? 1 : 0;
-assign ic_exp_2= ((addr_ins - tag_ins) < ISA_DEPTH + 1)? 1 : 0;
+assign ic_exp_2= ((addr_ins < (tag_ins + ISA_DEPTH + 1)) && (addr_ins >= tag_ins))? 1 : 0;
 assign ic_exp_3= (addr_ins == {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
 assign ic_exp_4= (addr_ins > {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
 assign ic_exp_5= (load_times <= 2)? 1 : 0;
