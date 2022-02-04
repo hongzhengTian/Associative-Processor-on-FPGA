@@ -48,13 +48,13 @@ always @(*) begin
         RowxRow: begin
             for (j = 0; j < DATA_WIDTH; j = j + 1) begin
                 Ie_C[j] = 1'b1;
-                for (i = 0; i < DATA_DEPTH; i = i + 1) begin
-                    if(!rstIn) begin
-                        Ie_R[i] = (addr_input_Row==i)? 1'b1 : 1'b0;
-                    end
-                    else begin
-                        Ie_R[i] = 1'b0;
-                    end
+            end
+            for (i = 0; i < DATA_DEPTH; i = i + 1) begin
+                if(!rstIn) begin
+                    Ie_R[i] = (addr_input_Row==i)? 1'b1 : 1'b0;
+                end
+                else begin
+                    Ie_R[i] = 1'b0;
                 end
             end
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
@@ -70,7 +70,8 @@ always @(*) begin
         ColxCol: begin
             for (j = 0; j < DATA_DEPTH; j = j + 1) begin
                 Ie_R[j] = 1'b1;
-                for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+            end
+            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
                     if(!rstIn) begin
                         Ie_C[i] = (addr_input_Col==i)? 1'b1 : 1'b0;
                     end
@@ -78,7 +79,6 @@ always @(*) begin
                         Ie_C[i] = 1'b0;
                     end
                 end
-            end
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
                     begin
