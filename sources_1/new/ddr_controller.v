@@ -70,12 +70,25 @@ assign rd_burst_data = app_rd_data;
 assign rd_burst_data_valid = app_rd_data_valid;
  
 assign wr_burst_data_req = (state == MEM_WRITE) & app_wdf_rdy ;
- 
+
+wire [9 : 0] arith_1 = rd_data_cnt + 1;
+wire [9 : 0] arith_2 = wr_addr_cnt + 1;
+wire [9 : 0] arith_3 = wr_data_cnt + 1;
+wire [DDR_ADDR_WIDTH - 1:0] arith_4 = app_addr_r + 8;
+wire [9 : 0] arith_5 = rd_addr_cnt + 1;
+
+wire exp_1 = (rd_addr_cnt == rd_burst_len - 1)? 1 : 0;
+wire exp_2 = (rd_data_cnt == rd_burst_len - 1)? 1 : 0;
+wire exp_3 = (wr_addr_cnt == wr_burst_len - 1)? 1 : 0;
+wire exp_4 = (wr_data_cnt == wr_burst_len - 1)? 1 : 0;
+wire exp_5 = (app_wdf_rdy & init_calib_complete)? 1 : 0;
+wire exp_6 = (~app_en_r & app_wdf_rdy)? 1 : 0;
+
 always@(posedge clk or posedge rst) begin
 	if(rst) begin
 		app_wdf_wren_r <= 1'b0;
 	end
-	else if(app_wdf_rdy & init_calib_complete) begin
+	else if(exp_5) begin
 		app_wdf_wren_r <= wr_burst_data_req;
 	end
 end
@@ -111,34 +124,34 @@ always@(posedge clk or posedge rst) begin
 			end
 			MEM_READ: begin
 				if(app_rdy) begin
-					app_addr_r <= app_addr_r + 8;
-					if(rd_addr_cnt == rd_burst_len - 1) begin
+					app_addr_r <= arith_4;
+					if(exp_1) begin
 						state <= MEM_READ_WAIT;
 						rd_addr_cnt <= 0;
 						app_en_r <= 1'b0;
 					end
 					else begin
-						rd_addr_cnt <= rd_addr_cnt + 1;
+						rd_addr_cnt <= arith_5;
 					end
 				end
 				if(app_rd_data_valid) begin
-					if(rd_data_cnt == rd_burst_len - 1) begin
+					if(exp_2) begin
 						rd_data_cnt <= 0;
 						state <= READ_END;
 					end
 					else begin
-						rd_data_cnt <= rd_data_cnt + 1;
+						rd_data_cnt <= arith_1;
 					end
 				end
 			end
 			MEM_READ_WAIT: begin
 				if(app_rd_data_valid) begin
-					if(rd_data_cnt == rd_burst_len - 1) begin
+					if(exp_2) begin
 						rd_data_cnt <= 0;
 						state <= READ_END;
 					end
 					else begin
-						rd_data_cnt <= rd_data_cnt + 1;
+						rd_data_cnt <= arith_1;
 					end
 				end
 			end
@@ -149,20 +162,20 @@ always@(posedge clk or posedge rst) begin
 			end
 			MEM_WRITE: begin
 				if(app_rdy) begin
-					app_addr_r <= app_addr_r + 8;
-					if(wr_addr_cnt == wr_burst_len - 1) begin
+					app_addr_r <= arith_4;
+					if(exp_3) begin
 						app_en_r <= 1'b0;
 					end
 					else begin
-						wr_addr_cnt <= wr_addr_cnt + 1;
+						wr_addr_cnt <= arith_2;
 					end
 				end
 				if(wr_burst_data_req) begin
-					if(wr_data_cnt == wr_burst_len - 1) begin	
+					if(exp_4) begin	
 						state <= MEM_WRITE_WAIT;
 					end
 					else begin
-						wr_data_cnt <= wr_data_cnt + 1;
+						wr_data_cnt <= arith_3;
 					end
 				end
 			end
@@ -171,18 +184,18 @@ always@(posedge clk or posedge rst) begin
 			end
 			MEM_WRITE_WAIT: begin
 				if(app_rdy) begin
-					app_addr_r <= app_addr_r + 8;
-					if(wr_addr_cnt == wr_burst_len - 1) begin
+					app_addr_r <= arith_4;
+					if(exp_3) begin
 						app_en_r <= 1'b0;
 						if(app_wdf_rdy) begin
 							state <= WRITE_END;
 						end
 					end
 					else begin
-						wr_addr_cnt <= wr_addr_cnt + 1;
+						wr_addr_cnt <= arith_2;
 					end
 				end
-				else if(~app_en_r & app_wdf_rdy) begin
+				else if(exp_6) begin
 					state <= WRITE_END;
 				end
 			end
