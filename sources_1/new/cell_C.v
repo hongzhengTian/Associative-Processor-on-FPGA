@@ -1,5 +1,7 @@
 module cell_C
-#(parameter DATA_DEPTH = 128)
+#(
+parameter DATA_DEPTH = 128
+)
 (
 input wire [DATA_DEPTH - 1 : 0] Ip,
 input wire                      Key,
