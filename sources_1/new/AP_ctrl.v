@@ -188,10 +188,10 @@ module AP_controller
     localparam                              FINISH_CK       = 6'd26;
     localparam                              LOAD_TMP        = 6'd27;
     localparam                              LOAD_CTXT       = 6'd28;
-    localparam                              LOAD_CTXT_FINISH_CHECK = 6'd29;
+    localparam                              LOAD_CTXT_FC    = 6'd29;
     localparam                              STORE_TMP       = 6'd30;
     localparam                              STORE_CTXT      = 6'd31;
-    localparam                              STORE_CTXT_FINISH_CHECK = 6'd32;
+    localparam                              STORE_CTXT_FC   = 6'd32;
     localparam                              GET_JMP_ADDR    = 6'd33;
     localparam                              JMP_INS         = 6'd34;
     localparam                              RET_STATE       = 6'd35;
@@ -326,7 +326,7 @@ module AP_controller
     assign      ctrl_exp_11 = (ctrl_exp_4 && !ctrl_exp_8)? 1 : 0;
     assign      ctrl_exp_12 = (op_code == STORERBR 
                       || op_code == STORECBC 
-                      || (addr_cam_auto == DATA_WIDTH - 1)&&(st_cur == STORE_CTXT_FINISH_CHECK))? 1 : 0;
+                      || (addr_cam_auto == DATA_WIDTH - 1)&&(st_cur == STORE_CTXT_FC))? 1 : 0;
     
     assign      ctrl_exp_13 = (addr_cam_auto < DATA_WIDTH)? 1 : 0;
     assign      ctrl_exp_14 = (addr_cam_auto <= DATA_WIDTH)? 1 : 0;
@@ -415,7 +415,7 @@ module AP_controller
                 addr_cam_auto <= 0;
                 matrix_cnt <= 1;
             end
-            STORE_CTXT_FINISH_CHECK: begin
+            STORE_CTXT_FC: begin
                 case (ctrl_exp_13)
                     1: addr_cam_auto <= arith_2;
                     default:begin
@@ -424,7 +424,7 @@ module AP_controller
                     end
                 endcase
             end
-            LOAD_CTXT_FINISH_CHECK: begin
+            LOAD_CTXT_FC: begin
                 case (ctrl_exp_15)
                     1: addr_cam_auto <= arith_2;
                     default:begin
@@ -612,7 +612,7 @@ module AP_controller
                         default: tmp_C_F <= 0;
                     endcase
                 end
-                STORE_CTXT_FINISH_CHECK: begin
+                STORE_CTXT_FC: begin
                     if (ctrl_exp_16) begin
                         store_ctxt_finish <= 1;
                     end
@@ -754,13 +754,13 @@ module AP_controller
                     6'b100001: st_next = GET_JMP_ADDR;
                     6'b100010: st_next = GET_JMP_ADDR;
                     6'b100011: st_next = GET_JMP_ADDR;
-                    6'b010011: st_next = STORE_CTXT_FINISH_CHECK;
-                    6'b001011: st_next = STORE_CTXT_FINISH_CHECK;
-                    6'b000111: st_next = STORE_CTXT_FINISH_CHECK;
+                    6'b010011: st_next = STORE_CTXT_FC;
+                    6'b001011: st_next = STORE_CTXT_FC;
+                    6'b000111: st_next = STORE_CTXT_FC;
                     default: st_next = STORE_CTXT;
                 endcase
             end
-            STORE_CTXT_FINISH_CHECK: begin 
+            STORE_CTXT_FC: begin 
                 st_next = ctrl_exp_14? STORE_CTXT : START;
             end
             GET_JMP_ADDR: begin
@@ -777,16 +777,16 @@ module AP_controller
                 ctrl_exp_7, data_cache_rdy, ctrl_exp_8})
                     6'b100000: st_next = RET_STATE;
                     6'b100010: st_next = RET_STATE;
-                    6'b010010: st_next = LOAD_CTXT_FINISH_CHECK;
-                    6'b010011: st_next = LOAD_CTXT_FINISH_CHECK;
-                    6'b001010: st_next = LOAD_CTXT_FINISH_CHECK;
-                    6'b001011: st_next = LOAD_CTXT_FINISH_CHECK;
-                    6'b000110: st_next = LOAD_CTXT_FINISH_CHECK;
-                    6'b000111: st_next = LOAD_CTXT_FINISH_CHECK;
+                    6'b010010: st_next = LOAD_CTXT_FC;
+                    6'b010011: st_next = LOAD_CTXT_FC;
+                    6'b001010: st_next = LOAD_CTXT_FC;
+                    6'b001011: st_next = LOAD_CTXT_FC;
+                    6'b000110: st_next = LOAD_CTXT_FC;
+                    6'b000111: st_next = LOAD_CTXT_FC;
                     default: st_next = LOAD_CTXT;
                 endcase
             end
-            LOAD_CTXT_FINISH_CHECK: begin
+            LOAD_CTXT_FC: begin
                 st_next = ctrl_exp_14? LOAD_CTXT : START;
             end
             RET_STATE: begin
@@ -897,7 +897,7 @@ module AP_controller
                     endcase
                 end
                 else begin
-                st_next = START;
+                    st_next = START;
                 end
             end
             FINISH: begin
@@ -1683,7 +1683,7 @@ module AP_controller
                     end
                 endcase
             end
-            STORE_CTXT_FINISH_CHECK: begin
+            STORE_CTXT_FC: begin
                 ins_inp_valid = 0;
                 pass = 0;
                 key_A = 0;
@@ -2008,7 +2008,7 @@ module AP_controller
                     end
                 endcase
             end
-            LOAD_CTXT_FINISH_CHECK: begin
+            LOAD_CTXT_FC: begin
                 ins_inp_valid = 0;
                 pass = pass_tmp;
                 key_A = key_A_tmp;
