@@ -126,7 +126,9 @@ module AP_controller
     output reg                              key_B,
     output reg                              key_C,
     output reg                              key_F,
-    output reg [DATA_WIDTH - 1 : 0]         mask,
+    output wire [DATA_WIDTH - 1 : 0]        mask_A,
+    output reg [DATA_WIDTH - 1 : 0]         mask_B,
+    output reg [DATA_WIDTH - 1 : 0]         mask_R,
     output reg                              mask_C,
     output reg                              mask_F,
     output reg [2 : 0]                      pass
@@ -238,6 +240,7 @@ module AP_controller
     reg  [OPRAND_2_WIDTH - 1 : 0]           matrix_select_reg;
     wire [OPRAND_2_WIDTH - 1 : 0]           matrix_select_1;
     wire [ADDR_WIDTH_MEM - 1 : 0]           addr_mem;
+    reg [DATA_WIDTH - 1 : 0]                mask_reg;
     
     reg [ADDR_WIDTH_MEM - 1 : 0]            addr_mem_col;
     reg [1 : 0]                             matrix_cnt;
@@ -299,7 +302,6 @@ module AP_controller
     wire                                    ctrl_exp_14;
     wire                                    ctrl_exp_15;
     wire                                    ctrl_exp_16;
-    
 
     localparam  DATA_DEPTH_P_3 = DATA_DEPTH + 3;
     localparam  DATA_WIDTH_P_3 = DATA_WIDTH + 3;
@@ -311,7 +313,7 @@ module AP_controller
     assign      arith_6 = bit_cnt + 1;
     assign      arith_7 = addr_cur_ctxt + DATA_DEPTH;
     assign      arith_8 = addr_cur_ctxt + DATA_DEPTH + DATA_DEPTH;
-    assign      arith_9 = mask << 1;
+    assign      arith_9 = mask_reg << 1;
 
     assign      ctrl_exp_1 = (cam_clk_cnt == 0)? 1 : 0;
     assign      ctrl_exp_2 = (cam_clk_cnt == 1)? 1 : 0;
@@ -332,8 +334,24 @@ module AP_controller
     assign      ctrl_exp_14 = (addr_cam_auto <= DATA_WIDTH)? 1 : 0;
     assign      ctrl_exp_15 = (addr_cam_auto < DATA_WIDTH - 1)? 1 : 0;
     assign      ctrl_exp_16 = ((addr_cam_auto == DATA_WIDTH) && (matrix_cnt == 0))? 1 : 0;
-    
+    assign      mask_A = mask_reg;
     assign      store_ddr = (ctrl_exp_12)? 1 : 0;
+
+    always @(*) begin
+        case(op_code)
+            ADD: mask_B = mask_reg;
+            SUB: mask_B = mask_reg;
+            default: mask_B = 0;
+        endcase
+    end
+
+    always @(*) begin
+        case(op_code)
+            ABS: mask_R = mask_reg;
+            TSC: mask_R = mask_reg;
+            default: mask_R = 0;
+        endcase
+    end
     
     always @(posedge clk or negedge rst_clk) begin
         if (!rst_clk) begin
@@ -463,7 +481,7 @@ module AP_controller
         addr_cam_tmp <= addr_cam;
         if (!rst_STATE) begin
             opt_cur <= 0;
-            mask <= 0;
+            mask_reg <= 0;
             bit_cnt <= 0;
             rst_InC <= 0;
             rst_InF <= 0;
@@ -494,7 +512,7 @@ module AP_controller
                 START: begin
                     bit_cnt <= 0;
                     opt_cur <= op_code;
-                    mask <= 1;
+                    mask_reg <= 1;
                     tmp_bit_cnt <= 0;
                     tmp_pass <= 0;
                     tmp_mask <= 0;
@@ -525,12 +543,12 @@ module AP_controller
                     case ({ctxt_rdy, tag_C_F})
                         2'b11: begin
                             bit_cnt <= tmp_bit_cnt_ret;
-                            mask <= tmp_mask_ret;
+                            mask_reg <= tmp_mask_ret;
                             input_C <= tmp_C_F_ret;
                         end
                         2'b10: begin
                             bit_cnt <= tmp_bit_cnt_ret;
-                            mask <= tmp_mask_ret;
+                            mask_reg <= tmp_mask_ret;
                             input_F <= tmp_C_F_ret;
                         end
                         default: ;
@@ -585,7 +603,7 @@ module AP_controller
                 STORE_TMP: begin
                     tmp_bit_cnt <= bit_cnt;
                     tmp_pass <= pass;
-                    tmp_mask <= mask;
+                    tmp_mask <= mask_reg;
                     tmp_key_A <= key_A;
                     tmp_key_B <= key_B;
                     tmp_key_C <= key_C;
@@ -648,7 +666,7 @@ module AP_controller
                 end
                 FINISH_CK: begin
                     if (ctrl_exp_9) begin
-                        mask <= arith_9;
+                        mask_reg <= arith_9;
                     end
                 end 
                 default:;
@@ -965,7 +983,10 @@ module AP_controller
                         ins_inp_valid = 0;
                         inout_mode = RST0;
                     end
-                    TSC: ins_inp_valid = 0;
+                    TSC: begin
+                        ins_inp_valid = 0;
+                        inout_mode = RST0;
+                    end
                     PRINT: ins_inp_valid = 0;
                     STOP: ins_inp_valid = 0;
                     default: ins_inp_valid = 1;
