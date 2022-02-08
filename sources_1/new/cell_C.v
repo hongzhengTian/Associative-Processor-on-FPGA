@@ -3,12 +3,12 @@ module cell_C
 parameter DATA_DEPTH = 128
 )
 (
-input wire [DATA_DEPTH - 1 : 0] Ip,
-input wire                      Key,
-input wire                      Mask,
-input wire [2:0]                Pass,
+input wire [DATA_DEPTH - 1 : 0] input_C,
+input wire                      key,
+input wire                      mask,
+input wire [2:0]                pass,
 input wire [DATA_DEPTH - 1 : 0] tag,
-input wire                      rstIn,
+input wire                      rst_In,
 input wire                      clk,
 output reg [DATA_DEPTH - 1 : 0] Q,
 output reg [DATA_DEPTH - 1 : 0] tag_cell
@@ -20,9 +20,9 @@ reg [DATA_DEPTH - 1 : 0] D;
   
 integer i;
   
-always @(rstIn) begin
+always @(rst_In) begin
     for (i = 0; i < DATA_DEPTH; i = i + 1) begin
-        if (!rstIn) begin
+        if (!rst_In) begin
             Ie[i] = 1'b1;
         end
         else begin
@@ -31,13 +31,13 @@ always @(rstIn) begin
     end
 end
 
-always@(tag, Ie, Pass, Ip, Qb, Q) begin
+always@(tag, Ie, pass, input_C, Qb, Q) begin
     for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
         if (Ie[i] == 1) begin
-            D[i] = Ip[i];
+            D[i] = input_C[i];
         end
         else if ((Ie[i] == 0) && (tag[i] == 1)) begin
-            case (Pass)
+            case (pass)
                 1: D[i] = Qb[i];
                 2: D[i] = Q[i];
                 3: D[i] = Qb[i];
@@ -58,9 +58,9 @@ always @(posedge clk) begin
     end
 end
 
-always @(Mask or Key or clk or Qb or Q) begin
+always @(mask or key or clk or Qb or Q) begin
    for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-        case ({Mask, Key})
+        case ({mask, key})
             2'b00: tag_cell[i] = 1'b1;
             2'b01: tag_cell[i] = 1'b1;
             2'b10: tag_cell[i] = Qb[i];
