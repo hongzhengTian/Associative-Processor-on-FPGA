@@ -23,8 +23,8 @@ module AP_top
     input                               sys_clk_i,
     input                               int,
     output                              init_calib_complete,
-    input [ISA_WIDTH - 1 : 0]           Instruction,
-    input [DATA_WIDTH - 1 : 0]          Data,
+    input [ISA_WIDTH - 1 : 0]           ins_input,
+    input [DATA_WIDTH - 1 : 0]          data_input,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
     output                              load_ins_ddr,
@@ -103,7 +103,7 @@ module AP_top
     wire [ADDR_WIDTH_CAM - 1 : 0]       addr_output_cbc_R;
     wire [DATA_DEPTH - 1 : 0]           input_C;
     wire [DATA_DEPTH - 1 : 0]           input_F;
-    wire                                ABS_opt;
+    wire                                abs_opt;
     wire                                rst_InA;
     wire                                rst_InB;
     wire                                rst_InC;
@@ -135,14 +135,14 @@ module AP_top
     wire                                ins_cache_rdy;
     wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_pc;
 
-    wire [ISA_WIDTH - 1 : 0]            instruction;
+    wire [ISA_WIDTH - 1 : 0]            ins_to_apctrl;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
-    wire                                ISA_read_req;
-    wire [DDR_ADDR_WIDTH -1 : 0]        ISA_read_addr;
-    wire [ISA_WIDTH - 1 : 0]            instruction_to_cache;
+    wire                                ins_read_req;
+    wire [DDR_ADDR_WIDTH -1 : 0]        ins_read_addr;
+    wire [ISA_WIDTH - 1 : 0]            ins_to_cache;
     wire [9 : 0]                        rd_cnt_isa;
     wire                                rd_burst_data_valid;
-    wire [9 : 0]                        isa_read_len;
+    wire [9 : 0]                        ins_read_len;
 
     wire                                data_cache_rdy;
     wire                                jmp_addr_rdy;
@@ -150,14 +150,14 @@ module AP_top
     wire [DATA_WIDTH - 1 : 0]           data_in_rbr;
     wire [DATA_DEPTH - 1 : 0]           data_in_cbc;
     wire [ADDR_WIDTH_MEM - 1 : 0]       addr_cur_ctxt;
-    wire                                DATA_read_req;
-    wire                                DATA_store_req;
-    wire                                JMP_ADDR_read_req;
-    wire [DDR_ADDR_WIDTH - 1 : 0]       JMP_ADDR_to_cache;
-    wire [DATA_WIDTH - 1 : 0]           DATA_to_ddr;
-	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
-	wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
-    wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
+    wire                                data_read_req;
+    wire                                data_store_req;
+    wire                                jmp_addr_read_req;
+    wire [DDR_ADDR_WIDTH - 1 : 0]       jmp_addr_to_cache;
+    wire [DATA_WIDTH - 1 : 0]           data_to_ddr;
+	wire [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr;
+	wire [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr;
+    wire [DATA_WIDTH - 1 : 0]			data_to_cache;
     wire [9 : 0]                        rd_cnt_data;
 
     wire [ADDR_WIDTH_MEM - 1 : 0]       ret_addr_ret;
@@ -183,7 +183,7 @@ module AP_top
     .rst_clk                (sys_rst),
     .int                    (int),
     .ins_valid              (ins_valid),
-    .instruction            (instruction),
+    .ins_to_apctrl          (ins_to_apctrl),
     .data_cache_rdy         (data_cache_rdy),
     .data_print             (data_print),
     .data_print_rdy         (data_print_rdy),
@@ -256,7 +256,7 @@ module AP_top
     .addr_output_cbc_R      (addr_output_cbc_R),
     .input_C                (input_C),
     .input_F                (input_F),
-    .ABS_opt                (ABS_opt),
+    .abs_opt                (abs_opt),
     .rst_InA                (rst_InA),
     .rst_InB                (rst_InB),
     .rst_InC                (rst_InC),
@@ -320,7 +320,7 @@ module AP_top
     .addr_output_Col_R      (addr_output_cbc_R),
     .Input_R_row            (input_R_rbr),
     .Input_R_col            (input_R_cbc),
-    .ABS_opt                (ABS_opt),
+    .abs_opt                (abs_opt),
     .Q_out_A_row            (data_A_rbr),
     .Q_out_A_col            (data_A_cbc),
     .Q_out_R_row            (data_R_rbr),
@@ -363,27 +363,27 @@ module AP_top
     .ui_clk                 (ui_clk),
     .init_calib_complete    (init_calib_complete),
     .sys_rst                (sys_rst),
-    .Instruction            (Instruction),
-    .Data                   (Data),
+    .ins_input              (ins_input),
+    .data_input             (data_input),
     .wr_burst_data_req      (wr_burst_data_req),
     .load_ins_ddr           (load_ins_ddr),
     .load_data_ddr          (load_data_ddr),
     .load_int_ins_ddr       (load_int_ins_ddr),
-    .ISA_read_req           (ISA_read_req),
-    .ISA_read_addr          (ISA_read_addr),
-    .instruction_to_cache   (instruction_to_cache),
+    .ins_read_req           (ins_read_req),
+    .ins_read_addr          (ins_read_addr),
+    .ins_to_cache           (ins_to_cache),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .DATA_read_req          (DATA_read_req),
-    .DATA_store_req         (DATA_store_req),
-    .JMP_ADDR_read_req      (JMP_ADDR_read_req),
-    .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
-    .DATA_to_ddr            (DATA_to_ddr),
-    .DATA_read_addr         (DATA_read_addr),
-    .DATA_write_addr        (DATA_write_addr),
-    .DATA_to_cache          (DATA_to_cache),
+    .data_read_req          (data_read_req),
+    .data_store_req         (data_store_req),
+    .jmp_addr_read_req      (jmp_addr_read_req),
+    .jmp_addr_to_cache      (jmp_addr_to_cache),
+    .data_to_ddr            (data_to_ddr),
+    .data_read_addr         (data_read_addr),
+    .data_write_addr        (data_write_addr),
+    .data_to_cache          (data_to_cache),
     .rd_cnt_data            (rd_cnt_data),
-    .isa_read_len           (isa_read_len)
+    .ins_read_len           (ins_read_len)
     );
 
     program_counter #(
@@ -421,14 +421,14 @@ module AP_top
     .rst                    (sys_rst),
     .addr_ins               (addr_ins),
     .ins_cache_rdy          (ins_cache_rdy),
-    .instruction            (instruction),
+    .ins_to_apctrl          (ins_to_apctrl),
     .ins_valid              (ins_valid),
-    .ISA_read_req           (ISA_read_req),
-    .ISA_read_addr          (ISA_read_addr),
-    .instruction_to_cache   (instruction_to_cache),
+    .ins_read_req           (ins_read_req),
+    .ins_read_addr          (ins_read_addr),
+    .ins_to_cache           (ins_to_cache),
     .rd_cnt_isa             (rd_cnt_isa),
     .rd_burst_data_valid    (rd_burst_data_valid),
-    .isa_read_len           (isa_read_len)
+    .ins_read_len           (ins_read_len)
     );
 
     
@@ -457,14 +457,14 @@ module AP_top
     .data_in_rbr            (data_in_rbr),
     .data_in_cbc            (data_in_cbc),
     .addr_cur_ctxt          (addr_cur_ctxt),
-    .DATA_read_req          (DATA_read_req),
-    .DATA_store_req         (DATA_store_req),
-    .JMP_ADDR_read_req      (JMP_ADDR_read_req),
-    .JMP_ADDR_to_cache      (JMP_ADDR_to_cache),
-    .DATA_to_ddr            (DATA_to_ddr),
-    .DATA_read_addr         (DATA_read_addr),
-    .DATA_write_addr        (DATA_write_addr),
-    .DATA_to_cache          (DATA_to_cache),
+    .data_read_req          (data_read_req),
+    .data_store_req         (data_store_req),
+    .jmp_addr_read_req      (jmp_addr_read_req),
+    .jmp_addr_to_cache      (jmp_addr_to_cache),
+    .data_to_ddr            (data_to_ddr),
+    .data_read_addr         (data_read_addr),
+    .data_write_addr        (data_write_addr),
+    .data_to_cache          (data_to_cache),
     .rd_cnt_data            (rd_cnt_data),
     .rd_burst_data_valid    (rd_burst_data_valid)
     );

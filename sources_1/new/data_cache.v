@@ -30,14 +30,14 @@ module data_cache
     output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ctxt,
 
     /* the interface of DDR */
-    output reg                              DATA_read_req,
-    output reg                              DATA_store_req,
-    output reg                              JMP_ADDR_read_req,
-    input wire [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
-    output reg [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
-	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
-	output reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
-    input wire [DATA_WIDTH - 1 : 0]			DATA_to_cache,
+    output reg                              data_read_req,
+    output reg                              data_store_req,
+    output reg                              jmp_addr_read_req,
+    input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
+    output reg [DATA_WIDTH - 1 : 0]         data_to_ddr,
+	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
+	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
+    input wire [DATA_WIDTH - 1 : 0]			data_to_cache,
     input wire [9 : 0]                      rd_cnt_data,
     input wire                              rd_burst_data_valid
 );
@@ -72,8 +72,8 @@ reg                                         rd_burst_data_valid_delay;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
 reg [DATA_WIDTH - 1 : 0]                    data_in_rbr_tmp;
 reg [DATA_DEPTH - 1 : 0]                    data_in_cbc_tmp;
-reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_read_addr_tmp;
-reg [DDR_ADDR_WIDTH - 1 : 0]		        DATA_write_addr_tmp;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        data_read_addr_tmp;
+reg [DDR_ADDR_WIDTH - 1 : 0]		        data_write_addr_tmp;
 
 integer j ;
 
@@ -166,13 +166,13 @@ always @(posedge clk or negedge rst) begin
     if (!rst) begin
         tag_data <= 0;//16'hFFFF;
         jmp_addr_tmp <= 0;
-        DATA_to_ddr <= 0;
+        data_to_ddr <= 0;
         data_to_ddr_rdy <= 0;
         data_store_cnt <= 0;
         data_in_rbr_tmp <= 0;
         data_in_cbc_tmp <= 0;
-        DATA_read_addr_tmp <= 0;
-        DATA_write_addr_tmp <= 0;
+        data_read_addr_tmp <= 0;
+        data_write_addr_tmp <= 0;
         for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
             data_cache[j][addr_cam_col] <= 0;
         end
@@ -180,7 +180,7 @@ always @(posedge clk or negedge rst) begin
     else begin
         case (st_cur)
             START:begin
-                DATA_to_ddr <= 0;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 case (data_cmd)
@@ -199,17 +199,17 @@ always @(posedge clk or negedge rst) begin
             end
             SENT_ADDR: begin
                 tag_data <= data_addr;
-                DATA_read_addr_tmp <= arith_2;
-                DATA_to_ddr <= 0;
+                data_read_addr_tmp <= arith_2;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 case (dc_exp_2)
-                    1'b1:jmp_addr_tmp <= JMP_ADDR_to_cache; 
+                    1'b1:jmp_addr_tmp <= jmp_addr_to_cache; 
                     default: jmp_addr_tmp <= 0;
                 endcase
             end
             SENT_DATA_RBR: begin
-                DATA_to_ddr <= 0;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 if(dc_exp_3) begin
@@ -217,7 +217,7 @@ always @(posedge clk or negedge rst) begin
                 end
             end
             SENT_DATA_CBC: begin
-                DATA_to_ddr <= 0;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 if(dc_exp_3) begin
@@ -228,17 +228,17 @@ always @(posedge clk or negedge rst) begin
             end
             LOAD_DATA: begin
                 tag_data <= data_addr;
-                DATA_read_addr_tmp <= arith_2;
-                DATA_to_ddr <= 0;
+                data_read_addr_tmp <= arith_2;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 if(dc_exp_9) begin
-                    data_cache[arith_5] <= DATA_to_cache;
+                    data_cache[arith_5] <= data_to_cache;
                 end
             end
             STORE_DATA: begin
-                DATA_write_addr_tmp <= arith_4; 
-                DATA_to_ddr <= data_cache[data_store_cnt];
+                data_write_addr_tmp <= arith_4; 
+                data_to_ddr <= data_cache[data_store_cnt];
                 data_to_ddr_rdy <= 1;
                 if(data_to_ddr_rdy) begin
                     data_store_cnt <= arith_6;
@@ -246,19 +246,19 @@ always @(posedge clk or negedge rst) begin
             end
             GET_DATA_RBR: begin
                 data_cache[arith_3] <= data_out_rbr;
-                DATA_to_ddr <= 0;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
             end
             GET_DATA_CBC: begin
-                DATA_to_ddr <= 0;
+                data_to_ddr <= 0;
                 data_to_ddr_rdy <= 0;
                 data_store_cnt <= 0;
                 for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
                     data_cache[j][addr_cam_col] <= data_out_cbc[j];
                 end
             end
-            default:DATA_to_ddr <= 0;// check
+            default:data_to_ddr <= 0;// check
         endcase
     end
 end
@@ -269,27 +269,27 @@ always @(*) begin
             data_cache_rdy = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
             data_in_rbr = data_in_rbr_tmp;
             data_in_cbc = data_in_cbc_tmp;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
         end
         SENT_ADDR: begin
-            JMP_ADDR_read_req = 1;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
+            jmp_addr_read_req = 1;
+            data_read_req = 0;
+            data_store_req = 0;
             data_in_rbr = 0;
             data_in_cbc = 0;
-            DATA_read_addr = arith_2;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_addr = arith_2;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_2;
             jmp_addr_rdy = dc_exp_2;
-            //jmp_addr = (dc_exp_2)? JMP_ADDR_to_cache : 0;
+            //jmp_addr = (dc_exp_2)? jmp_addr_to_cache : 0;
             case (dc_exp_2)
-                1'b1: jmp_addr = JMP_ADDR_to_cache;
+                1'b1: jmp_addr = jmp_addr_to_cache;
                 1'b0: jmp_addr = 0;
                 default: jmp_addr = 0;
             endcase
@@ -298,11 +298,11 @@ always @(*) begin
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_cbc = 0;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_3;
             //data_in_rbr = (dc_exp_3)? data_cache[arith_3] : data_in_rbr_tmp;
             case (dc_exp_3)
@@ -315,11 +315,11 @@ always @(*) begin
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_3;
             if(dc_exp_3) begin
                 for (j = 0; j <= DATA_CACHE_DEPTH - 1; j = j + 1) begin
@@ -331,14 +331,14 @@ always @(*) begin
             end
         end
         LOAD_DATA: begin
-            DATA_read_req = 1;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
+            data_read_req = 1;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
             data_cache_rdy = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
-            DATA_read_addr = arith_2;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_addr = arith_2;
+            data_write_addr = data_write_addr_tmp;
             data_in_rbr = 0;
             data_in_cbc = 0;
         end
@@ -347,11 +347,11 @@ always @(*) begin
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
             data_in_cbc = 0;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_4;
         end
         GET_DATA_CBC: begin
@@ -359,22 +359,22 @@ always @(*) begin
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
             data_in_cbc = 0;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_4;
         end
         STORE_DATA: begin
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
-            DATA_store_req = 1;
-            DATA_read_req = 0;
-            JMP_ADDR_read_req = 0;
+            data_store_req = 1;
+            data_read_req = 0;
+            jmp_addr_read_req = 0;
             data_cache_rdy = 0;
-            DATA_write_addr = arith_4;
-            DATA_read_addr = DATA_read_addr_tmp;
+            data_write_addr = arith_4;
+            data_read_addr = data_read_addr_tmp;
             data_in_rbr = 0;
             data_in_cbc = 0;
         end
@@ -383,11 +383,11 @@ always @(*) begin
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
             data_in_cbc = 0;
-            DATA_read_req = 0;
-            DATA_store_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_read_req = 0;
+            data_store_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
             data_cache_rdy = dc_exp_8;
         end
         default: begin
@@ -396,11 +396,11 @@ always @(*) begin
             jmp_addr = jmp_addr_tmp;
             data_in_cbc = 0;
             data_in_rbr = 0;
-            DATA_store_req = 0;
-            DATA_read_req = 0;
-            JMP_ADDR_read_req = 0;
-            DATA_read_addr = DATA_read_addr_tmp;
-            DATA_write_addr = DATA_write_addr_tmp;
+            data_store_req = 0;
+            data_read_req = 0;
+            jmp_addr_read_req = 0;
+            data_read_addr = data_read_addr_tmp;
+            data_write_addr = data_write_addr_tmp;
         end
     endcase
 end

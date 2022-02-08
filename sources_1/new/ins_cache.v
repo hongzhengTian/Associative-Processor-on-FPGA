@@ -23,16 +23,16 @@ module ins_cache
     output reg                          ins_cache_rdy,
 
     /* the interface of AP_ctrl */
-    output reg [ISA_WIDTH - 1 : 0]      instruction,
+    output reg [ISA_WIDTH - 1 : 0]      ins_to_apctrl,
     output reg [OPCODE_WIDTH - 1 : 0]   ins_valid,
 
     /* the interface to DDR interface */
-    output reg                          ISA_read_req,
-    output reg [DDR_ADDR_WIDTH -1 : 0]  ISA_read_addr,
-    input wire [ISA_WIDTH - 1 : 0]      instruction_to_cache,
+    output reg                          ins_read_req,
+    output reg [DDR_ADDR_WIDTH -1 : 0]  ins_read_addr,
+    input wire [ISA_WIDTH - 1 : 0]      ins_to_cache,
     input wire [9 : 0]                  rd_cnt_isa,
     input wire                          rd_burst_data_valid,
-    output wire [9 : 0]                 isa_read_len
+    output wire [9 : 0]                 ins_read_len
 );
 
 /* states */
@@ -47,10 +47,10 @@ reg [ISA_WIDTH - 1 : 0]                 int_serve;
 wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
 reg [9 : 0]                             ins_load_cnt;
-reg [9 : 0]                             rd_cnt_isa_reg;
+reg [9 : 0]                             rd_cnt_ins_reg;
 reg                                     rd_burst_data_valid_delay;
 
-reg [ISA_WIDTH - 1 : 0]                 instruction_tmp;
+reg [ISA_WIDTH - 1 : 0]                 ins_tmp;
 reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
 reg                                     rst_cache;
 reg [9 : 0]                             load_times;
@@ -73,7 +73,7 @@ wire                                    ic_exp_4;
 wire                                    ic_exp_5;
 wire                                    ic_exp_6;
 
-assign isa_read_len = (ic_exp_4)? arith_3 : ISA_DEPTH;
+assign ins_read_len = (ic_exp_4)? arith_3 : ISA_DEPTH;
 assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
 
  ALU_ins_cache #(
@@ -90,9 +90,9 @@ assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
     .load_times                 (load_times),
     .addr_ins                   (addr_ins),
     .tag_ins                    (tag_ins),
-    .rd_cnt_isa_reg             (rd_cnt_isa_reg),
+    .rd_cnt_ins_reg             (rd_cnt_ins_reg),
     .rd_cnt_isa                 (rd_cnt_isa),
-    .isa_read_len               (isa_read_len),
+    .ins_read_len               (ins_read_len),
     .st_cur_e_LI                (st_cur_e_LI),
     .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
     .arith_1                    (arith_1),
@@ -132,12 +132,12 @@ sm_ins_cache #(
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
-        rd_cnt_isa_reg <= 0;
+        rd_cnt_ins_reg <= 0;
         ins_cache_init <= 0;
         load_times <= 0;
         int_serve <= 0;
         tag_ins <= 0;
-        instruction_tmp <= 0;
+        ins_tmp <= 0;
         ins_valid_tmp <= 0;
     end
     else begin
@@ -145,7 +145,7 @@ always @(posedge clk or negedge rst) begin
             LOAD_INS: begin
                 tag_ins <= addr_ins;
                 if (ic_exp_1) begin
-                    rd_cnt_isa_reg <= rd_cnt_isa;
+                    rd_cnt_ins_reg <= rd_cnt_isa;
                     ins_cache_init <= 1;
                     load_times <= arith_1;
                 end
@@ -153,19 +153,19 @@ always @(posedge clk or negedge rst) begin
             SENT_INS: begin
                 case ({ic_exp_2, ic_exp_3})
                 2'b10: begin
-                    instruction_tmp <= ins_cache[arith_2];
+                    ins_tmp <= ins_cache[arith_2];
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 2'b01: begin
-                    instruction_tmp <= int_serve;
+                    ins_tmp <= int_serve;
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 2'b11: begin
-                    instruction_tmp <= int_serve;
+                    ins_tmp <= int_serve;
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 default: begin
-                    instruction_tmp <= 0;
+                    ins_tmp <= 0;
                     ins_valid_tmp <= 0;
                 end
                 endcase
@@ -178,11 +178,11 @@ end
 always @(*) begin
     case (st_cur)
         START: begin
-            ISA_read_req = 0;
-            ISA_read_addr = 0;
+            ins_read_req = 0;
+            ins_read_addr = 0;
             ins_load_cnt = 0;
             rst_cache = 0;
-            instruction = instruction_tmp;
+            ins_to_apctrl = ins_tmp;
             ins_cache_rdy = ins_cache_init;
             case (ins_cache_init)
                 1'b1: ins_valid = 0;
@@ -190,49 +190,49 @@ always @(*) begin
             endcase
         end
         SENT_INS: begin
-            ISA_read_req = 0;
-            ISA_read_addr = 0;
+            ins_read_req = 0;
+            ins_read_addr = 0;
             case ({ic_exp_2, ic_exp_3})
                 2'b10: begin
-                    instruction = ins_cache[arith_2];
+                    ins_to_apctrl = ins_cache[arith_2];
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 0;
                 end
                 2'b01: begin
-                    instruction = int_serve;
+                    ins_to_apctrl = int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;
                 end
                 2'b11: begin
-                    instruction = int_serve;
+                    ins_to_apctrl = int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;
                 end
                 default: begin
                     rst_cache = 1;
-                    instruction = 0;
+                    ins_to_apctrl = 0;
                     ins_valid = 0;
                     ins_cache_rdy = 0;
                 end
             endcase
         end
         LOAD_INS: begin
-            instruction = instruction_tmp;
+            ins_to_apctrl = ins_tmp;
             ins_valid = ins_valid_tmp;
             rst_cache = 0;
             ins_cache_rdy = 0;
-            ISA_read_addr = (ic_exp_5)? arith_5 : arith_6;
-            ISA_read_req = !ic_exp_1;
+            ins_read_addr = (ic_exp_5)? arith_5 : arith_6;
+            ins_read_req = !ic_exp_1;
         end
         default : begin
             ins_cache_rdy = 0;
             rst_cache = 0;
-            ISA_read_req = 0;
-            ISA_read_addr = 0; /* maybe wrong here when load ISA */
-            instruction = 0;
+            ins_read_req = 0;
+            ins_read_addr = 0; /* maybe wrong here when load ISA */
+            ins_to_apctrl = 0;
             ins_valid = 0;
         end
     endcase
@@ -249,7 +249,7 @@ always @(posedge clk or negedge rst or posedge rst_cache) begin
         end
     end
     else if (ic_exp_6) begin
-        ins_cache[arith_7] <= instruction_to_cache;
+        ins_cache[arith_7] <= ins_to_cache;
     end
 end
 endmodule

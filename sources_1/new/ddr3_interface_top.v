@@ -15,8 +15,8 @@ module ddr3_interface_top
     /* interface of system */
     input                               sys_clk_i,
     output                              init_calib_complete,
-    input [ISA_WIDTH - 1 : 0]           Instruction,
-    input [DATA_WIDTH - 1 : 0]          Data,
+    input [ISA_WIDTH - 1 : 0]           ins_input,
+    input [DATA_WIDTH - 1 : 0]          data_input,
     input			                    sys_rst,
     output                              wr_burst_data_req, 
     output                              load_ins_ddr,
@@ -25,24 +25,24 @@ module ddr3_interface_top
     output                              ui_clk,
 
     /* interface of ISA_cache */
-    input                               ISA_read_req,
-	input  [DDR_ADDR_WIDTH - 1 : 0]		ISA_read_addr,
-    output [ISA_WIDTH - 1 : 0]			instruction_to_cache,
+    input                               ins_read_req,
+	input  [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
+    output [ISA_WIDTH - 1 : 0]			ins_to_cache,
     output [9 : 0]                      rd_cnt_isa,
     output                              rd_burst_data_valid,
 
 
     /* interface of DATA_cache */
-    input                               DATA_read_req,
-    input                               DATA_store_req,
-    input                               JMP_ADDR_read_req,
-    output [DDR_ADDR_WIDTH - 1 : 0]	    JMP_ADDR_to_cache,
-    input  [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
-	input  [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
-	input  [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
-    output [DATA_WIDTH - 1 : 0]			DATA_to_cache, 
+    input                               data_read_req,
+    input                               data_store_req,
+    input                               jmp_addr_read_req,
+    output [DDR_ADDR_WIDTH - 1 : 0]	    jmp_addr_to_cache,
+    input  [DATA_WIDTH - 1 : 0]         data_to_ddr,
+	input  [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
+	input  [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
+    output [DATA_WIDTH - 1 : 0]			data_to_cache, 
     output [9 : 0] 						rd_cnt_data,
-    input  [9 : 0]                      isa_read_len,
+    input  [9 : 0]                      ins_read_len,
     
     /* interface of DDR3 */
     inout [15:0]                        ddr3_dq,
@@ -106,19 +106,19 @@ module ddr3_interface_top
     (
         .mem_clk(ui_clk),
         .rst(ui_clk_sync_rst),
-        .Instruction(Instruction),
-        .Data(Data),
-        .ISA_read_req(ISA_read_req),
-        .ISA_read_addr(ISA_read_addr),
-        .instruction_to_cache(instruction_to_cache),
+        .ins_input(ins_input),
+        .data_input(data_input),
+        .ins_read_req(ins_read_req),
+        .ins_read_addr(ins_read_addr),
+        .ins_to_cache(ins_to_cache),
         .rd_cnt_isa(rd_cnt_isa),
-        .DATA_read_req(DATA_read_req),
-        .DATA_store_req(DATA_store_req),
-        .JMP_ADDR_read_req(JMP_ADDR_read_req),
-        .DATA_to_ddr(DATA_to_ddr),
-        .DATA_read_addr(DATA_read_addr),
-        .DATA_write_addr(DATA_write_addr),
-        .DATA_to_cache(DATA_to_cache),
+        .data_read_req(data_read_req),
+        .data_store_req(data_store_req),
+        .jmp_addr_read_req(jmp_addr_read_req),
+        .data_to_ddr(data_to_ddr),
+        .data_read_addr(data_read_addr),
+        .data_write_addr(data_write_addr),
+        .data_to_cache(data_to_cache),
         .rd_cnt_data(rd_cnt_data),
         .rd_burst_req(rd_burst_req),
         .wr_burst_req(wr_burst_req),
@@ -128,7 +128,7 @@ module ddr3_interface_top
         .wr_burst_addr(wr_burst_addr),
         .rd_burst_data_valid(rd_burst_data_valid),
         .wr_burst_data_req(wr_burst_data_req),
-        .JMP_ADDR_to_cache(JMP_ADDR_to_cache),
+        .jmp_addr_to_cache(jmp_addr_to_cache),
         .rd_burst_data(rd_burst_data),
         .wr_burst_data(wr_burst_data),
         .rd_burst_finish(rd_burst_finish),
@@ -136,7 +136,7 @@ module ddr3_interface_top
         .load_ins_ddr(load_ins_ddr),
         .load_data_ddr(load_data_ddr),
         .load_int_ins_ddr(load_int_ins_ddr),
-        .isa_read_len(isa_read_len)
+        .ins_read_len(ins_read_len)
     );
 
     ddr_controller #(
