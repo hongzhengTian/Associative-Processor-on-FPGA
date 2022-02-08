@@ -15,29 +15,29 @@ module DDR_cache_interface
 	/*interface of system */
 	input wire 								rst,                    /* reset*/
 	input wire 								mem_clk,                /* interface clock*/
-	input wire [ISA_WIDTH - 1 : 0]			Instruction,
-	input wire [DATA_WIDTH - 1 : 0]			Data,
+	input wire [ISA_WIDTH - 1 : 0]			ins_input,
+	input wire [DATA_WIDTH - 1 : 0]			data_input,
 	output wire                             load_ins_ddr,
 	output wire                             load_data_ddr,
 	output wire                             load_int_ins_ddr,
 
     /* interface of ISA_cache */
-    input wire                              ISA_read_req,
-	input wire [DDR_ADDR_WIDTH - 1 : 0]		ISA_read_addr,
-    output reg [ISA_WIDTH - 1 : 0]			instruction_to_cache,
+    input wire                              ins_read_req,
+	input wire [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
+    output reg [ISA_WIDTH - 1 : 0]			ins_to_cache,
 	output reg [9 : 0] 						rd_cnt_isa,
-	input wire [9 : 0]						isa_read_len,
+	input wire [9 : 0]						ins_read_len,
 
     /* interface of DATA_cache */
-    input wire                              DATA_read_req,
-    input wire                              DATA_store_req,
-	input wire								JMP_ADDR_read_req,
-    input wire [DATA_WIDTH - 1 : 0]         DATA_to_ddr,
-	input wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr,
-	input wire [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr,
-    output reg [DATA_WIDTH - 1 : 0]			DATA_to_cache,
+    input wire                              data_read_req,
+    input wire                              data_store_req,
+	input wire								jmp_addr_read_req,
+    input wire [DATA_WIDTH - 1 : 0]         data_to_ddr,
+	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
+	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
+    output reg [DATA_WIDTH - 1 : 0]			data_to_cache,
 	output reg [9 : 0] 						rd_cnt_data,
-	output reg [DDR_ADDR_WIDTH - 1 : 0]		JMP_ADDR_to_cache,
+	output reg [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
 
 	/* interface of ddr_controller */
 	output reg 								rd_burst_req,           /* read request*/
@@ -132,15 +132,15 @@ always@(posedge mem_clk or posedge rst) begin
 	end
 	else begin
         case ({state, wr_burst_data_req})
-            {MEM_WRITE_ISA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{Instruction}};
+            {MEM_WRITE_ISA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{ins_input}};
             {MEM_WRITE_ISA, 1'b0}: ;
-			{MEM_WRITE_DATA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{Data}};
+			{MEM_WRITE_DATA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_input}};
             {MEM_WRITE_DATA, 1'b0}: ;
 			{MEM_WRITE_INT_ADDR, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
             {MEM_WRITE_INT_ADDR, 1'b0}: ;
-			{MEM_WRITE_INT_INS, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - 28){1'b0}}, {Instruction}};
+			{MEM_WRITE_INT_INS, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - 28){1'b0}}, {ins_input}};
             {MEM_WRITE_INT_INS, 1'b0}: ;
-			{MEM_WRITE_DATA_STORE, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{DATA_to_ddr}};
+			{MEM_WRITE_DATA_STORE, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_to_ddr}};
             {MEM_WRITE_DATA_STORE, 1'b0}: ;
 			default: wr_burst_data <= 0;
         endcase
@@ -150,15 +150,15 @@ end
 /* READ part */
 always @ (posedge mem_clk or posedge rst) begin
 	if (rst) begin
-		instruction_to_cache <= 0;
-		DATA_to_cache <= 0;
-		JMP_ADDR_to_cache <= 0;
+		ins_to_cache <= 0;
+		data_to_cache <= 0;
+		jmp_addr_to_cache <= 0;
 	end
     else begin
         case (state)
-            MEM_READ_ISA: instruction_to_cache <= rd_burst_data[ISA_WIDTH - 1 : 0];
-            MEM_READ_DATA: DATA_to_cache <= rd_burst_data[DATA_WIDTH - 1 : 0];
-            MEM_READ_INT_ADDR: JMP_ADDR_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0];
+            MEM_READ_ISA: ins_to_cache <= rd_burst_data[ISA_WIDTH - 1 : 0];
+            MEM_READ_DATA: data_to_cache <= rd_burst_data[DATA_WIDTH - 1 : 0];
+            MEM_READ_INT_ADDR: jmp_addr_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0];
             default: ;
         endcase
     end
@@ -239,21 +239,21 @@ begin
 						wr_burst_addr <= 0;
 						wr_burst_req <= 1'b0;
 						rd_burst_req <= 1'b1; 
-						rd_burst_addr <= ISA_read_addr;
-						rd_burst_len <= isa_read_len;
+						rd_burst_addr <= ins_read_addr;
+						rd_burst_len <= ins_read_len;
 					end
 					default: CMD <= 0;
 				endcase
 			end
 			1'b1: begin
-				case ({DATA_read_req, JMP_ADDR_read_req, DATA_store_req, ISA_read_req})
+				case ({data_read_req, jmp_addr_read_req, data_store_req, ins_read_req})
 					4'b1000: begin
 						CMD <= R_DATA;
 						wr_burst_len <= 0;
 						wr_burst_addr <= 0;
 						wr_burst_req <= 1'b0;
 						rd_burst_req <= 1'b1; 
-						rd_burst_addr <= DATA_read_addr;
+						rd_burst_addr <= data_read_addr;
 						rd_burst_len <= DATA_CACHE_DEPTH + 1;
 					end 
 					4'b0100: begin
@@ -262,7 +262,7 @@ begin
 						wr_burst_addr <= 0;
 						wr_burst_req <= 1'b0;
 						rd_burst_req <= 1'b1; 
-						rd_burst_addr <= DATA_read_addr;
+						rd_burst_addr <= data_read_addr;
 						rd_burst_len <= 1;
 					end
 					4'b0010: begin
@@ -271,7 +271,7 @@ begin
 						rd_burst_addr <= 0;
 						wr_burst_req <= 1'b1;
 						rd_burst_req <= 1'b0; 
-						wr_burst_addr <= DATA_write_addr + 8;
+						wr_burst_addr <= data_write_addr + 8;
 						wr_burst_len <= DATA_CACHE_DEPTH;
 					end
 					4'b0001: begin
@@ -280,8 +280,8 @@ begin
 						wr_burst_addr <= 0;
 						wr_burst_req <= 1'b0;
 						rd_burst_req <= 1'b1; 
-						rd_burst_addr <= ISA_read_addr;
-						rd_burst_len <= isa_read_len;
+						rd_burst_addr <= ins_read_addr;
+						rd_burst_len <= ins_read_len;
 					end
 					default: CMD <= 0;
 				endcase
@@ -330,52 +330,52 @@ begin
 		wr_burst_addr <= 0;
 		wr_burst_req <= 1'b0;
 		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= ISA_read_addr;
-		rd_burst_len <= isa_read_len;
+		rd_burst_addr <= ins_read_addr;
+		rd_burst_len <= ins_read_len;
 	end
 
-	else if(ddr_rdy == 1 && DATA_read_req == 1)
+	else if(ddr_rdy == 1 && data_read_req == 1)
 	begin
 		CMD <= R_DATA;
 		wr_burst_len <= 0;
 		wr_burst_addr <= 0;
 		wr_burst_req <= 1'b0;
 		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= DATA_read_addr;
+		rd_burst_addr <= data_read_addr;
 		rd_burst_len <= DATA_CACHE_DEPTH + 1;
 	end
 
-	else if(ddr_rdy == 1 && JMP_ADDR_read_req == 1)
+	else if(ddr_rdy == 1 && jmp_addr_read_req == 1)
 	begin
 		CMD <= R_INT_ADDR;
 		wr_burst_len <= 0;
 		wr_burst_addr <= 0;
 		wr_burst_req <= 1'b0;
 		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= DATA_read_addr;
+		rd_burst_addr <= data_read_addr;
 		rd_burst_len <= 1;
 	end
 
-	else if(ddr_rdy == 1 && DATA_store_req == 1)
+	else if(ddr_rdy == 1 && data_store_req == 1)
 	begin
 		CMD <= W_DATA_STORE;
 		rd_burst_len <= 0;
 		rd_burst_addr <= 0;
 		wr_burst_req <= 1'b1;
 		rd_burst_req <= 1'b0; 
-		wr_burst_addr <= DATA_write_addr + 8;
+		wr_burst_addr <= data_write_addr + 8;
 		wr_burst_len <= DATA_CACHE_DEPTH;
 	end
 
-	else if(ddr_rdy == 1 && ISA_read_req == 1)
+	else if(ddr_rdy == 1 && ins_read_req == 1)
 	begin
 		CMD <= R_ISA;
 		wr_burst_len <= 0;
 		wr_burst_addr <= 0;
 		wr_burst_req <= 1'b0;
 		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= ISA_read_addr;
-		rd_burst_len <= isa_read_len;
+		rd_burst_addr <= ins_read_addr;
+		rd_burst_len <= ins_read_len;
 	end
 	
 	else begin

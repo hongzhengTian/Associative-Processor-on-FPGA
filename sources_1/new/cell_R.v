@@ -21,7 +21,7 @@ input wire [DATA_DEPTH - 1 : 0]                 Ip_col,
 input wire [DATA_WIDTH * DATA_DEPTH - 1 : 0]    Q_B,
 input wire [DATA_WIDTH * DATA_DEPTH - 1 : 0]    Q_A,
 input wire [DATA_DEPTH - 1 : 0]                 Q_S,
-input wire                                      ABS_opt,
+input wire                                      abs_opt,
 input wire                                      rstIn,
 input wire [2:0]                                Pass,
 input wire [DATA_DEPTH - 1 : 0]                 tag,
@@ -62,7 +62,7 @@ always @(*) begin
             end
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                    case({Ie[i][j], ABS_opt, (tag[i] & Mask[j])})
+                    case({Ie[i][j], abs_opt, (tag[i] & Mask[j])})
                         3'b100: D[i][j] = Ip_row[j];
                         3'b101: D[i][j] = Ip_row[j];
                         3'b110: D[i][j] = Ip_row[j];
@@ -115,7 +115,7 @@ always @(*) begin
             end
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
-                    case({Ie[j][i], ABS_opt, (tag[j] & Mask[i])})
+                    case({Ie[j][i], abs_opt, (tag[j] & Mask[i])})
                     3'b100: D[j][i] = Ip_col[j];
                     3'b101: D[j][i] = Ip_col[j];
                     3'b110: D[j][i] = Ip_col[j];
@@ -155,7 +155,7 @@ always @(*) begin
                     if(!rstIn) begin
                         D[i][j] = Q_A[i * DATA_WIDTH + j];
                     end
-                    else if(ABS_opt == 0 && (tag[i] & Mask[j]) == 1) begin
+                    else if(abs_opt == 0 && (tag[i] & Mask[j]) == 1) begin
                         if ((Pass == 1) || (Pass == 2)) begin
                             D[i][j] = ~Q_A[i * DATA_WIDTH + j];
                         end
@@ -163,7 +163,7 @@ always @(*) begin
                             D[i][j] = Q_A[i * DATA_WIDTH + j];
                         end
                     end
-                    else if (ABS_opt == 1 && (tag[i] & Mask[j]) == 1) begin
+                    else if (abs_opt == 1 && (tag[i] & Mask[j]) == 1) begin
                         if(Q_S[i] == 1) begin
                             if ((Pass == 2) || (Pass == 3)) begin
                                 D[i][j] = ~Q_A[i * DATA_WIDTH + j];
@@ -191,7 +191,7 @@ always @(*) begin
                     if(!rstIn) begin
                         D[i][j] = Q_B[i * DATA_WIDTH + j];
                     end
-                    else if(ABS_opt == 0 && (tag[i] & Mask[j]) == 1) begin
+                    else if(abs_opt == 0 && (tag[i] & Mask[j]) == 1) begin
                         if ((Pass == 1) || (Pass == 2)) begin
                             D[i][j] = ~Q_A[i * DATA_WIDTH + j];
                         end
@@ -199,7 +199,7 @@ always @(*) begin
                             D[i][j] = Q_A[i * DATA_WIDTH + j];
                         end
                     end
-                    else if (ABS_opt == 1 && (tag[i] & Mask[j]) == 1) begin
+                    else if (abs_opt == 1 && (tag[i] & Mask[j]) == 1) begin
                         if(Q_S[i] == 1) begin
                             if ((Pass == 2) || (Pass == 3)) begin
                                 D[i][j] = ~Q_A[i * DATA_WIDTH + j];
@@ -231,7 +231,7 @@ always @(*) begin
             Ie_R = {{DATA_DEPTH}{1'b0}};
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                    if(ABS_opt == 0 && (tag[i] & Mask[j]) == 1) begin
+                    if(abs_opt == 0 && (tag[i] & Mask[j]) == 1) begin
                         if ((Pass == 1) || (Pass == 2)) begin
                             D[i][j] = ~Q_A[i * DATA_WIDTH + j];
                         end
@@ -239,7 +239,7 @@ always @(*) begin
                             D[i][j] = Q_A[i * DATA_WIDTH + j];
                         end
                     end
-                    else if (ABS_opt == 1 && (tag[i] & Mask[j]) == 1) begin
+                    else if (abs_opt == 1 && (tag[i] & Mask[j]) == 1) begin
                         if(Q_S[i] == 1) begin
                             if ((Pass == 2) || (Pass == 3)) begin
                                 D[i][j] = ~Q_A[i * DATA_WIDTH + j];

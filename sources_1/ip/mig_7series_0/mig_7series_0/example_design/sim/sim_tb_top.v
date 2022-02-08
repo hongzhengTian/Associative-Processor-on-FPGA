@@ -118,19 +118,9 @@ module sim_tb_top;
 	wire                                load_int_ins_ddr;
     wire                                wr_burst_data_req;
 
-    reg                                 ISA_read_req;
-	reg [DDR_ADDR_WIDTH - 1 : 0]		ISA_read_addr;
-    wire [ISA_WIDTH - 1 : 0]			instruction_to_cache;
     wire [DATA_WIDTH - 1 : 0]           data_print;
     wire                                data_print_rdy;
     wire                                finish_flag;
-
-    reg                                 DATA_read_req;
-    reg                                 DATA_store_req;
-    reg [DATA_WIDTH - 1 : 0]            DATA_to_ddr;
-	reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_read_addr;
-	reg [DDR_ADDR_WIDTH - 1 : 0]		DATA_write_addr;
-    wire [DATA_WIDTH - 1 : 0]			DATA_to_cache;
     reg                                 int;
 
 
@@ -142,10 +132,10 @@ module sim_tb_top;
     reg [CACHE_ISA_ADDR - 1 : 0]        MEM_ADDR_INT = 0;
     reg [CACHE_DATA_ADDR - 1 : 0]       MEM_ADDR_DATA = 0;
     reg [CACHE_DATA_ADDR - 1 : 0]       MEM_ADDR_DATA_REF = 0;
-    reg [ISA_WIDTH - 1 : 0]             Instruction_reg;
-    wire [ISA_WIDTH - 1 : 0]            Instruction;
-    reg [DATA_WIDTH - 1 : 0]            Data_reg;
-    wire [DATA_WIDTH -1 : 0]            Data;
+    reg [ISA_WIDTH - 1 : 0]             instruction_reg;
+    wire [ISA_WIDTH - 1 : 0]            instruction;
+    reg [DATA_WIDTH - 1 : 0]            data_reg;
+    wire [DATA_WIDTH -1 : 0]            data;
 
     integer                             outputfile;
     integer                             cnt_wrong;
@@ -171,19 +161,19 @@ module sim_tb_top;
     begin
         if(wr_burst_data_req & load_ins_ddr)
         begin
-          Instruction_reg = MEM_ISA[MEM_ADDR];
+          instruction_reg = MEM_ISA[MEM_ADDR];
           MEM_ADDR = MEM_ADDR + 1;
         end
 
         else if(wr_burst_data_req & load_data_ddr)
         begin
-          Data_reg = MEM_DATA[MEM_ADDR_DATA];
+          data_reg = MEM_DATA[MEM_ADDR_DATA];
           MEM_ADDR_DATA = MEM_ADDR_DATA + 1;
         end
 
         else if(wr_burst_data_req & load_int_ins_ddr)
         begin
-          Instruction_reg = MEM_INT_INS[MEM_ADDR_INT];
+          instruction_reg = MEM_INT_INS[MEM_ADDR_INT];
           MEM_ADDR_INT = MEM_ADDR_INT + 1;
         end
     end
@@ -204,8 +194,8 @@ module sim_tb_top;
         end
     end
 
-    assign Instruction = Instruction_reg;
-    assign Data = Data_reg;
+    assign instruction = instruction_reg;
+    assign data = data_reg;
 
     initial begin
         int = 0;
@@ -358,8 +348,8 @@ module sim_tb_top;
         .int                    (int),
         .init_calib_complete    (init_calib_complete),
         .sys_rst                (sys_rst),
-        .Instruction            (Instruction),
-        .Data                   (Data),
+        .ins_input              (instruction),
+        .data_input             (data),
         .wr_burst_data_req      (wr_burst_data_req),
         .load_ins_ddr           (load_ins_ddr),
         .load_data_ddr          (load_data_ddr),

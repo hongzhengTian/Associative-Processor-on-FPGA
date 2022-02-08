@@ -24,7 +24,7 @@ module AP_controller
 
     /* the interface of instruction cache */
     input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
-    input wire [ISA_WIDTH - 1 : 0]          instruction,
+    input wire [ISA_WIDTH - 1 : 0]          ins_to_apctrl,
 
     /* the interface of data cache */
     input wire                              data_cache_rdy,
@@ -112,7 +112,7 @@ module AP_controller
     output reg [DATA_DEPTH - 1 : 0]         input_F,
 
     /* control signals of CAM */
-    output reg                              ABS_opt,
+    output reg                              abs_opt,
     output reg                              rst_InA,
     output reg                              rst_InB,
     output reg                              rst_InC,
@@ -259,19 +259,19 @@ module AP_controller
     assign store_ddr_en = store_ddr_en_1 | store_ddr_en_delay;
     assign finish_flag = (st_cur == FINISH)? 1 : 0;
 
-    assign op_code = instruction [OPCODE_WIDTH + ADDR_WIDTH_CAM
+    assign op_code = ins_to_apctrl [OPCODE_WIDTH + ADDR_WIDTH_CAM
                                 + OPRAND_2_WIDTH + ADDR_WIDTH_MEM - 1 :
                                   ADDR_WIDTH_CAM + OPRAND_2_WIDTH 
                                 + ADDR_WIDTH_MEM];
 
-    assign addr_cam = instruction [ADDR_WIDTH_CAM + OPRAND_2_WIDTH 
+    assign addr_cam = ins_to_apctrl [ADDR_WIDTH_CAM + OPRAND_2_WIDTH 
                                 + ADDR_WIDTH_MEM - 1 :
                                   OPRAND_2_WIDTH 
                                 + ADDR_WIDTH_MEM];
 
-    assign matrix_select = instruction [OPRAND_2_WIDTH + ADDR_WIDTH_MEM - 1 : ADDR_WIDTH_MEM];
+    assign matrix_select = ins_to_apctrl [OPRAND_2_WIDTH + ADDR_WIDTH_MEM - 1 : ADDR_WIDTH_MEM];
     assign matrix_select_1 = addr_cam [OPRAND_2_WIDTH - 1 : 0];
-    assign addr_mem = instruction [ADDR_WIDTH_MEM - 1 : 0];
+    assign addr_mem = ins_to_apctrl [ADDR_WIDTH_MEM - 1 : 0];
     assign op_code_valid = op_code & ins_valid;     
 
     /* ALU */
@@ -936,7 +936,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1002,7 +1002,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 addr_input_cbc_A = 0;
                 addr_input_cbc_B = 0;
                 addr_input_cbc_R = 0;
@@ -1120,7 +1120,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 addr_input_rbr_A = 0;
                 addr_input_rbr_B = 0;
                 addr_input_rbr_R = 0;
@@ -1306,7 +1306,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 addr_input_cbc_A = 0;
                 addr_input_cbc_B = 0;
                 addr_input_cbc_R = 0;
@@ -1392,7 +1392,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1456,7 +1456,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1514,7 +1514,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1555,7 +1555,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1597,7 +1597,7 @@ module AP_controller
                 key_F = key_F_tmp;
                 ins_inp_valid = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1641,7 +1641,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1712,7 +1712,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1756,7 +1756,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1795,7 +1795,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1831,7 +1831,7 @@ module AP_controller
                 ins_inp_valid = 0;
                 ret_valid = 1;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -1888,7 +1888,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 addr_input_rbr_A = 0;
                 addr_input_rbr_B = 0;
                 addr_input_rbr_R = 0;
@@ -2037,7 +2037,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2078,7 +2078,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2121,7 +2121,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 addr_input_cbc_A = 0;
                 addr_input_cbc_B = 0;
                 addr_input_cbc_R = 0;
@@ -2168,7 +2168,7 @@ module AP_controller
                 key_B = 1;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2209,7 +2209,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2250,7 +2250,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 1;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2291,7 +2291,7 @@ module AP_controller
                 key_B = 1;
                 key_C = 1;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2332,7 +2332,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2374,7 +2374,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2415,7 +2415,7 @@ module AP_controller
                 key_B = 1;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2456,7 +2456,7 @@ module AP_controller
                 key_B = 1;
                 key_C = 1;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2497,7 +2497,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 1;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2538,7 +2538,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2580,7 +2580,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 1;
+                abs_opt = 1;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2621,7 +2621,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 1;
-                ABS_opt = 1;
+                abs_opt = 1;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2662,7 +2662,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 1;
-                ABS_opt = 1;
+                abs_opt = 1;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2703,7 +2703,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 1;
+                abs_opt = 1;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2744,7 +2744,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 1;
+                abs_opt = 1;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2786,7 +2786,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 1;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2827,7 +2827,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 1;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2868,7 +2868,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2909,7 +2909,7 @@ module AP_controller
                 key_B = 0;
                 key_C = 0;
                 key_F = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2949,7 +2949,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -2996,7 +2996,7 @@ module AP_controller
                 key_C = 0;
                 key_F = 0;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;
@@ -3037,7 +3037,7 @@ module AP_controller
                 key_C = key_C_tmp;
                 key_F = key_F_tmp;
                 rst_tag = 0;
-                ABS_opt = 0;
+                abs_opt = 0;
                 rst_InA = 1;
                 rst_InB = 1;
                 rst_InR = 1;

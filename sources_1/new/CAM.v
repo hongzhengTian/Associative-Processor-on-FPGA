@@ -16,7 +16,7 @@ module CAM
     input wire [DATA_WIDTH - 1 : 0] Mask_R,
     input wire [2:0]Pass,
     input wire rst_tag,
-    input wire ABS_opt,
+    input wire abs_opt,
 
     input wire [ADDR_WIDTH_CAM - 1 : 0]addr_input_Row_A,
     input wire [ADDR_WIDTH_CAM - 1 : 0]addr_input_Col_A,
@@ -167,7 +167,7 @@ cell_F #(DATA_DEPTH) cell_F(
 .rstIn(rstInF),
 .Q_S(Q_S),
 .Q(Q_out_F),
-.ABS_opt(ABS_opt),
+.abs_opt(abs_opt),
 .clk(clk),
 .tag_cell(tag_row_F),
 .tag(tag_TSC));
@@ -191,7 +191,7 @@ COPY_A) cell_R(
 .Q_B(Q_B),
 .Q_A(Q_A),
 .Q_S(Q_S),
-.ABS_opt(ABS_opt),
+.abs_opt(abs_opt),
 .rstIn(rstInR),
 .Pass(Pass),
 .tag(tag_TSC),
