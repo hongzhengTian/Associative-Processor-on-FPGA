@@ -31,10 +31,12 @@ output reg [DATA_DEPTH - 1 : 0]               tag_row,
 output reg [DATA_WIDTH * DATA_DEPTH - 1 : 0]  Q
 );
 
-reg [DATA_DEPTH - 1 : 0] OutE_R;
-reg [DATA_WIDTH - 1 : 0] OutE_C;
 reg [DATA_DEPTH - 1 : 0] Ie_R;
 reg [DATA_WIDTH - 1 : 0] Ie_C;
+reg [DATA_WIDTH - 1: 0] Ie [0 : DATA_DEPTH - 1];
+reg [DATA_DEPTH - 1 : 0] OutE_R;
+reg [DATA_WIDTH - 1 : 0] OutE_C;
+reg [DATA_WIDTH - 1: 0] OutE [0 : DATA_DEPTH - 1];
 reg [DATA_WIDTH * DATA_DEPTH - 1 : 0] tag_cell;
 reg [DATA_WIDTH * DATA_DEPTH - 1 : 0] Qb; 
 reg [DATA_WIDTH - 1: 0] D [0 : DATA_DEPTH - 1]; 
@@ -47,6 +49,26 @@ always @(*) begin
             for (j = 0; j < DATA_WIDTH; j = j + 1) begin
                 Ie_C[j] = 1'b1;
             end
+        end
+        ColxCol: begin
+            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+                if (!rst_In) begin
+                    Ie_C[i] = (addr_input_cbc == i)? 1'b1 : 1'b0;
+                end
+                else begin
+                    Ie_C[i] = 1'b0;
+                end
+            end
+        end
+        default: begin
+          Ie_C = {{DATA_WIDTH}{1'b0}};
+        end
+    endcase
+end
+
+always @(*) begin
+    case (input_mode)
+        RowxRow: begin
             for (i = 0; i < DATA_DEPTH; i = i + 1) begin
                 if (!rst_In) begin
                     Ie_R[i] = (addr_input_rbr == i)? 1'b1 : 1'b0;
@@ -55,9 +77,32 @@ always @(*) begin
                     Ie_R[i] = 1'b0;
                 end
             end
+        end
+        ColxCol: begin
+            for (j = 0; j < DATA_DEPTH; j = j + 1) begin
+                Ie_R[j] = 1'b1;
+            end
+        end
+        default: begin
+          Ie_R = {{DATA_DEPTH}{1'b0}};
+        end
+    endcase
+end
+
+always @(*) begin
+    for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+        for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+            Ie[i][j] = Ie_C[j] & Ie_R[i];
+        end
+    end
+end
+
+always @(*) begin
+    case (input_mode)
+        RowxRow: begin
             for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                    case({tag[i], mask[j], (Ie_R[i] & Ie_C[j])})
+                    case({tag[i], mask[j], Ie[i][j]})
                         3'b001: D[i][j] = input_row[j];
                         3'b011: D[i][j] = input_row[j];
                         3'b101: D[i][j] = input_row[j];
@@ -69,20 +114,9 @@ always @(*) begin
             end
         end
         ColxCol: begin
-            for (j = 0; j < DATA_DEPTH; j = j + 1) begin
-                Ie_R[j] = 1'b1;
-            end
-            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
-                if (!rst_In) begin
-                    Ie_C[i] = (addr_input_cbc == i)? 1'b1 : 1'b0;
-                end
-                else begin
-                    Ie_C[i] = 1'b0;
-                end
-            end
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
-                    case({tag[j], mask[i], (Ie_R[j] & Ie_C[i])})
+                    case({tag[j], mask[i], Ie[j][i]})
                         3'b001: D[j][i] = input_col[j];
                         3'b011: D[j][i] = input_col[j];
                         3'b101: D[j][i] = input_col[j];
@@ -126,8 +160,6 @@ always @(*) begin
             end
         end
         default: begin
-          Ie_C = {{DATA_WIDTH}{1'b0}};
-          Ie_R = {{DATA_DEPTH}{1'b0}};
           for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
                     if (tag[i] == 1 && mask[j] == 1 ) begin
@@ -162,15 +194,21 @@ always @(posedge clk) begin
                     OutE_C[j] <= 1'b1;
                 end
             end
+        end
+        ColxCol: begin
+            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+                OutE_C[i] <= (addr_output_cbc == i)? 1'b1 : 1'b0;
+            end
+        end
+        default: ;
+    endcase
+end
+
+always @(posedge clk) begin
+    case (input_mode)
+        RowxRow: begin
             for (i = 0; i < DATA_DEPTH; i = i + 1) begin
                 OutE_R[i] <= (addr_output_rbr == i)? 1'b1 : 1'b0;
-            end
-            for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-                for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
-                    if((OutE_R[i] & OutE_C[j] == 1)) begin
-                        Q_out_row[j] <= Q[i * DATA_WIDTH + j];
-                    end
-                end
             end
         end
         ColxCol: begin
@@ -182,12 +220,34 @@ always @(posedge clk) begin
                     OutE_R[j] <= 1'b1;
                 end
             end
-            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
-                OutE_C[i] <= (addr_output_cbc == i)? 1'b1 : 1'b0;
+        end
+        default: ;
+    endcase
+end
+
+always @(*) begin
+    for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+        for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+            OutE[i][j] = OutE_C[j] & OutE_R[i];
+        end
+    end
+end
+
+always @(posedge clk) begin
+    case (input_mode)
+        RowxRow: begin
+            for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
+                for (j = 0; j <= DATA_WIDTH - 1; j = j + 1) begin
+                    if(OutE[i][j]) begin
+                        Q_out_row[j] <= Q[i * DATA_WIDTH + j];
+                    end
+                end
             end
+        end
+        ColxCol: begin
             for (i = 0; i <= DATA_WIDTH - 1; i = i + 1) begin
                 for (j = 0; j <= DATA_DEPTH - 1; j = j + 1) begin
-                    if((OutE_R[j] & OutE_C[i] == 1)) begin
+                    if(OutE[j][i]) begin
                         Q_out_col[j] <= Q[j * DATA_WIDTH + i];
                     end
                 end
