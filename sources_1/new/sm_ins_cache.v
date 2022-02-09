@@ -59,8 +59,8 @@ always @(*) begin
         end 
         LOAD_INS: begin
             case (ic_exp_1)
-                1'b1: st_next = START; 
-                default: st_next = LOAD_INS;
+                1'b1: st_next = LOAD_INS; 
+                default: st_next = START;
             endcase
         end
         default: st_next = START;

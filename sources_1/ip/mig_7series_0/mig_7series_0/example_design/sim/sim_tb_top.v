@@ -42,7 +42,9 @@ module sim_tb_top;
 
     // The following parameters are multiplier and divisor factors for PLLE2.
     // Based on the selected design frequency these parameters vary.
-    parameter                       CLKIN_PERIOD            = 5000;// Input Clock Period
+    parameter                       CLKIN_PERIOD_1          = 5000;// Input Clock Period
+    parameter                       CLKIN_PERIOD_2          = 5000;// Input Clock Period
+
     parameter                       CLKIN_CAM_PERIOD        = 5000;//CLKIN_PERIOD / 8;
 
     // Simulation parameters
@@ -76,7 +78,8 @@ module sim_tb_top;
     // Wire Declarations
     reg                                 sys_rst_n;
     wire                                sys_rst;
-    reg                                 sys_clk_i;
+    reg                                 sys_clk_i_1;
+    reg                                 sys_clk_i_2;
     reg                                 clk_ref_i;
     wire                                ddr3_reset_n;
     wire [DQ_WIDTH-1:0]                 ddr3_dq_fpga;
@@ -157,7 +160,7 @@ module sim_tb_top;
         $finish;
     end
 
-    always @(posedge sys_clk_i) 
+    always @(posedge sys_clk_i_2) 
     begin
         if(wr_burst_data_req & load_ins_ddr)
         begin
@@ -200,7 +203,7 @@ module sim_tb_top;
     initial begin
         int = 0;
         cnt_wrong = 0;
-        #58972900
+        #58977900
         int = 1;
         #6000
         int = 0;
@@ -216,9 +219,13 @@ module sim_tb_top;
 
     // Clock Generation
     initial
-        sys_clk_i = 1'b0;
+        sys_clk_i_1 = 1'b0;
     always
-        sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
+        sys_clk_i_1 = #(CLKIN_PERIOD_1/2.0) ~sys_clk_i_1;
+    initial
+        sys_clk_i_2 = 1'b0;
+    always
+        sys_clk_i_2 = #(CLKIN_PERIOD_2/2.0) ~sys_clk_i_2;
 
     initial
         clk_ref_i = 1'b0;
@@ -344,7 +351,8 @@ module sim_tb_top;
      ADDR_WIDTH_MEM
       ) u_AP_top
         (
-        .sys_clk_i              (sys_clk_i),
+        .sys_clk_i_1            (sys_clk_i_1),
+        .sys_clk_i_2            (sys_clk_i_2),
         .int                    (int),
         .init_calib_complete    (init_calib_complete),
         .sys_rst                (sys_rst),

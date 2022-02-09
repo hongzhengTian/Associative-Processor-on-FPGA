@@ -28,8 +28,10 @@ module ddr3_interface_top
     input                               ins_read_req,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
     output [ISA_WIDTH - 1 : 0]			ins_to_cache,
-    output [9 : 0]                      rd_cnt_isa,
+    output                              wr_en_ddr_to_ins_fifo,
     output                              rd_burst_data_valid,
+    output                              ins_reading,
+    input                               ddr_to_ic_empty,
 
 
     /* interface of DATA_cache */
@@ -42,7 +44,7 @@ module ddr3_interface_top
 	input  [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
     output [DATA_WIDTH - 1 : 0]			data_to_cache, 
     output [9 : 0] 						rd_cnt_data,
-    input  [9 : 0]                      ins_read_len,
+    input  [7 : 0]                      ins_read_len,
     
     /* interface of DDR3 */
     inout [15:0]                        ddr3_dq,
@@ -111,7 +113,9 @@ module ddr3_interface_top
         .ins_read_req(ins_read_req),
         .ins_read_addr(ins_read_addr),
         .ins_to_cache(ins_to_cache),
-        .rd_cnt_isa(rd_cnt_isa),
+        .wr_en_ddr_to_ins_fifo(wr_en_ddr_to_ins_fifo),
+        .ddr_to_ic_empty(ddr_to_ic_empty),
+        .ins_reading(ins_reading),
         .data_read_req(data_read_req),
         .data_store_req(data_store_req),
         .jmp_addr_read_req(jmp_addr_read_req),

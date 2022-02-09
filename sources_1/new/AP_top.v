@@ -20,7 +20,8 @@ module AP_top
    )
     (
     /* interface of system */
-    input                               sys_clk_i,
+    input                               sys_clk_i_1,
+    input                               sys_clk_i_2,
     input                               int,
     output                              init_calib_complete,
     input [ISA_WIDTH - 1 : 0]           ins_input,
@@ -138,11 +139,12 @@ module AP_top
     wire [ISA_WIDTH - 1 : 0]            ins_to_apctrl;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
     wire                                ins_read_req;
+    wire                                ddr_to_ic_rd_en;
     wire [DDR_ADDR_WIDTH -1 : 0]        ins_read_addr;
     wire [ISA_WIDTH - 1 : 0]            ins_to_cache;
-    wire [9 : 0]                        rd_cnt_isa;
+    wire [7 : 0]                        rd_cnt_ins;
     wire                                rd_burst_data_valid;
-    wire [9 : 0]                        ins_read_len;
+    wire [7 : 0]                        ins_read_len;
 
     wire                                data_cache_rdy;
     wire                                jmp_addr_rdy;
@@ -168,6 +170,20 @@ module AP_top
     wire [DATA_DEPTH - 1 : 0]           tmp_C_F_ret;
     wire                                ctxt_rdy;
 
+    wire [29 : 0]                       ins_ddr_to_fifo;
+    wire                                wr_en_ddr_to_ins_fifo;
+    wire                                rd_en_ic_to_ins_fifo;
+    wire [29 : 0]                       ins_fifo_to_cache;
+    wire                                ddr_to_ic_full;
+    wire                                ddr_to_ic_empty;
+    wire                                ins_reading;
+    wire [7 : 0]                        rd_data_cnt_to_ic;
+    wire [7 : 0]                        wr_data_cnt_to_ddr_ins;
+    wire                                prog_full;
+    wire                                prog_empty;
+    wire                                wr_rst_busy;
+    wire                                rd_rst_busy;
+
     AP_controller #(
     DATA_WIDTH, 
     DATA_DEPTH, 
@@ -178,7 +194,7 @@ module AP_top
     DDR_ADDR_WIDTH
     )AP_controller_u 
     (
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .rst_STATE              (sys_rst),
     .rst_clk                (sys_rst),
     .int                    (int),
@@ -294,7 +310,7 @@ module AP_top
     .mask_A                 (mask_A),
     .mask_B                 (mask_B),
     .mask_R                 (mask_R),
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .addr_input_rbr_B       (addr_input_rbr_B),
     .addr_input_cbc_B       (addr_input_cbc_B),
     .rst_InB                (rst_InB),
@@ -359,7 +375,7 @@ module AP_top
     .ddr3_cs_n              (ddr3_cs_n),
     .ddr3_dm                (ddr3_dm),
     .ddr3_odt               (ddr3_odt),
-    .sys_clk_i              (sys_clk_i),
+    .sys_clk_i              (sys_clk_i_2),
     .ui_clk                 (ui_clk),
     .init_calib_complete    (init_calib_complete),
     .sys_rst                (sys_rst),
@@ -371,8 +387,10 @@ module AP_top
     .load_int_ins_ddr       (load_int_ins_ddr),
     .ins_read_req           (ins_read_req),
     .ins_read_addr          (ins_read_addr),
-    .ins_to_cache           (ins_to_cache),
-    .rd_cnt_isa             (rd_cnt_isa),
+    .ins_to_cache           (ins_ddr_to_fifo),
+    .wr_en_ddr_to_ins_fifo  (wr_en_ddr_to_ins_fifo),
+    .ddr_to_ic_empty        (ddr_to_ic_empty),
+    .ins_reading            (ins_reading),
     .rd_burst_data_valid    (rd_burst_data_valid),
     .data_read_req          (data_read_req),
     .data_store_req         (data_store_req),
@@ -393,7 +411,7 @@ module AP_top
     DDR_ADDR_WIDTH
     ) program_counter_u 
     (
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .rst                    (sys_rst),
     .ret_valid              (ret_valid),
     .int                    (int),
@@ -405,7 +423,25 @@ module AP_top
     .ins_cache_rdy          (ins_cache_rdy)
     );
 
-    
+    fifo_generator_0 fifo_ins_to_cache_u
+    (
+    .rst                    (!sys_rst), // input wire rst
+    .wr_clk                 (sys_clk_i_2), // input wire wr_clk
+    .rd_clk                 (sys_clk_i_1), // input wire rd_clk
+    .din                    (ins_ddr_to_fifo), // input wire [29 : 0] din
+    .wr_en                  (wr_en_ddr_to_ins_fifo), // input wire wr_en
+    .rd_en                  (ddr_to_ic_rd_en), // input wire rd_en
+    .dout                   (ins_fifo_to_cache), // output wire [29 : 0] dout
+    .full                   (ddr_to_ic_full), // output wire full
+    .empty                  (ddr_to_ic_empty), // output wire empty
+    .rd_data_count          (rd_data_cnt_to_ic), // output wire [7 : 0] rd_data_count
+    .wr_data_count          (wr_data_cnt_to_ddr_ins), // output wire [7 : 0] wr_data_count
+    .prog_full              (prog_full), // output wire prog_full
+    .prog_empty             (prog_empty), // output wire prog_empty
+    .wr_rst_busy            (wr_rst_busy), // output wire wr_rst_busy
+    .rd_rst_busy            (rd_rst_busy) // output wire rd_rst_busy
+    );
+
     ins_cache #(
     ISA_DEPTH,
     INT_INS_DEPTH,
@@ -417,17 +453,20 @@ module AP_top
     TOTAL_ISA_DEPTH
     )ins_cache_u 
     (
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .rst                    (sys_rst),
     .addr_ins               (addr_ins),
     .ins_cache_rdy          (ins_cache_rdy),
     .ins_to_apctrl          (ins_to_apctrl),
     .ins_valid              (ins_valid),
     .ins_read_req           (ins_read_req),
+    .ins_reading            (ins_reading),
+    .ddr_to_ic_rd_en        (ddr_to_ic_rd_en),
     .ins_read_addr          (ins_read_addr),
-    .ins_to_cache           (ins_to_cache),
-    .rd_cnt_isa             (rd_cnt_isa),
-    .rd_burst_data_valid    (rd_burst_data_valid),
+    .ins_to_cache           (ins_fifo_to_cache),
+    //.rd_cnt_ins             (rd_data_cnt_to_ic),
+    .rd_burst_data_valid    (prog_full),
+    .ddr_to_ic_empty        (ddr_to_ic_empty),
     .ins_read_len           (ins_read_len)
     );
 
@@ -441,7 +480,7 @@ module AP_top
     ADDR_WIDTH_CAM
     )data_cache_u 
     (
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .rst                    (sys_rst),
     .int_set                (int_set),
     .data_out_rbr           (data_out_rbr),
@@ -475,7 +514,7 @@ module AP_top
     DATA_DEPTH,
     ADDR_WIDTH_MEM
     )int_stack_u (
-    .clk                    (sys_clk_i),
+    .clk                    (sys_clk_i_1),
     .rst                    (sys_rst),
     .int_set                (int_set),
     .ret_valid              (ret_valid),

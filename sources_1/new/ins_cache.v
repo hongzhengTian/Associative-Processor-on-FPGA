@@ -28,11 +28,14 @@ module ins_cache
 
     /* the interface to DDR interface */
     output reg                          ins_read_req,
+    input wire                          ins_reading,
+    output reg                          ddr_to_ic_rd_en,
     output reg [DDR_ADDR_WIDTH -1 : 0]  ins_read_addr,
     input wire [ISA_WIDTH - 1 : 0]      ins_to_cache,
-    input wire [9 : 0]                  rd_cnt_isa,
+    //input wire [7 : 0]                  rd_cnt_ins,
     input wire                          rd_burst_data_valid,
-    output wire [9 : 0]                 ins_read_len
+    input wire                          ddr_to_ic_empty,
+    output wire [7 : 0]                 ins_read_len
 );
 
 /* states */
@@ -46,8 +49,8 @@ reg [ISA_WIDTH - 1 : 0]                 int_serve;
 
 wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
-reg [9 : 0]                             ins_load_cnt;
-reg [9 : 0]                             rd_cnt_ins_reg;
+reg [7 : 0]                             rd_cnt_ins;
+reg [7 : 0]                             rd_cnt_ins_reg;
 reg                                     rd_burst_data_valid_delay;
 
 reg [ISA_WIDTH - 1 : 0]                 ins_tmp;
@@ -91,7 +94,7 @@ assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
     .addr_ins                   (addr_ins),
     .tag_ins                    (tag_ins),
     .rd_cnt_ins_reg             (rd_cnt_ins_reg),
-    .rd_cnt_isa                 (rd_cnt_isa),
+    .rd_cnt_ins                 (rd_cnt_ins),
     .ins_read_len               (ins_read_len),
     .st_cur_e_LI                (st_cur_e_LI),
     .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
@@ -132,6 +135,19 @@ sm_ins_cache #(
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
+        rd_cnt_ins <= 0;
+    end
+    else if (rd_cnt_ins == ISA_DEPTH) begin
+        rd_cnt_ins <= 0;
+    end
+    else if (!ddr_to_ic_empty && st_cur == LOAD_INS) begin
+        rd_cnt_ins <= rd_cnt_ins + 1;
+    end
+end
+
+
+always @(posedge clk or negedge rst) begin
+    if (!rst) begin
         rd_cnt_ins_reg <= 0;
         ins_cache_init <= 0;
         load_times <= 0;
@@ -144,11 +160,16 @@ always @(posedge clk or negedge rst) begin
         case (st_cur)
             LOAD_INS: begin
                 tag_ins <= addr_ins;
-                if (ic_exp_1) begin
-                    rd_cnt_ins_reg <= rd_cnt_isa;
-                    ins_cache_init <= 1;
-                    load_times <= arith_1;
-                end
+                case(ic_exp_1)
+                    1'b1: begin
+                        rd_cnt_ins_reg <= rd_cnt_ins;
+                        ins_cache_init <= 1;
+                    end
+                    1'b0: begin
+                        load_times <= arith_1;
+                    end
+                    default:;
+                endcase
             end
             SENT_INS: begin
                 case ({ic_exp_2, ic_exp_3})
@@ -175,12 +196,21 @@ always @(posedge clk or negedge rst) begin
     end
 end
 
+always @(*) begin // TODO
+    if (st_cur == LOAD_INS && ins_reading == 0) begin
+        ins_read_req = 1;
+    end
+    else begin
+        ins_read_req = 0;
+    end
+end
+
 always @(*) begin
     case (st_cur)
         START: begin
-            ins_read_req = 0;
+            //ins_read_req = 0;
+            ddr_to_ic_rd_en = 0;
             ins_read_addr = 0;
-            ins_load_cnt = 0;
             rst_cache = 0;
             ins_to_apctrl = ins_tmp;
             ins_cache_rdy = ins_cache_init;
@@ -190,7 +220,8 @@ always @(*) begin
             endcase
         end
         SENT_INS: begin
-            ins_read_req = 0;
+            //ins_read_req = 0;
+            ddr_to_ic_rd_en = 0;
             ins_read_addr = 0;
             case ({ic_exp_2, ic_exp_3})
                 2'b10: begin
@@ -225,12 +256,19 @@ always @(*) begin
             rst_cache = 0;
             ins_cache_rdy = 0;
             ins_read_addr = (ic_exp_5)? arith_5 : arith_6;
-            ins_read_req = !ic_exp_1;
+            /*if (!ins_reading) begin
+                ins_read_req = ic_exp_1;
+            end
+            else begin
+                ins_read_req = 0;
+            end*/
+            ddr_to_ic_rd_en = ic_exp_1 && (!ddr_to_ic_empty);
         end
         default : begin
             ins_cache_rdy = 0;
             rst_cache = 0;
-            ins_read_req = 0;
+            //  ins_read_req = 0;
+            ddr_to_ic_rd_en = 0;
             ins_read_addr = 0; /* maybe wrong here when load ISA */
             ins_to_apctrl = 0;
             ins_valid = 0;
@@ -248,7 +286,7 @@ always @(posedge clk or negedge rst or posedge rst_cache) begin
             ins_cache[i] <= 0;
         end
     end
-    else if (ic_exp_6) begin
+    else if (!ddr_to_ic_empty) begin
         ins_cache[arith_7] <= ins_to_cache;
     end
 end
