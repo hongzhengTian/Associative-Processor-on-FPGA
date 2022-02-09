@@ -17,9 +17,9 @@ module ALU_ins_cache
     input wire [9 : 0]                          load_times,
     input wire [ADDR_WIDTH_MEM - 1 : 0]         addr_ins,
     input wire [15 : 0]                         tag_ins,
-    input wire [9 : 0]                          rd_cnt_ins_reg,
-    input wire [9 : 0]                          rd_cnt_isa, 
-    input wire [9 : 0]                          ins_read_len,
+    input wire [7 : 0]                          rd_cnt_ins_reg,
+    input wire [7 : 0]                          rd_cnt_ins, 
+    input wire [7 : 0]                          ins_read_len,
     input wire                                  st_cur_e_LI,
     input wire                                  rd_burst_data_valid_delay,
 
@@ -46,13 +46,13 @@ assign arith_3 = INT_INS_DEPTH + 1;
 assign arith_4 = TOTAL_ISA_DEPTH - rd_cnt_ins_reg;
 assign arith_5 = addr_ins << 3;
 assign arith_6 = (addr_ins - 1) << 3;
-assign arith_7 = rd_cnt_isa - 1;
+assign arith_7 = rd_cnt_ins - 1;
 
-assign ic_exp_1= (rd_cnt_isa >= ins_read_len)? 1 : 0;
+assign ic_exp_1= (rd_cnt_ins < ins_read_len)? 1 : 0;
 assign ic_exp_2= ((addr_ins < (tag_ins + ISA_DEPTH + 1)) && (addr_ins >= tag_ins))? 1 : 0;
 assign ic_exp_3= (addr_ins == {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
 assign ic_exp_4= (addr_ins > {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
 assign ic_exp_5= (load_times <= 2)? 1 : 0;
-assign ic_exp_6= (st_cur_e_LI && rd_burst_data_valid_delay && rd_cnt_isa >= 1)? 1 : 0;
+assign ic_exp_6= (st_cur_e_LI && rd_burst_data_valid_delay && rd_cnt_ins >= 1)? 1 : 0;
 
 endmodule
