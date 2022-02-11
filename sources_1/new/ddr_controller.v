@@ -5,7 +5,8 @@ module ddr_controller
 )
 (
 	input                           rst,                              
-	input                           clk,                            
+	input                           clk,     
+	input 							cache_clk,                       
 	input                           rd_burst_req,                       
 	input                           wr_burst_req,                       
 	input [9:0]                     rd_burst_len,                  
@@ -105,8 +106,6 @@ always@(posedge clk or posedge rst) begin
 		app_en_r <= 0;
 		rd_addr_cnt <= 0;
 		rd_data_cnt <= 0;
-		wr_addr_cnt <= 0;
-		wr_data_cnt <= 0;
 		app_addr_r <= 0;
 	end
 	else if (init_calib_complete) begin
@@ -123,8 +122,6 @@ always@(posedge clk or posedge rst) begin
 					app_cmd_r <= 3'b000;
 					app_addr_r <= wr_burst_addr;
 					app_en_r <= 1'b1;
-					wr_addr_cnt <= 0;
-					wr_data_cnt <= 0;
 				end
 			end
 			MEM_READ: begin
@@ -163,7 +160,6 @@ always@(posedge clk or posedge rst) begin
 			MEM_WRITE_FIRST_READ: begin
 				app_en_r <= 1'b1;
 				state <= MEM_WRITE;
-				wr_addr_cnt <= 0;
 			end
 			MEM_WRITE: begin
 				if (app_rdy) begin
@@ -171,16 +167,10 @@ always@(posedge clk or posedge rst) begin
 					if (exp_3) begin
 						app_en_r <= 1'b0;
 					end
-					else begin
-						wr_addr_cnt <= arith_2;
-					end
 				end
 				if (wr_burst_data_req) begin
 					if (exp_4) begin	
 						state <= MEM_WRITE_WAIT;
-					end
-					else begin
-						wr_data_cnt <= arith_3;
 					end
 				end
 			end
@@ -196,9 +186,6 @@ always@(posedge clk or posedge rst) begin
 							state <= WRITE_END;
 						end
 					end
-					else begin
-						wr_addr_cnt <= arith_2;
-					end
 				end
 				else if (exp_6) begin
 					state <= WRITE_END;
@@ -206,8 +193,6 @@ always@(posedge clk or posedge rst) begin
 			end
 			WRITE_END: begin
 				state <= IDLE;
-				wr_data_cnt <= 0;
-				wr_addr_cnt <= 0;
 			end
 			default: begin
 				state <= IDLE;
@@ -215,4 +200,49 @@ always@(posedge clk or posedge rst) begin
 		endcase
 	end
 end
+
+always@(posedge clk or posedge rst) begin
+	if (rst) begin
+		wr_addr_cnt <= 0;
+		wr_data_cnt <= 0;
+	end
+	else if (init_calib_complete) begin
+		case(state)
+			IDLE: begin
+				if (wr_burst_req) begin
+					wr_addr_cnt <= 0;
+					wr_data_cnt <= 0;
+				end
+			end
+			MEM_WRITE_FIRST_READ: begin
+				wr_addr_cnt <= 0;
+			end
+			MEM_WRITE: begin
+				if (app_rdy) begin
+					if (!exp_3) begin
+						wr_addr_cnt <= arith_2;
+					end
+				end
+				if (wr_burst_data_req) begin
+					if (!exp_4) begin
+						wr_data_cnt <= arith_3;
+					end
+				end
+			end
+			MEM_WRITE_WAIT: begin
+				if (app_rdy) begin
+					if (!exp_3) begin
+						wr_addr_cnt <= arith_2;
+					end
+				end
+			end
+			WRITE_END: begin
+				wr_data_cnt <= 0;
+				wr_addr_cnt <= 0;
+			end
+			default: ;
+		endcase
+	end
+end
+
 endmodule
