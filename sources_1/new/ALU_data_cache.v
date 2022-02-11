@@ -18,6 +18,7 @@ module ALU_data_cache
     input wire                              rd_burst_data_valid,
     input wire                              data_cmd_0,
     input wire                              store_ddr_en,
+    input wire                              ddr_to_dc_fifo_empty_delay,
 
     output wire [ADDR_WIDTH_MEM - 1 : 0]    arith_1,
     output wire [DDR_ADDR_WIDTH - 1 : 0]    arith_2,
@@ -54,7 +55,7 @@ assign dc_exp_2 = (rd_burst_data_valid && rd_cnt_data == 1)? 1 : 0;
 assign dc_exp_3_1 = (data_addr >= tag_data)? 1 : 0;
 assign dc_exp_3_2 = (data_addr < DATA_CACHE_DEPTH + tag_data)? 1 : 0;
 assign dc_exp_4 = !store_ddr_en;
-assign dc_exp_5 = (rd_cnt_data <= DATA_CACHE_DEPTH)? 1 : 0;
+assign dc_exp_5 = ((rd_cnt_data <= DATA_CACHE_DEPTH) || ddr_to_dc_fifo_empty_delay)? 1 : 0;
 assign dc_exp_7 = (data_store_cnt < DATA_CACHE_DEPTH)? 1 : 0;
 assign dc_exp_8 = !data_cmd_0;//(data_cmd == RowxRow_load || data_cmd == ColxCol_load || data_cmd == Addr_load)? 1 : 0;
 assign dc_exp_9 = (rd_burst_data_valid && rd_cnt_data >= 2)? 1 : 0;
