@@ -28,23 +28,27 @@ module ddr3_interface_top
     input                               ins_read_req,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
     output [ISA_WIDTH + 8 : 0]			ins_ddr_to_fifo,
-    output                              wr_en_ddr_to_ins_fifo,
-    output                              rd_burst_data_valid,
+    output                              wr_en_ddr_to_ic_fifo,
+    //output                              rd_burst_data_valid,
     output                              ins_reading,
-    input                               ddr_to_ic_empty,
+    input                               ddr_to_ic_fifo_empty,
 
 
     /* interface of DATA_cache */
     input                               data_read_req,
     input                               data_store_req,
     input                               jmp_addr_read_req,
-    output [DDR_ADDR_WIDTH - 1 : 0]	    jmp_addr_to_cache,
+    //output [DDR_ADDR_WIDTH - 1 : 0]	    jmp_addr_to_cache,
     input  [DATA_WIDTH - 1 : 0]         data_to_ddr,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
-    output [DATA_WIDTH - 1 : 0]			data_to_cache, 
-    output [9 : 0] 						rd_cnt_data,
+    //output [DATA_WIDTH - 1 : 0]			data_to_cache, 
+    //output [9 : 0] 						rd_cnt_data,
+    output [52 : 0]                     data_ddr_to_fifo,
     input  [7 : 0]                      ins_read_len,
+    input                               ddr_to_dc_fifo_empty,
+    output                              wr_en_ddr_to_dc_fifo,
+    output                              data_reading,
     
     /* interface of DDR3 */
     inout [15:0]                        ddr3_dq,
@@ -95,8 +99,12 @@ module ddr3_interface_top
     wire [ISA_WIDTH - 1 : 0]    ins_to_cache;
     wire [7 : 0]                rd_cnt_ins;
     wire                        rd_burst_data_valid_delay;
+    wire [DDR_ADDR_WIDTH - 1:0] jmp_addr_to_cache;
+    wire [DATA_WIDTH - 1:0]     data_to_cache;
+    wire [7 : 0]                rd_cnt_data;
 
     assign ins_ddr_to_fifo = {ins_to_cache, rd_cnt_ins, rd_burst_data_valid_delay};
+    assign data_ddr_to_fifo = {data_to_cache, jmp_addr_to_cache, rd_cnt_data, rd_burst_data_valid_delay};
     
     DDR_cache_interface #(
     DDR_DATA_WIDTH, 
@@ -119,8 +127,8 @@ module ddr3_interface_top
         .ins_read_addr(ins_read_addr),
         .ins_to_cache(ins_to_cache),
         .rd_cnt_ins(rd_cnt_ins),
-        .wr_en_ddr_to_ins_fifo(wr_en_ddr_to_ins_fifo),
-        .ddr_to_ic_empty(ddr_to_ic_empty),
+        .wr_en_ddr_to_ic_fifo(wr_en_ddr_to_ic_fifo),
+        .ddr_to_ic_fifo_empty(ddr_to_ic_fifo_empty),
         .ins_reading(ins_reading),
         .data_read_req(data_read_req),
         .data_store_req(data_store_req),
@@ -129,6 +137,9 @@ module ddr3_interface_top
         .data_read_addr(data_read_addr),
         .data_write_addr(data_write_addr),
         .data_to_cache(data_to_cache),
+        .ddr_to_dc_fifo_empty(ddr_to_dc_fifo_empty),
+        .wr_en_ddr_to_dc_fifo(wr_en_ddr_to_dc_fifo),
+        .data_reading(data_reading),
         .rd_cnt_data(rd_cnt_data),
         .rd_burst_req(rd_burst_req),
         .wr_burst_req(wr_burst_req),

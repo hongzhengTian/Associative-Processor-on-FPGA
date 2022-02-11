@@ -26,9 +26,9 @@ module DDR_cache_interface
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
     output reg [ISA_WIDTH - 1 : 0]			ins_to_cache,
 	output reg [7 : 0]						rd_cnt_ins,
-	output reg                              wr_en_ddr_to_ins_fifo,
+	output reg                              wr_en_ddr_to_ic_fifo,
 	output reg                              ins_reading, // handshake signal with ins cache, reset ins_read_req
-	input wire 								ddr_to_ic_empty,
+	input wire 								ddr_to_ic_fifo_empty,
 	input wire [7 : 0]						ins_read_len,
 
     /* interface of DATA_cache */
@@ -39,8 +39,11 @@ module DDR_cache_interface
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
     output reg [DATA_WIDTH - 1 : 0]			data_to_cache,
-	output reg [9 : 0] 						rd_cnt_data,
+	output reg [7 : 0] 						rd_cnt_data,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
+	input wire                              ddr_to_dc_fifo_empty,
+	output reg                              wr_en_ddr_to_dc_fifo,
+	output reg                              data_reading,
 
 	/* interface of ddr_controller */
 	output reg 								rd_burst_req,           /* read request*/
@@ -106,7 +109,8 @@ assign load_ins_ddr 						= (state == MEM_WRITE_ISA);
 assign load_data_ddr 						= (state == MEM_WRITE_DATA);
 assign load_int_ins_ddr 					= (state == MEM_WRITE_INT_INS);
 
-reg                      					ddr_to_ic_empty_delay;
+reg                      					ddr_to_ic_fifo_empty_delay;
+reg  										ddr_to_dc_fifo_empty_delay;
 
 wire [9 : 0]								arith_1;
 wire [7 : 0]								arith_2;
@@ -131,7 +135,8 @@ always @(posedge mem_clk or posedge rst) begin
 end
 
 always @(posedge mem_clk) begin
-	ddr_to_ic_empty_delay <= ddr_to_ic_empty;
+	ddr_to_ic_fifo_empty_delay <= ddr_to_ic_fifo_empty;
+	ddr_to_dc_fifo_empty_delay <= ddr_to_dc_fifo_empty;
 end
 
 /* WRITE part */
@@ -163,6 +168,7 @@ always @ (posedge mem_clk or posedge rst) begin
 		data_to_cache <= 0;
 		jmp_addr_to_cache <= 0;
 		ins_reading <= 0;
+		data_reading <= 0;
 	end
     else begin
         case (state)
@@ -170,10 +176,17 @@ always @ (posedge mem_clk or posedge rst) begin
 				ins_to_cache <= rd_burst_data[ISA_WIDTH - 1 : 0];
 				ins_reading <= 1;
 			end
-            MEM_READ_DATA: data_to_cache <= rd_burst_data[DATA_WIDTH - 1 : 0];
-            MEM_READ_INT_ADDR: jmp_addr_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0];
+            MEM_READ_DATA: begin
+				data_to_cache <= rd_burst_data[DATA_WIDTH - 1 : 0];
+				data_reading <= 1;
+			end
+            MEM_READ_INT_ADDR: begin
+				jmp_addr_to_cache <= rd_burst_data[DDR_ADDR_WIDTH - 1 : 0];
+				data_reading <= 1;
+			end
             default: begin
 				ins_reading <= 0;
+				data_reading <= 0;
 			end
         endcase
     end
@@ -184,21 +197,35 @@ always @(posedge mem_clk or posedge rst) begin
     if (rst) begin
         rd_cnt_ins <= 0;
 		rd_cnt_data <= 0;
+		wr_en_ddr_to_ic_fifo <= 0;
+		wr_en_ddr_to_dc_fifo <= 0;
     end
     else begin
         case ({state, rd_burst_data_valid, rd_burst_finish})
             {MEM_READ_ISA,2'b10}: begin
 				rd_cnt_ins <= arith_2;
-				wr_en_ddr_to_ins_fifo <= 1;
+				wr_en_ddr_to_ic_fifo <= 1;
 			end
             {MEM_READ_ISA,2'b01}: begin
 				rd_cnt_ins <= 0;
-				wr_en_ddr_to_ins_fifo <= 0;
+				wr_en_ddr_to_ic_fifo <= 0;
 			end
-            {MEM_READ_DATA,2'b10}: rd_cnt_data <= arith_1;
-            {MEM_READ_DATA,2'b01}: rd_cnt_data <= 0;
-            {MEM_READ_INT_ADDR,2'b10}: rd_cnt_data <= arith_1;
-            {MEM_READ_INT_ADDR,2'b01}: rd_cnt_data <= 0; 
+            {MEM_READ_DATA,2'b10}: begin
+				rd_cnt_data <= arith_1;
+				wr_en_ddr_to_dc_fifo <= 1;
+			end
+            {MEM_READ_DATA,2'b01}: begin
+				rd_cnt_data <= 0;
+				wr_en_ddr_to_dc_fifo <= 0;
+			end
+            {MEM_READ_INT_ADDR,2'b10}: begin
+				rd_cnt_data <= arith_1;
+				wr_en_ddr_to_dc_fifo <= 1;
+			end
+            {MEM_READ_INT_ADDR,2'b01}: begin
+				rd_cnt_data <= 0; 
+				wr_en_ddr_to_dc_fifo <= 0;
+			end
             default:;
         endcase
     end
@@ -315,17 +342,31 @@ always@(posedge mem_clk or posedge rst) begin
 					W_ISA: state <= MEM_WRITE_ISA;
 					W_DATA: state <= MEM_WRITE_DATA;
 					R_ISA: begin
-						if (ddr_to_ic_empty_delay) begin
+						if (ddr_to_ic_fifo_empty_delay) begin
 							state <= MEM_READ_ISA;
 						end
 						else begin
 							state <= START;
 						end
 					end
-					R_DATA: state <= MEM_READ_DATA;
+					R_DATA: begin
+						if (ddr_to_dc_fifo_empty_delay) begin
+							state <= MEM_READ_DATA;
+						end
+						else begin
+							state <= START;
+						end
+					end
 					W_INT_ADDR: state <= MEM_WRITE_INT_ADDR;
 					W_INT_INS: state <= MEM_WRITE_INT_INS;
-					R_INT_ADDR: state <= MEM_READ_INT_ADDR;
+					R_INT_ADDR: begin
+						if (ddr_to_dc_fifo_empty_delay) begin
+							state <= MEM_READ_INT_ADDR;
+						end
+						else begin
+							state <= START;
+						end
+					end
 					W_DATA_STORE: state <= MEM_WRITE_DATA_STORE;
 					default: state <= START;
 				endcase

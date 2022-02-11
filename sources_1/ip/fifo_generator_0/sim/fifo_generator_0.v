@@ -63,10 +63,6 @@ module fifo_generator_0 (
   dout,
   full,
   empty,
-  rd_data_count,
-  wr_data_count,
-  prog_full,
-  prog_empty,
   wr_rst_busy,
   rd_rst_busy
 );
@@ -90,10 +86,6 @@ output wire [38 : 0] dout;
 output wire full;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ EMPTY" *)
 output wire empty;
-output wire [7 : 0] rd_data_count;
-output wire [7 : 0] wr_data_count;
-output wire prog_full;
-output wire prog_empty;
 output wire wr_rst_busy;
 output wire rd_rst_busy;
 
@@ -116,14 +108,14 @@ output wire rd_rst_busy;
     .C_HAS_INT_CLK(0),
     .C_HAS_MEMINIT_FILE(0),
     .C_HAS_OVERFLOW(0),
-    .C_HAS_RD_DATA_COUNT(1),
+    .C_HAS_RD_DATA_COUNT(0),
     .C_HAS_RD_RST(0),
     .C_HAS_RST(1),
     .C_HAS_SRST(0),
     .C_HAS_UNDERFLOW(0),
     .C_HAS_VALID(0),
     .C_HAS_WR_ACK(0),
-    .C_HAS_WR_DATA_COUNT(1),
+    .C_HAS_WR_DATA_COUNT(0),
     .C_HAS_WR_RST(0),
     .C_IMPLEMENTATION_TYPE(2),
     .C_INIT_WR_PNTR_VAL(0),
@@ -136,10 +128,10 @@ output wire rd_rst_busy;
     .C_PRIM_FIFO_TYPE("512x72"),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL(2),
     .C_PROG_EMPTY_THRESH_NEGATE_VAL(3),
-    .C_PROG_EMPTY_TYPE(1),
-    .C_PROG_FULL_THRESH_ASSERT_VAL(128),
-    .C_PROG_FULL_THRESH_NEGATE_VAL(127),
-    .C_PROG_FULL_TYPE(1),
+    .C_PROG_EMPTY_TYPE(0),
+    .C_PROG_FULL_THRESH_ASSERT_VAL(253),
+    .C_PROG_FULL_THRESH_NEGATE_VAL(252),
+    .C_PROG_FULL_TYPE(0),
     .C_RD_DATA_COUNT_WIDTH(8),
     .C_RD_DEPTH(256),
     .C_RD_FREQ(1),
@@ -333,10 +325,10 @@ output wire rd_rst_busy;
     .valid(),
     .underflow(),
     .data_count(),
-    .rd_data_count(rd_data_count),
-    .wr_data_count(wr_data_count),
-    .prog_full(prog_full),
-    .prog_empty(prog_empty),
+    .rd_data_count(),
+    .wr_data_count(),
+    .prog_full(),
+    .prog_empty(),
     .sbiterr(),
     .dbiterr(),
     .wr_rst_busy(wr_rst_busy),

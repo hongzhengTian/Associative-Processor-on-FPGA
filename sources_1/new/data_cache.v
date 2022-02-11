@@ -33,13 +33,17 @@ module data_cache
     output reg                              data_read_req,
     output reg                              data_store_req,
     output reg                              jmp_addr_read_req,
-    input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
+    //input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         data_to_ddr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
-    input wire [DATA_WIDTH - 1 : 0]			data_to_cache,
-    input wire [9 : 0]                      rd_cnt_data,
-    input wire                              rd_burst_data_valid
+    //input wire [DATA_WIDTH - 1 : 0]			data_to_cache,
+    //input wire [9 : 0]                      rd_cnt_data,
+    input wire [52 : 0]                     data_fifo_to_dc,
+    output reg                              rd_en_ddr_to_dc_fifo,
+    input wire                              ddr_to_dc_fifo_empty,
+    input wire                              data_reading
+    //input wire                              rd_burst_data_valid
 );
 
 /* states */
@@ -68,21 +72,31 @@ reg                                         data_to_ddr_rdy;
 
 wire [3 : 0]                                st_cur;
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
-reg                                         rd_burst_data_valid_delay;
+
 reg [DDR_ADDR_WIDTH - 1 : 0]		        jmp_addr_tmp;
 reg [DATA_WIDTH - 1 : 0]                    data_in_rbr_tmp;
 reg [DATA_DEPTH - 1 : 0]                    data_in_cbc_tmp;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        data_read_addr_tmp;
 reg [DDR_ADDR_WIDTH - 1 : 0]		        data_write_addr_tmp;
 
+wire [DDR_ADDR_WIDTH - 1 : 0]               jmp_addr_to_cache;
+wire [DATA_WIDTH - 1 : 0]                   data_to_cache;
+wire [7 : 0]                                rd_cnt_data;
+wire                                        rd_burst_data_valid;
+
 integer j ;
+
+assign data_to_cache = data_fifo_to_dc[DDR_ADDR_WIDTH + DATA_WIDTH + 8 : DDR_ADDR_WIDTH + 9];
+assign jmp_addr_to_cache = data_fifo_to_dc[DDR_ADDR_WIDTH + 8 : 9];
+assign rd_cnt_data = data_fifo_to_dc[8 : 1];
+assign rd_burst_data_valid = data_fifo_to_dc[0 : 0];
 
 /* ALU */
 wire [ADDR_WIDTH_MEM - 1 : 0]               arith_1;
 wire [DDR_ADDR_WIDTH - 1 : 0]               arith_2;
 wire [ADDR_WIDTH_MEM - 1 : 0]               arith_3;
 wire [DDR_ADDR_WIDTH - 1 : 0]               arith_4;
-wire [9 : 0]                                arith_5;
+wire [7 : 0]                                arith_5;
 wire [9 : 0]                                arith_6;
 wire                                        dc_exp_1;
 wire                                        dc_exp_2;
@@ -109,7 +123,7 @@ ALU_data_cache_u(
     .tag_data                   (tag_data),
     .rd_cnt_data                (rd_cnt_data),
     .data_store_cnt             (data_store_cnt),
-    .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
+    .rd_burst_data_valid        (rd_burst_data_valid),
     .data_cmd_0                 (data_cmd[0]),
     .store_ddr_en               (store_ddr_en),
     .arith_1                    (arith_1),
@@ -156,10 +170,6 @@ always @(posedge store_ctxt_finish or negedge rst) begin
     else if (store_ctxt_finish) begin
         addr_cur_ctxt <= arith_1;
     end
-end
-
-always @(posedge clk) begin
-    rd_burst_data_valid_delay <= rd_burst_data_valid;
 end
 
 always @(posedge clk or negedge rst) begin
@@ -266,6 +276,7 @@ end
 always @(*) begin
     case (st_cur)
         START: begin
+            rd_en_ddr_to_dc_fifo = 0;
             data_cache_rdy = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
@@ -278,6 +289,7 @@ always @(*) begin
             data_write_addr = data_write_addr_tmp;
         end
         SENT_ADDR: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_read_req = 1;
             data_read_req = 0;
             data_store_req = 0;
@@ -295,6 +307,7 @@ always @(*) begin
             endcase
         end
         SENT_DATA_RBR: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_cbc = 0;
@@ -312,6 +325,7 @@ always @(*) begin
             endcase
         end
         SENT_DATA_CBC: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
@@ -331,6 +345,7 @@ always @(*) begin
             end
         end
         LOAD_DATA: begin
+            rd_en_ddr_to_dc_fifo = !ddr_to_dc_fifo_empty;
             data_read_req = 1;
             data_store_req = 0;
             jmp_addr_read_req = 0;
@@ -343,6 +358,7 @@ always @(*) begin
             data_in_cbc = 0;
         end
         GET_DATA_RBR: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
@@ -355,6 +371,7 @@ always @(*) begin
             data_cache_rdy = dc_exp_4;
         end
         GET_DATA_CBC: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
@@ -367,6 +384,7 @@ always @(*) begin
             data_cache_rdy = dc_exp_4;
         end
         STORE_DATA: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_store_req = 1;
@@ -379,6 +397,7 @@ always @(*) begin
             data_in_cbc = 0;
         end
         STORE_DATA_END: begin
+            rd_en_ddr_to_dc_fifo = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
             data_in_rbr = 0;
@@ -391,6 +410,7 @@ always @(*) begin
             data_cache_rdy = dc_exp_8;
         end
         default: begin
+            rd_en_ddr_to_dc_fifo = 0;
             data_cache_rdy = 0;
             jmp_addr_rdy = 0;
             jmp_addr = jmp_addr_tmp;
