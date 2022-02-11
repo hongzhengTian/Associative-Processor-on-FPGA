@@ -13,7 +13,8 @@ module ddr3_interface_top
 )
     (
     /* interface of system */
-    input                               sys_clk_i,
+    input                               sys_clk_i_1,
+    input                               sys_clk_i_2,
     output                              init_calib_complete,
     input [ISA_WIDTH - 1 : 0]           ins_input,
     input [DATA_WIDTH - 1 : 0]          data_input,
@@ -166,6 +167,7 @@ module ddr3_interface_top
     )u_ddr_controller 
     (
         .clk(ui_clk),
+        .cache_clk(sys_clk_i_1),
         .rst(ui_clk_sync_rst),
         .rd_burst_req(rd_burst_req),
         .wr_burst_req(wr_burst_req),
@@ -237,7 +239,7 @@ module ddr3_interface_top
     .app_wdf_mask                   (app_wdf_mask),  // input [15:0]		app_wdf_mask
     .device_temp                    (device_temp),
     // System Clock Ports
-    .sys_clk_i                      (sys_clk_i),
+    .sys_clk_i                      (sys_clk_i_2),
     .sys_rst                        (sys_rst) // input sys_rst
     );
 endmodule
