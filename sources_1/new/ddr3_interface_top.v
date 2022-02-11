@@ -27,7 +27,7 @@ module ddr3_interface_top
     /* interface of ISA_cache */
     input                               ins_read_req,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
-    output [ISA_WIDTH - 1 : 0]			ins_to_cache,
+    output [ISA_WIDTH + 8 : 0]			ins_ddr_to_fifo,
     output                              wr_en_ddr_to_ins_fifo,
     output                              rd_burst_data_valid,
     output                              ins_reading,
@@ -92,6 +92,11 @@ module ddr3_interface_top
 	wire                        wr_burst_finish;           
 	wire                        burst_finish;
     wire [11:0]                 device_temp;
+    wire [ISA_WIDTH - 1 : 0]    ins_to_cache;
+    wire [7 : 0]                rd_cnt_ins;
+    wire                        rd_burst_data_valid_delay;
+
+    assign ins_ddr_to_fifo = {ins_to_cache, rd_cnt_ins, rd_burst_data_valid_delay};
     
     DDR_cache_interface #(
     DDR_DATA_WIDTH, 
@@ -113,6 +118,7 @@ module ddr3_interface_top
         .ins_read_req(ins_read_req),
         .ins_read_addr(ins_read_addr),
         .ins_to_cache(ins_to_cache),
+        .rd_cnt_ins(rd_cnt_ins),
         .wr_en_ddr_to_ins_fifo(wr_en_ddr_to_ins_fifo),
         .ddr_to_ic_empty(ddr_to_ic_empty),
         .ins_reading(ins_reading),
@@ -157,6 +163,7 @@ module ddr3_interface_top
         .rd_burst_addr(rd_burst_addr),
         .wr_burst_addr(wr_burst_addr),
         .rd_burst_data_valid(rd_burst_data_valid),
+        .rd_burst_data_valid_delay(rd_burst_data_valid_delay),
         .wr_burst_data_req(wr_burst_data_req),
         .rd_burst_data(rd_burst_data),
         .wr_burst_data(wr_burst_data),

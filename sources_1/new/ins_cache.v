@@ -31,9 +31,7 @@ module ins_cache
     input wire                          ins_reading,
     output reg                          ddr_to_ic_rd_en,
     output reg [DDR_ADDR_WIDTH -1 : 0]  ins_read_addr,
-    input wire [ISA_WIDTH - 1 : 0]      ins_to_cache,
-    //input wire [7 : 0]                  rd_cnt_ins,
-    input wire                          rd_burst_data_valid,
+    input wire [ISA_WIDTH + 8 : 0]      ins_fifo_to_cache,
     input wire                          ddr_to_ic_empty,
     output wire [7 : 0]                 ins_read_len
 );
@@ -43,15 +41,23 @@ localparam                              START = 4'd1;
 localparam                              LOAD_INS = 4'd2;
 localparam                              SENT_INS = 4'd3;
 
+wire [ISA_WIDTH - 1 : 0]                ins_to_cache;
+wire [7 : 0]                            rd_cnt_ins;
+wire                                    rd_burst_data_valid;
+
+assign ins_to_cache = ins_fifo_to_cache[ISA_WIDTH + 8 : 9];
+assign rd_cnt_ins = ins_fifo_to_cache[8 : 1];
+assign rd_burst_data_valid = ins_fifo_to_cache[0 : 0];
+
 reg [15 : 0]                            tag_ins;
 reg [ISA_WIDTH - 1 : 0]                 ins_cache [0 : ISA_DEPTH -1];
 reg [ISA_WIDTH - 1 : 0]                 int_serve;
 
 wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
-reg [7 : 0]                             rd_cnt_ins;
+
 reg [7 : 0]                             rd_cnt_ins_reg;
-reg                                     rd_burst_data_valid_delay;
+reg                                     ddr_to_ic_empty_delay;
 
 reg [ISA_WIDTH - 1 : 0]                 ins_tmp;
 reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
@@ -97,7 +103,8 @@ assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
     .rd_cnt_ins                 (rd_cnt_ins),
     .ins_read_len               (ins_read_len),
     .st_cur_e_LI                (st_cur_e_LI),
-    .rd_burst_data_valid_delay  (rd_burst_data_valid_delay),
+    .rd_burst_data_valid        (rd_burst_data_valid),
+    .ddr_to_ic_empty_delay      (ddr_to_ic_empty_delay),
     .arith_1                    (arith_1),
     .arith_2                    (arith_2),
     .arith_3                    (arith_3),
@@ -132,19 +139,6 @@ sm_ins_cache #(
     .ic_exp_1                   (ic_exp_1),
     .st_cur                     (st_cur)
 );
-
-always @(posedge clk or negedge rst) begin
-    if (!rst) begin
-        rd_cnt_ins <= 0;
-    end
-    else if (rd_cnt_ins == ISA_DEPTH) begin
-        rd_cnt_ins <= 0;
-    end
-    else if (!ddr_to_ic_empty && st_cur == LOAD_INS) begin
-        rd_cnt_ins <= rd_cnt_ins + 1;
-    end
-end
-
 
 always @(posedge clk or negedge rst) begin
     if (!rst) begin
@@ -196,12 +190,12 @@ always @(posedge clk or negedge rst) begin
     end
 end
 
-always @(*) begin // TODO
-    if (st_cur == LOAD_INS && ins_reading == 0) begin
-        ins_read_req = 1;
+always @(posedge st_cur_e_LI or posedge ins_reading) begin // TODO
+    if (st_cur_e_LI && ins_reading) begin
+        ins_read_req <= 0;
     end
     else begin
-        ins_read_req = 0;
+        ins_read_req <= 1;
     end
 end
 
@@ -277,7 +271,7 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
-    rd_burst_data_valid_delay <= rd_burst_data_valid;
+    ddr_to_ic_empty_delay <= ddr_to_ic_empty;
 end
 
 always @(posedge clk or negedge rst or posedge rst_cache) begin
@@ -286,7 +280,7 @@ always @(posedge clk or negedge rst or posedge rst_cache) begin
             ins_cache[i] <= 0;
         end
     end
-    else if (!ddr_to_ic_empty) begin
+    else if (ic_exp_6) begin
         ins_cache[arith_7] <= ins_to_cache;
     end
 end

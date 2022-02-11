@@ -203,7 +203,7 @@ module sim_tb_top;
     initial begin
         int = 0;
         cnt_wrong = 0;
-        #58977900
+        #58982900
         int = 1;
         #6000
         int = 0;

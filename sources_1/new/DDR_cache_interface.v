@@ -25,6 +25,7 @@ module DDR_cache_interface
     input wire                              ins_read_req,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		ins_read_addr,
     output reg [ISA_WIDTH - 1 : 0]			ins_to_cache,
+	output reg [7 : 0]						rd_cnt_ins,
 	output reg                              wr_en_ddr_to_ins_fifo,
 	output reg                              ins_reading, // handshake signal with ins cache, reset ins_read_req
 	input wire 								ddr_to_ic_empty,
@@ -105,16 +106,15 @@ assign load_ins_ddr 						= (state == MEM_WRITE_ISA);
 assign load_data_ddr 						= (state == MEM_WRITE_DATA);
 assign load_int_ins_ddr 					= (state == MEM_WRITE_INT_INS);
 
-reg [9 : 0] 								rd_cnt_isa;
 reg                      					ddr_to_ic_empty_delay;
 
 wire [9 : 0]								arith_1;
-wire [9 : 0]								arith_2;
+wire [7 : 0]								arith_2;
 wire                                        ddri_exp_2;
 wire                                        burst_finish;
 
 assign arith_1 = rd_cnt_data + 1;
-assign arith_2 = rd_cnt_isa + 1;
+assign arith_2 = rd_cnt_ins + 1;
 assign ddri_exp_2 = (state == MEM_WRITE_DATA_STORE)? 1 : 0;
 assign burst_finish = rd_burst_finish || wr_burst_finish;
 
@@ -182,17 +182,17 @@ end
 /* cnt part */
 always @(posedge mem_clk or posedge rst) begin
     if (rst) begin
-        rd_cnt_isa <= 0;
+        rd_cnt_ins <= 0;
 		rd_cnt_data <= 0;
     end
     else begin
         case ({state, rd_burst_data_valid, rd_burst_finish})
             {MEM_READ_ISA,2'b10}: begin
-				rd_cnt_isa <= arith_2;
+				rd_cnt_ins <= arith_2;
 				wr_en_ddr_to_ins_fifo <= 1;
 			end
             {MEM_READ_ISA,2'b01}: begin
-				rd_cnt_isa <= 0;
+				rd_cnt_ins <= 0;
 				wr_en_ddr_to_ins_fifo <= 0;
 			end
             {MEM_READ_DATA,2'b10}: rd_cnt_data <= arith_1;
@@ -254,15 +254,6 @@ begin
 						rd_burst_addr <= 0;
 						rd_burst_len <= 0;
 					end
-					/*4'b0001: begin
-						CMD <= R_ISA;
-						wr_burst_len <= 0;
-						wr_burst_addr <= 0;
-						wr_burst_req <= 1'b0;
-						rd_burst_req <= 1'b1; 
-						rd_burst_addr <= ins_read_addr;
-						rd_burst_len <= ins_read_len;
-					end*/
 					default: CMD <= 0;
 				endcase
 			end
@@ -310,98 +301,6 @@ begin
 			default: ;
 		endcase
 	end
-
-	/*else if(finish_flag_w_isa)
-	begin
-	  	CMD <= W_DATA;
-		wr_burst_len <= TOTAL_DATA_DEPTH + 1;
-		wr_burst_addr <= 28'h0008000;
-		wr_burst_req <= 1'b1;
-		rd_burst_req <= 1'b0;
-		rd_burst_addr <= 0;
-		rd_burst_len <= 0;
-	end
-
-	else if(finish_flag_w_data)
-	begin
-		CMD <= W_INT_ADDR;
-		wr_burst_len <= 1 + 1;
-		wr_burst_addr <= 28'h0070000;
-		wr_burst_req <= 1'b1;
-		rd_burst_req <= 1'b0;
-		rd_burst_addr <= 0;
-		rd_burst_len <= 0;
-	end
-
-	else if(finish_flag_w_int_addr)
-	begin
-		CMD <= W_INT_INS;
-		wr_burst_len <= INT_INS_DEPTH + 1;
-		wr_burst_addr <= 28'h0060000;
-		wr_burst_req <= 1'b1;
-		rd_burst_req <= 1'b0;
-		rd_burst_addr <= 0;
-		rd_burst_len <= 0;
-	end
-
-	else if(finish_flag_w_int_ins)
-	begin
-		CMD <= R_ISA;
-		wr_burst_len <= 0;
-		wr_burst_addr <= 0;
-		wr_burst_req <= 1'b0;
-		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= ins_read_addr;
-		rd_burst_len <= ins_read_len;
-	end
-
-	else if(ddr_rdy == 1 && data_read_req == 1)
-	begin
-		CMD <= R_DATA;
-		wr_burst_len <= 0;
-		wr_burst_addr <= 0;
-		wr_burst_req <= 1'b0;
-		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= data_read_addr;
-		rd_burst_len <= DATA_CACHE_DEPTH + 1;
-	end
-
-	else if(ddr_rdy == 1 && jmp_addr_read_req == 1)
-	begin
-		CMD <= R_INT_ADDR;
-		wr_burst_len <= 0;
-		wr_burst_addr <= 0;
-		wr_burst_req <= 1'b0;
-		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= data_read_addr;
-		rd_burst_len <= 1;
-	end
-
-	else if(ddr_rdy == 1 && data_store_req == 1)
-	begin
-		CMD <= W_DATA_STORE;
-		rd_burst_len <= 0;
-		rd_burst_addr <= 0;
-		wr_burst_req <= 1'b1;
-		rd_burst_req <= 1'b0; 
-		wr_burst_addr <= data_write_addr + 8;
-		wr_burst_len <= DATA_CACHE_DEPTH;
-	end
-
-	else if(ddr_rdy == 1 && ins_read_req == 1)
-	begin
-		CMD <= R_ISA;
-		wr_burst_len <= 0;
-		wr_burst_addr <= 0;
-		wr_burst_req <= 1'b0;
-		rd_burst_req <= 1'b1; 
-		rd_burst_addr <= ins_read_addr;
-		rd_burst_len <= ins_read_len;
-	end
-	
-	else begin
-		CMD <= 0;
-	end*/
 end
 
 /* state machine part */
@@ -412,15 +311,22 @@ always@(posedge mem_clk or posedge rst) begin
 	else begin
 		case(state)
 			START: begin
-				case ({CMD, ddr_to_ic_empty_delay})
-					{W_ISA, 1'b1}: state <= MEM_WRITE_ISA;
-					{W_DATA, 1'b1}: state <= MEM_WRITE_DATA;
-					{R_ISA, 1'b1}: state <= MEM_READ_ISA;
-					{R_DATA, 1'b1}: state <= MEM_READ_DATA;
-					{W_INT_ADDR, 1'b1}: state <= MEM_WRITE_INT_ADDR;
-					{W_INT_INS, 1'b1}: state <= MEM_WRITE_INT_INS;
-					{R_INT_ADDR, 1'b1}: state <= MEM_READ_INT_ADDR;
-					{W_DATA_STORE, 1'b1}: state <= MEM_WRITE_DATA_STORE;
+				case (CMD)
+					W_ISA: state <= MEM_WRITE_ISA;
+					W_DATA: state <= MEM_WRITE_DATA;
+					R_ISA: begin
+						if (ddr_to_ic_empty_delay) begin
+							state <= MEM_READ_ISA;
+						end
+						else begin
+							state <= START;
+						end
+					end
+					R_DATA: state <= MEM_READ_DATA;
+					W_INT_ADDR: state <= MEM_WRITE_INT_ADDR;
+					W_INT_INS: state <= MEM_WRITE_INT_INS;
+					R_INT_ADDR: state <= MEM_READ_INT_ADDR;
+					W_DATA_STORE: state <= MEM_WRITE_DATA_STORE;
 					default: state <= START;
 				endcase
 			end
