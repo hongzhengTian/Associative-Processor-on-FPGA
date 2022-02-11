@@ -12,7 +12,8 @@ module ddr_controller
 	input [9:0]                     wr_burst_len,                   
 	input [DDR_ADDR_WIDTH - 1:0]    rd_burst_addr,        
 	input [DDR_ADDR_WIDTH - 1:0]    wr_burst_addr,        
-	output                          rd_burst_data_valid,                  
+	output                          rd_burst_data_valid,   
+	output reg                      rd_burst_data_valid_delay,          
 	output                          wr_burst_data_req,                    
 	output [DDR_DATA_WIDTH - 1:0]   rd_burst_data,   
 	input [DDR_DATA_WIDTH - 1:0]    wr_burst_data,    
@@ -91,6 +92,10 @@ always@(posedge clk or posedge rst) begin
 	else if (exp_5) begin
 		app_wdf_wren_r <= wr_burst_data_req;
 	end
+end
+
+always @(posedge clk) begin
+	rd_burst_data_valid_delay <= rd_burst_data_valid;
 end
  
 always@(posedge clk or posedge rst) begin

@@ -141,8 +141,6 @@ module AP_top
     wire                                ins_read_req;
     wire                                ddr_to_ic_rd_en;
     wire [DDR_ADDR_WIDTH -1 : 0]        ins_read_addr;
-    wire [ISA_WIDTH - 1 : 0]            ins_to_cache;
-    wire [7 : 0]                        rd_cnt_ins;
     wire                                rd_burst_data_valid;
     wire [7 : 0]                        ins_read_len;
 
@@ -170,10 +168,10 @@ module AP_top
     wire [DATA_DEPTH - 1 : 0]           tmp_C_F_ret;
     wire                                ctxt_rdy;
 
-    wire [29 : 0]                       ins_ddr_to_fifo;
+    wire [38 : 0]                       ins_ddr_to_fifo;
     wire                                wr_en_ddr_to_ins_fifo;
     wire                                rd_en_ic_to_ins_fifo;
-    wire [29 : 0]                       ins_fifo_to_cache;
+    wire [38 : 0]                       ins_fifo_to_cache;
     wire                                ddr_to_ic_full;
     wire                                ddr_to_ic_empty;
     wire                                ins_reading;
@@ -387,7 +385,7 @@ module AP_top
     .load_int_ins_ddr       (load_int_ins_ddr),
     .ins_read_req           (ins_read_req),
     .ins_read_addr          (ins_read_addr),
-    .ins_to_cache           (ins_ddr_to_fifo),
+    .ins_ddr_to_fifo        (ins_ddr_to_fifo),
     .wr_en_ddr_to_ins_fifo  (wr_en_ddr_to_ins_fifo),
     .ddr_to_ic_empty        (ddr_to_ic_empty),
     .ins_reading            (ins_reading),
@@ -463,9 +461,7 @@ module AP_top
     .ins_reading            (ins_reading),
     .ddr_to_ic_rd_en        (ddr_to_ic_rd_en),
     .ins_read_addr          (ins_read_addr),
-    .ins_to_cache           (ins_fifo_to_cache),
-    //.rd_cnt_ins             (rd_data_cnt_to_ic),
-    .rd_burst_data_valid    (prog_full),
+    .ins_fifo_to_cache      (ins_fifo_to_cache),
     .ddr_to_ic_empty        (ddr_to_ic_empty),
     .ins_read_len           (ins_read_len)
     );
