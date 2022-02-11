@@ -1,6 +1,6 @@
 module AP_top
 #(
-    parameter DATA_WIDTH        = 8,
+    parameter DATA_WIDTH        = 16,
     parameter DATA_DEPTH        = 16,
     parameter ISA_DEPTH         = 72,
     parameter INT_INS_DEPTH     = 27,
@@ -139,7 +139,7 @@ module AP_top
     wire [ISA_WIDTH - 1 : 0]            ins_to_apctrl;
     wire [OPCODE_WIDTH - 1 : 0]         ins_valid;
     wire                                ins_read_req;
-    wire                                ddr_to_ic_rd_en;
+    wire                                rd_en_ddr_to_ic_fifo;
     wire [DDR_ADDR_WIDTH -1 : 0]        ins_read_addr;
     wire                                rd_burst_data_valid;
     wire [7 : 0]                        ins_read_len;
@@ -169,18 +169,20 @@ module AP_top
     wire                                ctxt_rdy;
 
     wire [38 : 0]                       ins_ddr_to_fifo;
-    wire                                wr_en_ddr_to_ins_fifo;
+    wire                                wr_en_ddr_to_ic_fifo;
     wire                                rd_en_ic_to_ins_fifo;
-    wire [38 : 0]                       ins_fifo_to_cache;
-    wire                                ddr_to_ic_full;
-    wire                                ddr_to_ic_empty;
+    wire [38 : 0]                       ins_fifo_to_ic;
+    wire                                ddr_to_ic_fifo_full;
+    wire                                ddr_to_ic_fifo_empty;
     wire                                ins_reading;
-    wire [7 : 0]                        rd_data_cnt_to_ic;
-    wire [7 : 0]                        wr_data_cnt_to_ddr_ins;
-    wire                                prog_full;
-    wire                                prog_empty;
-    wire                                wr_rst_busy;
-    wire                                rd_rst_busy;
+
+    wire [52 : 0]                       data_ddr_to_fifo;
+    wire                                wr_en_ddr_to_dc_fifo;
+    wire                                rd_en_ddr_to_dc_fifo;
+    wire [52 : 0]                       data_fifo_to_dc;
+    wire                                ddr_to_dc_fifo_full;
+    wire                                ddr_to_dc_fifo_empty;
+    wire                                data_reading;
 
     AP_controller #(
     DATA_WIDTH, 
@@ -386,19 +388,23 @@ module AP_top
     .ins_read_req           (ins_read_req),
     .ins_read_addr          (ins_read_addr),
     .ins_ddr_to_fifo        (ins_ddr_to_fifo),
-    .wr_en_ddr_to_ins_fifo  (wr_en_ddr_to_ins_fifo),
-    .ddr_to_ic_empty        (ddr_to_ic_empty),
+    .wr_en_ddr_to_ic_fifo   (wr_en_ddr_to_ic_fifo),
+    .ddr_to_ic_fifo_empty   (ddr_to_ic_fifo_empty),
     .ins_reading            (ins_reading),
-    .rd_burst_data_valid    (rd_burst_data_valid),
+    //.rd_burst_data_valid    (rd_burst_data_valid),
     .data_read_req          (data_read_req),
     .data_store_req         (data_store_req),
     .jmp_addr_read_req      (jmp_addr_read_req),
-    .jmp_addr_to_cache      (jmp_addr_to_cache),
+    //.jmp_addr_to_cache      (jmp_addr_to_cache),
     .data_to_ddr            (data_to_ddr),
     .data_read_addr         (data_read_addr),
     .data_write_addr        (data_write_addr),
-    .data_to_cache          (data_to_cache),
-    .rd_cnt_data            (rd_cnt_data),
+    .ddr_to_dc_fifo_empty   (ddr_to_dc_fifo_empty),
+    .wr_en_ddr_to_dc_fifo   (wr_en_ddr_to_dc_fifo),
+    //.data_to_cache          (data_to_cache),
+    //.rd_cnt_data            (rd_cnt_data),
+    .data_ddr_to_fifo       (data_ddr_to_fifo),
+    .data_reading           (data_reading),
     .ins_read_len           (ins_read_len)
     );
 
@@ -421,23 +427,19 @@ module AP_top
     .ins_cache_rdy          (ins_cache_rdy)
     );
 
-    fifo_generator_0 fifo_ins_to_cache_u
+    fifo_generator_0 fifo_ddr_to_ic_u
     (
     .rst                    (!sys_rst), // input wire rst
     .wr_clk                 (sys_clk_i_2), // input wire wr_clk
     .rd_clk                 (sys_clk_i_1), // input wire rd_clk
     .din                    (ins_ddr_to_fifo), // input wire [29 : 0] din
-    .wr_en                  (wr_en_ddr_to_ins_fifo), // input wire wr_en
-    .rd_en                  (ddr_to_ic_rd_en), // input wire rd_en
-    .dout                   (ins_fifo_to_cache), // output wire [29 : 0] dout
-    .full                   (ddr_to_ic_full), // output wire full
-    .empty                  (ddr_to_ic_empty), // output wire empty
-    .rd_data_count          (rd_data_cnt_to_ic), // output wire [7 : 0] rd_data_count
-    .wr_data_count          (wr_data_cnt_to_ddr_ins), // output wire [7 : 0] wr_data_count
-    .prog_full              (prog_full), // output wire prog_full
-    .prog_empty             (prog_empty), // output wire prog_empty
-    .wr_rst_busy            (wr_rst_busy), // output wire wr_rst_busy
-    .rd_rst_busy            (rd_rst_busy) // output wire rd_rst_busy
+    .wr_en                  (wr_en_ddr_to_ic_fifo), // input wire wr_en
+    .rd_en                  (rd_en_ddr_to_ic_fifo), // input wire rd_en
+    .dout                   (ins_fifo_to_ic), // output wire [29 : 0] dout
+    .full                   (ddr_to_ic_fifo_full), // output wire full
+    .empty                  (ddr_to_ic_fifo_empty), // output wire empty
+    .wr_rst_busy            (), // output wire wr_rst_busy
+    .rd_rst_busy            () // output wire rd_rst_busy
     );
 
     ins_cache #(
@@ -459,14 +461,28 @@ module AP_top
     .ins_valid              (ins_valid),
     .ins_read_req           (ins_read_req),
     .ins_reading            (ins_reading),
-    .ddr_to_ic_rd_en        (ddr_to_ic_rd_en),
+    .rd_en_ddr_to_ic_fifo   (rd_en_ddr_to_ic_fifo),
     .ins_read_addr          (ins_read_addr),
-    .ins_fifo_to_cache      (ins_fifo_to_cache),
-    .ddr_to_ic_empty        (ddr_to_ic_empty),
+    .ins_fifo_to_ic         (ins_fifo_to_ic),
+    .ddr_to_ic_fifo_empty   (ddr_to_ic_fifo_empty),
     .ins_read_len           (ins_read_len)
     );
 
     
+    fifo_generator_1 fifo_ddr_to_dc_u (
+    .rst                    (!sys_rst), // input wire rst
+    .wr_clk                 (sys_clk_i_2), // input wire wr_clk
+    .rd_clk                 (sys_clk_i_1), // input wire rd_clk
+    .din                    (data_ddr_to_fifo), // input wire [52 : 0] din
+    .wr_en                  (wr_en_ddr_to_dc_fifo), // input wire wr_en
+    .rd_en                  (rd_en_ddr_to_dc_fifo), // input wire rd_en
+    .dout                   (data_fifo_to_dc), // output wire [52 : 0] dout
+    .full                   (ddr_to_dc_fifo_full), // output wire full
+    .empty                  (ddr_to_dc_fifo_empty), // output wire empty
+    .wr_rst_busy            (), // output wire wr_rst_busy
+    .rd_rst_busy            () // output wire rd_rst_busy
+    );
+
     data_cache #(
     DATA_CACHE_DEPTH,
     DATA_WIDTH,
@@ -495,13 +511,17 @@ module AP_top
     .data_read_req          (data_read_req),
     .data_store_req         (data_store_req),
     .jmp_addr_read_req      (jmp_addr_read_req),
-    .jmp_addr_to_cache      (jmp_addr_to_cache),
+    //.jmp_addr_to_cache      (jmp_addr_to_cache),
     .data_to_ddr            (data_to_ddr),
     .data_read_addr         (data_read_addr),
     .data_write_addr        (data_write_addr),
-    .data_to_cache          (data_to_cache),
-    .rd_cnt_data            (rd_cnt_data),
-    .rd_burst_data_valid    (rd_burst_data_valid)
+    //.data_to_cache          (data_to_cache),
+    //.rd_cnt_data            (rd_cnt_data)
+    .data_fifo_to_dc        (data_fifo_to_dc),
+    .rd_en_ddr_to_dc_fifo   (rd_en_ddr_to_dc_fifo),
+    .ddr_to_dc_fifo_empty   (ddr_to_dc_fifo_empty),
+    .data_reading           (data_reading)
+    //.rd_burst_data_valid    (rd_burst_data_valid)
     );
 
     

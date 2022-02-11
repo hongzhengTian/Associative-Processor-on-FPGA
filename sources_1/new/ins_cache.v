@@ -29,10 +29,10 @@ module ins_cache
     /* the interface to DDR interface */
     output reg                          ins_read_req,
     input wire                          ins_reading,
-    output reg                          ddr_to_ic_rd_en,
+    output reg                          rd_en_ddr_to_ic_fifo,
     output reg [DDR_ADDR_WIDTH -1 : 0]  ins_read_addr,
-    input wire [ISA_WIDTH + 8 : 0]      ins_fifo_to_cache,
-    input wire                          ddr_to_ic_empty,
+    input wire [ISA_WIDTH + 8 : 0]      ins_fifo_to_ic,
+    input wire                          ddr_to_ic_fifo_empty,
     output wire [7 : 0]                 ins_read_len
 );
 
@@ -45,9 +45,9 @@ wire [ISA_WIDTH - 1 : 0]                ins_to_cache;
 wire [7 : 0]                            rd_cnt_ins;
 wire                                    rd_burst_data_valid;
 
-assign ins_to_cache = ins_fifo_to_cache[ISA_WIDTH + 8 : 9];
-assign rd_cnt_ins = ins_fifo_to_cache[8 : 1];
-assign rd_burst_data_valid = ins_fifo_to_cache[0 : 0];
+assign ins_to_cache = ins_fifo_to_ic[ISA_WIDTH + 8 : 9];
+assign rd_cnt_ins = ins_fifo_to_ic[8 : 1];
+assign rd_burst_data_valid = ins_fifo_to_ic[0 : 0];
 
 reg [15 : 0]                            tag_ins;
 reg [ISA_WIDTH - 1 : 0]                 ins_cache [0 : ISA_DEPTH -1];
@@ -57,7 +57,7 @@ wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
 
 reg [7 : 0]                             rd_cnt_ins_reg;
-reg                                     ddr_to_ic_empty_delay;
+reg                                     ddr_to_ic_fifo_empty_delay;
 
 reg [ISA_WIDTH - 1 : 0]                 ins_tmp;
 reg [OPCODE_WIDTH - 1 : 0]              ins_valid_tmp;
@@ -104,7 +104,7 @@ assign st_cur_e_LI = (st_cur == LOAD_INS)? 1 : 0;
     .ins_read_len               (ins_read_len),
     .st_cur_e_LI                (st_cur_e_LI),
     .rd_burst_data_valid        (rd_burst_data_valid),
-    .ddr_to_ic_empty_delay      (ddr_to_ic_empty_delay),
+    .ddr_to_ic_fifo_empty_delay (ddr_to_ic_fifo_empty_delay),
     .arith_1                    (arith_1),
     .arith_2                    (arith_2),
     .arith_3                    (arith_3),
@@ -202,8 +202,7 @@ end
 always @(*) begin
     case (st_cur)
         START: begin
-            //ins_read_req = 0;
-            ddr_to_ic_rd_en = 0;
+            rd_en_ddr_to_ic_fifo = 0;
             ins_read_addr = 0;
             rst_cache = 0;
             ins_to_apctrl = ins_tmp;
@@ -214,8 +213,7 @@ always @(*) begin
             endcase
         end
         SENT_INS: begin
-            //ins_read_req = 0;
-            ddr_to_ic_rd_en = 0;
+            rd_en_ddr_to_ic_fifo = 0;
             ins_read_addr = 0;
             case ({ic_exp_2, ic_exp_3})
                 2'b10: begin
@@ -250,19 +248,12 @@ always @(*) begin
             rst_cache = 0;
             ins_cache_rdy = 0;
             ins_read_addr = (ic_exp_5)? arith_5 : arith_6;
-            /*if (!ins_reading) begin
-                ins_read_req = ic_exp_1;
-            end
-            else begin
-                ins_read_req = 0;
-            end*/
-            ddr_to_ic_rd_en = ic_exp_1 && (!ddr_to_ic_empty);
+            rd_en_ddr_to_ic_fifo = ic_exp_1 && (!ddr_to_ic_fifo_empty);
         end
         default : begin
             ins_cache_rdy = 0;
             rst_cache = 0;
-            //  ins_read_req = 0;
-            ddr_to_ic_rd_en = 0;
+            rd_en_ddr_to_ic_fifo = 0;
             ins_read_addr = 0; /* maybe wrong here when load ISA */
             ins_to_apctrl = 0;
             ins_valid = 0;
@@ -271,7 +262,7 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
-    ddr_to_ic_empty_delay <= ddr_to_ic_empty;
+    ddr_to_ic_fifo_empty_delay <= ddr_to_ic_fifo_empty;
 end
 
 always @(posedge clk or negedge rst or posedge rst_cache) begin

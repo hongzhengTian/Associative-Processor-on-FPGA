@@ -22,7 +22,7 @@ module ALU_ins_cache
     input wire [7 : 0]                          ins_read_len,
     input wire                                  st_cur_e_LI,
     input wire                                  rd_burst_data_valid,
-    input wire                                  ddr_to_ic_empty_delay,
+    input wire                                  ddr_to_ic_fifo_empty_delay,
 
     output wire [9 : 0]                         arith_1,
     output wire [9 : 0]                         arith_2,
@@ -49,7 +49,7 @@ assign arith_5 = addr_ins << 3;
 assign arith_6 = (addr_ins - 1) << 3;
 assign arith_7 = rd_cnt_ins - 1;
 
-assign ic_exp_1= ((rd_cnt_ins < ins_read_len) || ddr_to_ic_empty_delay)? 1 : 0;
+assign ic_exp_1= ((rd_cnt_ins < ins_read_len) || ddr_to_ic_fifo_empty_delay)? 1 : 0;
 assign ic_exp_2= ((addr_ins < (tag_ins + ISA_DEPTH + 1)) && (addr_ins >= tag_ins))? 1 : 0;
 assign ic_exp_3= (addr_ins == {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
 assign ic_exp_4= (addr_ins > {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}})? 1 : 0;
