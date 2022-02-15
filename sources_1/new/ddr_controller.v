@@ -19,7 +19,8 @@ module ddr_controller
 	output [DDR_DATA_WIDTH - 1:0]   rd_burst_data,   
 	input [DDR_DATA_WIDTH - 1:0]    wr_burst_data,    
 	output                          rd_burst_finish,                     
-	output                          wr_burst_finish,                      
+	output                          wr_burst_finish, 
+	input  							ddr_init_input_finish,                     
 	output                          burst_finish,  
 	output reg [9:0]                rd_addr_cnt,                       
 	
