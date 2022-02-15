@@ -46,6 +46,7 @@ module DDR_cache_interface
 	output reg                              data_reading,
 
 	/* interface of ddr_controller */
+	output reg                              ddr_init_input_finish,
 	output reg 								rd_burst_req,           /* read request*/
 	output reg 								wr_burst_req,           /* write request*/
 	output reg [9 : 0] 						rd_burst_len,           /* read burst data length*/
@@ -243,6 +244,7 @@ begin
 		rd_burst_req <= 1'b0;
 		rd_burst_addr <= 0;
 		rd_burst_len <= 0;
+		ddr_init_input_finish <= 0;
 	end
 
 	else if(burst_finish) begin
@@ -280,6 +282,9 @@ begin
 						rd_burst_req <= 1'b0;
 						rd_burst_addr <= 0;
 						rd_burst_len <= 0;
+					end
+					4'b0001: begin
+						ddr_init_input_finish <= 1;
 					end
 					default: CMD <= 0;
 				endcase
