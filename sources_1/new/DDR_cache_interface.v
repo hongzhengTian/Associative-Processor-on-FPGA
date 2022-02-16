@@ -36,6 +36,7 @@ module DDR_cache_interface
     input wire                              data_store_req,
 	input wire								jmp_addr_read_req,
     input wire [DATA_WIDTH - 1 : 0]         data_to_ddr,
+	input wire [9 : 0]						wr_data_cnt_1,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	input wire [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
     output reg [DATA_WIDTH - 1 : 0]			data_to_cache,
@@ -47,6 +48,7 @@ module DDR_cache_interface
 
 	/* interface of ddr_controller */
 	output reg                              ddr_init_input_finish,
+	output reg [9 : 0] 					    wr_data_cnt_2,
 	output reg 								rd_burst_req,           /* read request*/
 	output reg 								wr_burst_req,           /* write request*/
 	output reg [9 : 0] 						rd_burst_len,           /* read burst data length*/
@@ -138,6 +140,7 @@ end
 always @(posedge mem_clk) begin
 	ddr_to_ic_fifo_empty_delay <= ddr_to_ic_fifo_empty;
 	ddr_to_dc_fifo_empty_delay <= ddr_to_dc_fifo_empty;
+	wr_data_cnt_2 <= wr_data_cnt_1;
 end
 
 /* WRITE part */

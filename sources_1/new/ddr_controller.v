@@ -20,7 +20,8 @@ module ddr_controller
 	input [DDR_DATA_WIDTH - 1:0]    wr_burst_data,    
 	output                          rd_burst_finish,                     
 	output                          wr_burst_finish, 
-	input  							ddr_init_input_finish,                     
+	input  							ddr_init_input_finish, 
+	input [9 : 0]					wr_data_cnt_2,
 	output                          burst_finish,  
 	output reg [9:0]                rd_addr_cnt,                       
 	
@@ -77,6 +78,7 @@ assign wr_burst_data_req = (state == MEM_WRITE) & app_wdf_rdy ;
 wire [9 : 0] arith_1 = rd_data_cnt + 1;
 wire [9 : 0] arith_2 = wr_addr_cnt + 1;
 wire [9 : 0] arith_3 = wr_data_cnt + 1;
+reg [9 : 0]	arith_3_delay;
 wire [DDR_ADDR_WIDTH - 1:0] arith_4 = app_addr_r + 8;
 wire [9 : 0] arith_5 = rd_addr_cnt + 1;
 
@@ -98,6 +100,7 @@ end
 
 always @(posedge clk) begin
 	rd_burst_data_valid_delay <= rd_burst_data_valid;
+	arith_3_delay <= arith_3;
 end
  
 always@(posedge clk or posedge rst) begin
@@ -205,14 +208,12 @@ end
 always@(posedge clk or posedge rst) begin
 	if (rst) begin
 		wr_addr_cnt <= 0;
-		wr_data_cnt <= 0;
 	end
 	else if (init_calib_complete) begin
 		case(state)
 			IDLE: begin
 				if (wr_burst_req) begin
 					wr_addr_cnt <= 0;
-					wr_data_cnt <= 0;
 				end
 			end
 			MEM_WRITE_FIRST_READ: begin
@@ -224,11 +225,6 @@ always@(posedge clk or posedge rst) begin
 						wr_addr_cnt <= arith_2;
 					end
 				end
-				if (wr_burst_data_req) begin
-					if (!exp_4) begin
-						wr_data_cnt <= arith_3;
-					end
-				end
 			end
 			MEM_WRITE_WAIT: begin
 				if (app_rdy) begin
@@ -238,8 +234,36 @@ always@(posedge clk or posedge rst) begin
 				end
 			end
 			WRITE_END: begin
-				wr_data_cnt <= 0;
 				wr_addr_cnt <= 0;
+			end
+			default: ;
+		endcase
+	end
+end
+
+always@(posedge clk or posedge rst) begin
+	if (rst) begin
+		wr_data_cnt <= 0;
+	end
+	else if (init_calib_complete) begin
+		case(state)
+			IDLE: begin
+				if (wr_burst_req) begin
+					wr_data_cnt <= 0;
+				end
+			end
+			MEM_WRITE: begin
+				if (wr_burst_data_req) begin
+					if ((!exp_4) && (!ddr_init_input_finish)) begin
+						wr_data_cnt <= arith_3;
+					end
+					if ((!exp_4) && (ddr_init_input_finish)) begin
+						wr_data_cnt <= wr_data_cnt_2;
+					end
+				end
+			end
+			WRITE_END: begin
+				wr_data_cnt <= 0;
 			end
 			default: ;
 		endcase

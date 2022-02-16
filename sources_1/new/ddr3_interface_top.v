@@ -41,6 +41,7 @@ module ddr3_interface_top
     input                               jmp_addr_read_req,
     //output [DDR_ADDR_WIDTH - 1 : 0]	    jmp_addr_to_cache,
     input  [DATA_WIDTH - 1 : 0]         data_to_ddr,
+    input [9 : 0]                       wr_data_cnt_1,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	input  [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
     //output [DATA_WIDTH - 1 : 0]			data_to_cache, 
@@ -96,6 +97,7 @@ module ddr3_interface_top
 	wire                        rd_burst_finish;              
 	wire                        wr_burst_finish;     
     wire                        ddr_init_input_finish;      
+    wire [9 : 0]                wr_data_cnt_2;
 	wire                        burst_finish;
     wire [11:0]                 device_temp;
     wire [ISA_WIDTH - 1 : 0]    ins_to_cache;
@@ -136,6 +138,7 @@ module ddr3_interface_top
         .data_store_req(data_store_req),
         .jmp_addr_read_req(jmp_addr_read_req),
         .data_to_ddr(data_to_ddr),
+        .wr_data_cnt_1(wr_data_cnt_1),
         .data_read_addr(data_read_addr),
         .data_write_addr(data_write_addr),
         .data_to_cache(data_to_cache),
@@ -144,6 +147,7 @@ module ddr3_interface_top
         .data_reading(data_reading),
         .rd_cnt_data(rd_cnt_data),
         .ddr_init_input_finish(ddr_init_input_finish),
+        .wr_data_cnt_2(wr_data_cnt_2),
         .rd_burst_req(rd_burst_req),
         .wr_burst_req(wr_burst_req),
         .rd_burst_len(rd_burst_len),
@@ -185,6 +189,7 @@ module ddr3_interface_top
         .rd_burst_finish(rd_burst_finish),
         .wr_burst_finish(wr_burst_finish),
         .ddr_init_input_finish(ddr_init_input_finish),
+        .wr_data_cnt_2(wr_data_cnt_2),
         .burst_finish(burst_finish),
         .rd_addr_cnt(rd_addr_cnt),
         .app_rd_data(app_rd_data),
