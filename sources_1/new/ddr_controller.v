@@ -42,16 +42,17 @@ module ddr_controller
  
 assign app_wdf_mask = {DDR_DATA_WIDTH/8{1'b0}};
  
-localparam IDLE = 3'd0;
-localparam MEM_READ = 3'd1;
-localparam MEM_READ_WAIT = 3'd2;
-localparam MEM_WRITE  = 3'd3;
-localparam MEM_WRITE_WAIT = 3'd4;
-localparam READ_END = 3'd5;
-localparam WRITE_END = 3'd6;
-localparam MEM_WRITE_FIRST_READ = 3'd7;
+localparam IDLE = 4'd0;
+localparam MEM_READ = 4'd1;
+localparam MEM_READ_WAIT = 4'd2;
+localparam MEM_WRITE  = 4'd3;
+localparam MEM_WRITE_2  = 4'd4;
+localparam MEM_WRITE_WAIT = 4'd5;
+localparam READ_END = 4'd6;
+localparam WRITE_END = 4'd7;
+localparam MEM_WRITE_FIRST_READ = 4'd8;
 
-reg [2:0] state;	
+reg [3:0] state;	
 reg [9:0] rd_data_cnt;
 reg [9:0] wr_addr_cnt;
 reg [9:0] wr_data_cnt;
@@ -75,7 +76,7 @@ assign burst_finish = rd_burst_finish | wr_burst_finish;
 assign rd_burst_data = app_rd_data;
 assign rd_burst_data_valid = app_rd_data_valid;
  
-assign wr_burst_data_req = (state == MEM_WRITE) & app_wdf_rdy ;
+assign wr_burst_data_req = ((state == MEM_WRITE) || (state == MEM_WRITE_2)) & app_wdf_rdy ;
 
 wire [9 : 0] arith_1 = rd_data_cnt + 1;
 wire [9 : 0] arith_2 = wr_addr_cnt + 1;
@@ -152,9 +153,15 @@ always@(posedge clk or posedge rst) begin
 				state <= MEM_WRITE;
 			end
 			MEM_WRITE: begin
-				if (wr_burst_data_req && exp_4) begin	
+				if (wr_burst_data_req && exp_4 && (!ddr_init_input_finish)) begin	
 					state <= MEM_WRITE_WAIT;
 				end
+				if (wr_burst_data_req && exp_4 && ddr_init_input_finish) begin	
+					state <= MEM_WRITE_2;
+				end
+			end
+			MEM_WRITE_2: begin
+				state <= MEM_WRITE_WAIT;
 			end
 			READ_END: begin
 				state <= IDLE;
@@ -256,7 +263,7 @@ always@(posedge clk or posedge rst) begin
 					end
 				end
 				if (app_rdy && (ddr_init_input_finish)) begin
-					if (wr_addr_add_cnt == 2) begin
+					if (wr_addr_add_cnt == 1) begin
 						app_addr_r <= arith_4;
 					end
 					if (exp_3) begin
@@ -302,7 +309,7 @@ always@(posedge clk or posedge rst) begin
 					end
 				end
 				if (app_rdy && (ddr_init_input_finish)) begin
-					if ((!exp_3) && (wr_addr_add_cnt == 2)) begin
+					if ((!exp_3) && (wr_addr_add_cnt == 1)) begin
 						wr_addr_cnt <= arith_2;
 					end
 				end
