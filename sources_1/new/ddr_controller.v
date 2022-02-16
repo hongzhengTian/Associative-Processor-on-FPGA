@@ -55,10 +55,12 @@ reg [2:0] state;
 reg [9:0] rd_data_cnt;
 reg [9:0] wr_addr_cnt;
 reg [9:0] wr_data_cnt;
+reg [9:0] wr_data_cnt_2_delay;
 reg [2:0] app_cmd_r;
 reg [DDR_ADDR_WIDTH - 1:0] app_addr_r;
 reg app_en_r;
 reg app_wdf_wren_r;
+reg [1 : 0]	wr_addr_add_cnt;
 
 assign app_cmd = app_cmd_r;
 assign app_addr = app_addr_r;
@@ -101,95 +103,65 @@ end
 always @(posedge clk) begin
 	rd_burst_data_valid_delay <= rd_burst_data_valid;
 	arith_3_delay <= arith_3;
+	wr_data_cnt_2_delay <= wr_data_cnt_2;
 end
- 
+
+always @(posedge clk or posedge rst) begin
+	if (rst) begin
+		wr_addr_add_cnt <= 0;
+	end
+	else if (wr_addr_add_cnt == 2 && wr_burst_req) begin
+		wr_addr_add_cnt <= 1;
+	end
+	else if (((state == MEM_WRITE) || (state == MEM_WRITE_WAIT)) && ddr_init_input_finish) begin
+		wr_addr_add_cnt <= wr_addr_add_cnt + 1;
+	end
+	else begin
+		wr_addr_add_cnt <= 0;
+	end
+end
+
 always@(posedge clk or posedge rst) begin
 	if (rst) begin
 		state <= IDLE;
-		app_cmd_r <= 0;
-		app_en_r <= 0;
-		rd_addr_cnt <= 0;
-		rd_data_cnt <= 0;
-		app_addr_r <= 0;
 	end
 	else if (init_calib_complete) begin
 		case(state)
 			IDLE: begin
 				if (rd_burst_req) begin
 					state <= MEM_READ;
-					app_cmd_r <= 3'b001;
-					app_addr_r <= rd_burst_addr;
-					app_en_r <= 1'b1;
 				end
 				else if (wr_burst_req) begin
 					state <= MEM_WRITE;
-					app_cmd_r <= 3'b000;
-					app_addr_r <= wr_burst_addr;
-					app_en_r <= 1'b1;
 				end
 			end
 			MEM_READ: begin
-				if (app_rdy) begin
-					app_addr_r <= arith_4;
-					if (exp_1) begin
-						state <= MEM_READ_WAIT;
-						rd_addr_cnt <= 0;
-						app_en_r <= 1'b0;
-					end
-					else begin
-						rd_addr_cnt <= arith_5;
-					end
+				if (app_rdy && exp_1) begin
+					state <= MEM_READ_WAIT;
 				end
-				if (app_rd_data_valid) begin
-					if (exp_2) begin
-						rd_data_cnt <= 0;
-						state <= READ_END;
-					end
-					else begin
-						rd_data_cnt <= arith_1;
-					end
+				if (app_rd_data_valid && exp_2) begin
+					state <= READ_END;
 				end
 			end
 			MEM_READ_WAIT: begin
-				if (app_rd_data_valid) begin
-					if (exp_2) begin
-						rd_data_cnt <= 0;
-						state <= READ_END;
-					end
-					else begin
-						rd_data_cnt <= arith_1;
-					end
+				if (app_rd_data_valid && exp_2) begin
+					state <= READ_END;
 				end
 			end
 			MEM_WRITE_FIRST_READ: begin
-				app_en_r <= 1'b1;
 				state <= MEM_WRITE;
 			end
 			MEM_WRITE: begin
-				if (app_rdy) begin
-					app_addr_r <= arith_4;
-					if (exp_3) begin
-						app_en_r <= 1'b0;
-					end
-				end
-				if (wr_burst_data_req) begin
-					if (exp_4) begin	
-						state <= MEM_WRITE_WAIT;
-					end
+				if (wr_burst_data_req && exp_4) begin	
+					state <= MEM_WRITE_WAIT;
 				end
 			end
 			READ_END: begin
 				state <= IDLE;
 			end
 			MEM_WRITE_WAIT: begin
-				if (app_rdy) begin
-					app_addr_r <= arith_4;
-					if (exp_3) begin
-						app_en_r <= 1'b0;
-						if (app_wdf_rdy) begin
-							state <= WRITE_END;
-						end
-					end
+				if (app_rdy && exp_3 && app_wdf_rdy) begin
+					state <= WRITE_END;
 				end
 				else if (exp_6) begin
 					state <= WRITE_END;
@@ -201,6 +173,98 @@ always@(posedge clk or posedge rst) begin
 			default: begin
 				state <= IDLE;
 			end
+		endcase
+	end
+end
+
+always@(posedge clk or posedge rst) begin
+	if (rst) begin
+		app_cmd_r <= 0;
+		app_en_r <= 0;
+		rd_addr_cnt <= 0;
+		rd_data_cnt <= 0;
+		app_addr_r <= 0;
+	end
+	else if (init_calib_complete) begin
+		case(state)
+			IDLE: begin
+				if (rd_burst_req) begin
+					app_cmd_r <= 3'b001;
+					app_addr_r <= rd_burst_addr;
+					app_en_r <= 1'b1;
+				end
+				else if (wr_burst_req) begin
+					app_cmd_r <= 3'b000;
+					app_addr_r <= wr_burst_addr;
+					app_en_r <= 1'b1;
+				end
+			end
+			MEM_READ: begin
+				if (app_rdy) begin
+					app_addr_r <= arith_4;
+					if (exp_1) begin
+						rd_addr_cnt <= 0;
+						app_en_r <= 1'b0;
+					end
+					else begin
+						rd_addr_cnt <= arith_5;
+					end
+				end
+				if (app_rd_data_valid) begin
+					if (exp_2) begin
+						rd_data_cnt <= 0;
+					end
+					else begin
+						rd_data_cnt <= arith_1;
+					end
+				end
+			end
+			MEM_READ_WAIT: begin
+				if (app_rd_data_valid) begin
+					if (exp_2) begin
+						rd_data_cnt <= 0;
+					end
+					else begin
+						rd_data_cnt <= arith_1;
+					end
+				end
+			end
+			MEM_WRITE_FIRST_READ: begin
+				app_en_r <= 1'b1;
+			end
+			MEM_WRITE: begin
+				if (app_rdy && (!ddr_init_input_finish)) begin
+					app_addr_r <= arith_4;
+					if (exp_3) begin
+						app_en_r <= 1'b0;
+					end
+				end
+				if (app_rdy && (ddr_init_input_finish)) begin
+					if (wr_addr_add_cnt == 2) begin
+						app_addr_r <= arith_4;
+					end
+					if (exp_3) begin
+						app_en_r <= 1'b0;
+					end
+				end
+			end
+			MEM_WRITE_WAIT: begin
+				if (app_rdy && (!ddr_init_input_finish)) begin
+					app_addr_r <= arith_4;
+					if (exp_3) begin
+						app_en_r <= 1'b0;
+					end
+				end
+				if (app_rdy && (ddr_init_input_finish)) begin
+					if (wr_addr_add_cnt == 2) begin
+						app_addr_r <= arith_4;
+					end
+					if (exp_3) begin
+						app_en_r <= 1'b0;
+					end
+				end
+			end
+			default: ;
 		endcase
 	end
 end
@@ -220,15 +284,25 @@ always@(posedge clk or posedge rst) begin
 				wr_addr_cnt <= 0;
 			end
 			MEM_WRITE: begin
-				if (app_rdy) begin
+				if (app_rdy && (!ddr_init_input_finish)) begin
 					if (!exp_3) begin
+						wr_addr_cnt <= arith_2;
+					end
+				end
+				if (app_rdy && (ddr_init_input_finish)) begin
+					if ((!exp_3) && (wr_addr_add_cnt == 2)) begin
 						wr_addr_cnt <= arith_2;
 					end
 				end
 			end
 			MEM_WRITE_WAIT: begin
-				if (app_rdy) begin
+				if (app_rdy && (!ddr_init_input_finish)) begin
 					if (!exp_3) begin
+						wr_addr_cnt <= arith_2;
+					end
+				end
+				if (app_rdy && (ddr_init_input_finish)) begin
+					if ((!exp_3) && (wr_addr_add_cnt == 2)) begin
 						wr_addr_cnt <= arith_2;
 					end
 				end
@@ -258,7 +332,7 @@ always@(posedge clk or posedge rst) begin
 						wr_data_cnt <= arith_3;
 					end
 					if ((!exp_4) && (ddr_init_input_finish)) begin
-						wr_data_cnt <= wr_data_cnt_2;
+						wr_data_cnt <= wr_data_cnt_2_delay;
 					end
 				end
 			end

@@ -314,9 +314,9 @@ always @(posedge clk or negedge rst) begin
             end
             STORE_DATA: begin
                 data_write_addr_tmp <= arith_4; 
-                data_to_ddr <= data_cache[data_store_cnt];
                 data_to_ddr_rdy <= 1;
                 if(data_to_ddr_rdy) begin
+                    data_to_ddr <= data_cache[data_store_cnt];
                     data_store_cnt <= arith_6;
                 end
             end
