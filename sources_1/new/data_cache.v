@@ -35,6 +35,7 @@ module data_cache
     output reg                              jmp_addr_read_req,
     //input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         data_to_ddr,
+    output reg [9 : 0]                      wr_data_cnt_1,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_read_addr,
 	output reg [DDR_ADDR_WIDTH - 1 : 0]		data_write_addr,
     //input wire [DATA_WIDTH - 1 : 0]			data_to_cache,
@@ -70,6 +71,8 @@ reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
 reg [9 : 0]                                 data_store_cnt;
 reg                                         data_to_ddr_rdy;
+reg                                         wr_data_cnt_1_delay;
+wire                                        wr_pulse;
 
 wire [3 : 0]                                st_cur;
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
@@ -89,6 +92,7 @@ reg                                         ddr_to_dc_fifo_empty_delay;
 wire                                        st_cur_e_LD;
 wire                                        st_cur_e_START_PRE;
 wire                                        st_cur_e_SENT_ADDR;
+wire                                        st_cur_e_STORE_DATA;
 
 integer j ;
 
@@ -99,6 +103,7 @@ assign rd_burst_data_valid = data_fifo_to_dc[0 : 0];
 assign st_cur_e_LD = (st_cur == LOAD_DATA)? 1 : 0;
 assign st_cur_e_START_PRE = (st_cur == START_PRE)? 1 : 0;
 assign st_cur_e_SENT_ADDR = (st_cur == SENT_ADDR)? 1 : 0;
+assign st_cur_e_STORE_DATA = (st_cur == STORE_DATA)? 1 : 0;
 
 /* ALU */
 wire [ADDR_WIDTH_MEM - 1 : 0]               arith_1;
@@ -185,6 +190,26 @@ end
 always @(posedge clk) begin
     ddr_to_dc_fifo_empty_delay <= ddr_to_dc_fifo_empty;
 end
+
+always @ (posedge clk or rst) begin
+	if(!rst) begin
+		wr_data_cnt_1 <= 0;
+	end
+	else begin
+		if (st_cur_e_STORE_DATA && !(wr_data_cnt_1 == DATA_CACHE_DEPTH - 1)) begin
+			wr_data_cnt_1 <= wr_data_cnt_1 + 1;
+		end
+		else if (!st_cur_e_STORE_DATA) begin
+			wr_data_cnt_1 <= 0;
+		end
+	end
+end
+
+always @(posedge clk) begin
+	wr_data_cnt_1_delay <= wr_data_cnt_1[0 : 0];
+end
+
+assign wr_pulse = wr_data_cnt_1 ^ wr_data_cnt_1_delay;
 
 always @(posedge st_cur_e_LD or posedge st_cur_e_START_PRE or posedge st_cur_e_SENT_ADDR or posedge data_reading) begin // TODO
     if (st_cur_e_LD && data_reading) begin
