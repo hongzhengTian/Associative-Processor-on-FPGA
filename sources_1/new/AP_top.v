@@ -376,7 +376,6 @@ module AP_top
     .ddr3_cs_n              (ddr3_cs_n),
     .ddr3_dm                (ddr3_dm),
     .ddr3_odt               (ddr3_odt),
-    .sys_clk_i_1            (sys_clk_i_1),
     .sys_clk_i_2            (sys_clk_i_2),
     .ui_clk                 (ui_clk),
     .init_calib_complete    (init_calib_complete),

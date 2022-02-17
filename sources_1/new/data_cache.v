@@ -191,7 +191,7 @@ always @(posedge clk) begin
     ddr_to_dc_fifo_empty_delay <= ddr_to_dc_fifo_empty;
 end
 
-always @ (posedge clk or rst) begin
+always @ (posedge clk or negedge rst) begin
 	if(!rst) begin
 		wr_data_cnt_1 <= 0;
 	end
