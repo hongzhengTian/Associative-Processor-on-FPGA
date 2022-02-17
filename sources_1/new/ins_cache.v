@@ -51,7 +51,7 @@ assign rd_burst_data_valid = ins_fifo_to_ic[0 : 0];
 
 reg [15 : 0]                            tag_ins;
 reg [ISA_WIDTH - 1 : 0]                 ins_cache [0 : ISA_DEPTH -1];
-reg [ISA_WIDTH - 1 : 0]                 int_serve;
+//reg [ISA_WIDTH - 1 : 0]                 int_serve;
 
 wire [3 : 0]                            st_cur;
 reg                                     ins_cache_init;
@@ -145,7 +145,7 @@ always @(posedge clk or negedge rst) begin
         rd_cnt_ins_reg <= 0;
         ins_cache_init <= 0;
         load_times <= 0;
-        int_serve <= 0;
+        //int_serve <= 0;
         tag_ins <= 0;
         ins_tmp <= 0;
         ins_valid_tmp <= 0;
@@ -172,11 +172,11 @@ always @(posedge clk or negedge rst) begin
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 2'b01: begin
-                    ins_tmp <= int_serve;
+                    ins_tmp <= 0;//int_serve;
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 2'b11: begin
-                    ins_tmp <= int_serve;
+                    ins_tmp <= 0;//int_serve;
                     ins_valid_tmp <= {OPCODE_WIDTH{1'b1}};
                 end
                 default: begin
@@ -223,13 +223,13 @@ always @(*) begin
                     ins_cache_rdy = 0;
                 end
                 2'b01: begin
-                    ins_to_apctrl = int_serve;
+                    ins_to_apctrl = 0;//int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;
                 end
                 2'b11: begin
-                    ins_to_apctrl = int_serve;
+                    ins_to_apctrl = 0;//int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;

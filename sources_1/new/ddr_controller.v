@@ -6,7 +6,6 @@ module ddr_controller
 (
 	input                           rst,                              
 	input                           clk,     
-	input 							cache_clk,                       
 	input                           rd_burst_req,                       
 	input                           wr_burst_req,                       
 	input [9:0]                     rd_burst_len,                  
