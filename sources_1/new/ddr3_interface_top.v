@@ -122,7 +122,7 @@ module ddr3_interface_top
     INT_INS_DEPTH
     ) u_DDR_cache_interface
     (
-        .mem_clk(sys_clk_i_2),
+        .mem_clk(ui_clk),
         .rst(ui_clk_sync_rst),
         .ins_input(ins_input),
         .data_input(data_input),
@@ -171,7 +171,7 @@ module ddr3_interface_top
     DDR_ADDR_WIDTH
     )u_ddr_controller 
     (
-        .clk(sys_clk_i_2),
+        .clk(ui_clk),
         .rst(ui_clk_sync_rst),
         .rd_burst_req(rd_burst_req),
         .wr_burst_req(wr_burst_req),
