@@ -130,7 +130,6 @@ module AP_controller
     output reg [DATA_WIDTH - 1 : 0]         mask_B,
     output reg [DATA_WIDTH - 1 : 0]         mask_R,
     output reg                              mask_C,
-    output reg                              mask_F,
     output reg [2 : 0]                      pass
 );
 
@@ -471,7 +470,6 @@ module AP_controller
     always @(posedge clk or negedge rst_STATE) begin
         pass_tmp <= pass;
         mask_C <= 1;
-        mask_F <= 1;
         key_A_tmp <= key_A;
         key_B_tmp <= key_B;
         key_C_tmp <= key_C;

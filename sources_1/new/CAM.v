@@ -52,7 +52,6 @@ module CAM
     input wire rst_InF,
     input wire [DATA_DEPTH - 1 : 0] input_F,
     input wire key_F,
-    input wire mask_F,
 
     output wire [DATA_WIDTH - 1 : 0] Q_out_A_row,
     output wire [DATA_DEPTH - 1 : 0] Q_out_A_col,
@@ -162,7 +161,6 @@ cell_F #(DATA_DEPTH) cell_F(
 //.addr_input(addr_F),
 .input_F(input_F),
 .key(key_F),
-.mask(mask_F),
 .pass(pass),
 .rst_In(rst_InF),
 .Q_S(Q_S),

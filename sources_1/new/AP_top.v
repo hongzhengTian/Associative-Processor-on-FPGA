@@ -120,7 +120,6 @@ module AP_top
     wire [DATA_WIDTH - 1 : 0]           mask_B;
     wire [DATA_WIDTH - 1 : 0]           mask_R;
     wire                                mask_C;
-    wire                                mask_F;
     wire [2 : 0]                        pass;
 
     wire [DATA_WIDTH - 1 : 0]           data_A_rbr;
@@ -289,7 +288,6 @@ module AP_top
     .mask_B                 (mask_B),
     .mask_R                 (mask_R),
     .mask_C                 (mask_C),
-    .mask_F                 (mask_F),
     .pass                   (pass)
     );
 
@@ -329,7 +327,6 @@ module AP_top
     .rst_InF                (rst_InF),
     .input_F                (input_F),
     .key_F                  (key_F),
-    .mask_F                 (mask_F),
     .addr_input_rbr_R       (addr_input_rbr_R),
     .addr_input_cbc_R       (addr_input_cbc_R),
     .rst_InR                (rst_InR),
