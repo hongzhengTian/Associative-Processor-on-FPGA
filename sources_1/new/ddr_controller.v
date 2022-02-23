@@ -51,7 +51,7 @@ localparam READ_END = 4'd6;
 localparam WRITE_END = 4'd7;
 localparam MEM_WRITE_FIRST_READ = 4'd8;
 
-reg [3:0] state;	
+(*dont_touch = "true"*) reg [3:0] state;	
 reg [9:0] rd_data_cnt;
 reg [9:0] wr_addr_cnt;
 reg [9:0] wr_data_cnt;

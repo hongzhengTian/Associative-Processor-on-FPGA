@@ -32,7 +32,7 @@ module data_cache
     /* the interface of DDR */
     output reg                              data_read_req,
     output reg                              data_store_req,
-    output reg                              jmp_addr_read_req,
+    (*dont_touch = "true"*) output reg                              jmp_addr_read_req,
     //input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,
     output reg [DATA_WIDTH - 1 : 0]         data_to_ddr,
     output reg [9 : 0]                      wr_data_cnt_1,
