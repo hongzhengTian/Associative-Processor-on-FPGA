@@ -71,8 +71,6 @@ reg [15 :0]                                 tag_data;
 reg [DATA_WIDTH - 1 : 0]                    data_cache [0 : DATA_CACHE_DEPTH - 1];
 reg [9 : 0]                                 data_store_cnt;
 reg                                         data_to_ddr_rdy;
-reg                                         wr_data_cnt_1_delay;
-wire                                        wr_pulse;
 
 wire [3 : 0]                                st_cur;
 reg [ADDR_WIDTH_MEM - 1 : 0]                addr_init_ctxt = 16'h5000;
@@ -204,12 +202,6 @@ always @ (posedge clk or negedge rst) begin
 		end
 	end
 end
-
-always @(posedge clk) begin
-	wr_data_cnt_1_delay <= wr_data_cnt_1[0 : 0];
-end
-
-assign wr_pulse = wr_data_cnt_1 ^ wr_data_cnt_1_delay;
 
 always @(posedge st_cur_e_LD or posedge st_cur_e_START_PRE or posedge st_cur_e_SENT_ADDR or posedge data_reading) begin // TODO
     if (st_cur_e_LD && data_reading) begin

@@ -80,7 +80,6 @@ assign wr_burst_data_req = ((state == MEM_WRITE) || (state == MEM_WRITE_2)) & ap
 wire [9 : 0] arith_1 = rd_data_cnt + 1;
 wire [9 : 0] arith_2 = wr_addr_cnt + 1;
 wire [9 : 0] arith_3 = wr_data_cnt + 1;
-reg [9 : 0]	arith_3_delay;
 wire [DDR_ADDR_WIDTH - 1:0] arith_4 = app_addr_r + 8;
 wire [9 : 0] arith_5 = rd_addr_cnt + 1;
 
@@ -102,7 +101,6 @@ end
 
 always @(posedge clk) begin
 	rd_burst_data_valid_delay <= rd_burst_data_valid;
-	arith_3_delay <= arith_3;
 	wr_data_cnt_2_delay <= wr_data_cnt_2;
 end
 

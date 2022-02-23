@@ -6,7 +6,7 @@ parameter DATA_DEPTH = 4
 input wire [DATA_DEPTH - 1 : 0] input_F,
 input wire                      rst_In,
 input wire                      key,
-input wire                      mask,
+//input wire                      mask,
 input wire [2:0]                pass,
 input wire [DATA_DEPTH - 1 : 0] tag,
 input wire                      clk,
@@ -57,13 +57,11 @@ always @(posedge clk) begin
     end
 end
         
-always @(mask or Q or Qb or key or clk) begin
+always @(Q or Qb or key or clk) begin
     for (i = 0; i <= DATA_DEPTH - 1; i = i + 1) begin
-        case ({mask,key})
-            2'b00: tag_cell[i] = 1'b1;
-            2'b01: tag_cell[i] = 1'b1;
-            2'b10: tag_cell[i] = Qb[i];
-            2'b11: tag_cell[i] = Q[i];
+        case (key)
+            1'b0: tag_cell[i] = Qb[i];
+            1'b1: tag_cell[i] = Q[i];
             default: ;
         endcase
     end
