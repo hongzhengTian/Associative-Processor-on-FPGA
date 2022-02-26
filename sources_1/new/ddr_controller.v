@@ -12,10 +12,10 @@ module ddr_controller
 	input [9:0]                     wr_burst_len,                   
 	input [DDR_ADDR_WIDTH - 1:0]    rd_burst_addr,        
 	input [DDR_ADDR_WIDTH - 1:0]    wr_burst_addr,        
-	output                          rd_burst_data_valid,   
+	output reg                      rd_burst_data_valid,   
 	output reg                      rd_burst_data_valid_delay,          
 	output                          wr_burst_data_req,                    
-	output [DDR_DATA_WIDTH - 1:0]   rd_burst_data,   
+	output reg [DDR_DATA_WIDTH - 1:0]   rd_burst_data,   
 	input [DDR_DATA_WIDTH - 1:0]    wr_burst_data,    
 	output                          rd_burst_finish,                     
 	output                          wr_burst_finish, 
@@ -28,7 +28,7 @@ module ddr_controller
    output [DDR_ADDR_WIDTH - 1 :0]   app_addr,
    output [2:0]                     app_cmd,
    output                           app_en,
-   output [DDR_DATA_WIDTH-1:0]      app_wdf_data,
+   output reg [DDR_DATA_WIDTH-1:0]      app_wdf_data,
    output                           app_wdf_end,
    output [DDR_DATA_WIDTH/8-1:0]    app_wdf_mask,
    output                           app_wdf_wren,
@@ -66,14 +66,14 @@ assign app_cmd = app_cmd_r;
 assign app_addr = app_addr_r;
 assign app_en = app_en_r;
 assign app_wdf_end = app_wdf_wren;
-assign app_wdf_data = wr_burst_data;
+//assign app_wdf_data = wr_burst_data;
 assign app_wdf_wren = app_wdf_wren_r & app_wdf_rdy;
 assign rd_burst_finish = (state == READ_END);
 assign wr_burst_finish = (state == WRITE_END);
 assign burst_finish = rd_burst_finish | wr_burst_finish;
  
-assign rd_burst_data = app_rd_data;
-assign rd_burst_data_valid = app_rd_data_valid;
+//assign rd_burst_data = app_rd_data;
+//assign rd_burst_data_valid = app_rd_data_valid;
  
 assign wr_burst_data_req = ((state == MEM_WRITE) || (state == MEM_WRITE_2)) & app_wdf_rdy ;
 
@@ -102,6 +102,9 @@ end
 always @(posedge clk) begin
 	rd_burst_data_valid_delay <= rd_burst_data_valid;
 	wr_data_cnt_2_delay <= wr_data_cnt_2;
+	rd_burst_data <= app_rd_data;
+	rd_burst_data_valid <= app_rd_data_valid;
+	app_wdf_data <= wr_burst_data;
 end
 
 always @(posedge clk or posedge rst) begin

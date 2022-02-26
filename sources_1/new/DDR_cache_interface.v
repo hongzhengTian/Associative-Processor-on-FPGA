@@ -125,8 +125,8 @@ assign arith_2 = rd_cnt_ins + 1;
 assign ddri_exp_2 = (state == MEM_WRITE_DATA_STORE)? 1 : 0;
 assign burst_finish = rd_burst_finish || wr_burst_finish;
 
-always @(posedge mem_clk or posedge rst) begin
-	if (rst) begin
+always @(posedge mem_clk or negedge rst) begin
+	if (!rst) begin
 		ddr_rdy <= 0;
 	end
 	else begin
@@ -144,30 +144,30 @@ always @(posedge mem_clk) begin
 end
 
 /* WRITE part */
-always@(posedge mem_clk or posedge rst) begin
-	if(rst) begin
+always@(*) begin //TODO
+	/*if(!rst) begin
 		wr_burst_data <= 0;
 	end
-	else begin
+	else begin*/
         case ({state, wr_burst_data_req})
-            {MEM_WRITE_ISA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{ins_input}};
+            {MEM_WRITE_ISA, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{ins_input}};
             {MEM_WRITE_ISA, 1'b0}: ;
-			{MEM_WRITE_DATA, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_input}};
+			{MEM_WRITE_DATA, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_input}};
             {MEM_WRITE_DATA, 1'b0}: ;
-			{MEM_WRITE_INT_ADDR, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
+			{MEM_WRITE_INT_ADDR, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
             {MEM_WRITE_INT_ADDR, 1'b0}: ;
-			{MEM_WRITE_INT_INS, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - 28){1'b0}}, {ins_input}};
+			{MEM_WRITE_INT_INS, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, {ins_input}};
             {MEM_WRITE_INT_INS, 1'b0}: ;
-			{MEM_WRITE_DATA_STORE, 1'b1}: wr_burst_data <= {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_to_ddr}};
+			{MEM_WRITE_DATA_STORE, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_to_ddr}};
             {MEM_WRITE_DATA_STORE, 1'b0}: ;
-			default: wr_burst_data <= 0;
+			default: wr_burst_data = 0;
         endcase
-    end
+    //end
 end
 
 /* READ part */
-always @ (posedge mem_clk or posedge rst) begin
-	if (rst) begin
+always @ (posedge mem_clk or negedge rst) begin
+	if (!rst) begin
 		ins_to_cache <= 0;
 		data_to_cache <= 0;
 		jmp_addr_to_cache <= 0;
@@ -197,38 +197,26 @@ always @ (posedge mem_clk or posedge rst) begin
 end
 
 /* cnt part */
-always @(posedge mem_clk or posedge rst) begin
-    if (rst) begin
+always @(posedge mem_clk or negedge rst) begin
+    if (!rst) begin
         rd_cnt_ins <= 0;
 		rd_cnt_data <= 0;
 		wr_en_ddr_to_ic_fifo <= 0;
 		wr_en_ddr_to_dc_fifo <= 0;
     end
     else begin
-        case ({state, rd_burst_data_valid, rd_burst_finish})
-            {MEM_READ_ISA,2'b10}: begin
+        case ({state, rd_burst_data_valid})
+            {MEM_READ_ISA,1'b1}: begin
 				rd_cnt_ins <= arith_2;
 				wr_en_ddr_to_ic_fifo <= 1;
 			end
-            {MEM_READ_ISA,2'b01}: begin
-				rd_cnt_ins <= 0;
-				wr_en_ddr_to_ic_fifo <= 0;
-			end
-            {MEM_READ_DATA,2'b10}: begin
+            {MEM_READ_DATA,1'b1}: begin
 				rd_cnt_data <= arith_1;
 				wr_en_ddr_to_dc_fifo <= 1;
 			end
-            {MEM_READ_DATA,2'b01}: begin
-				rd_cnt_data <= 0;
-				wr_en_ddr_to_dc_fifo <= 0;
-			end
-            {MEM_READ_INT_ADDR,2'b10}: begin
+            {MEM_READ_INT_ADDR,1'b1}: begin
 				rd_cnt_data <= arith_1;
 				wr_en_ddr_to_dc_fifo <= 1;
-			end
-            {MEM_READ_INT_ADDR,2'b01}: begin
-				rd_cnt_data <= 0; 
-				wr_en_ddr_to_dc_fifo <= 0;
 			end
             default:;
         endcase
@@ -236,9 +224,9 @@ always @(posedge mem_clk or posedge rst) begin
 end
 
 /* finish part */
-always @(posedge mem_clk or posedge rst)// or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
+always @(posedge mem_clk or negedge rst)// or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
 begin
-	if(rst)
+	if(!rst)
 	begin
 		CMD <= W_ISA;
 		wr_burst_len <= TOTAL_ISA_DEPTH;
@@ -339,8 +327,8 @@ begin
 end
 
 /* state machine part */
-always@(posedge mem_clk or posedge rst) begin
-	if(rst) begin
+always@(posedge mem_clk or negedge rst) begin
+	if(!rst) begin
 		state <= START;
 	end
 	else begin

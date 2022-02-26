@@ -122,8 +122,8 @@ module ddr3_interface_top
     INT_INS_DEPTH
     ) u_DDR_cache_interface
     (
-        .mem_clk(ui_clk),
-        .rst(ui_clk_sync_rst),
+        .mem_clk(sys_clk_i_2),
+        .rst(sys_rst),
         .ins_input(ins_input),
         .data_input(data_input),
         .ins_read_req(ins_read_req),

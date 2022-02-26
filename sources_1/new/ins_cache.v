@@ -201,11 +201,24 @@ end
 
 always @(*) begin
     case (st_cur)
+        SENT_INS: begin
+            if (ic_exp_3) begin
+                ins_to_apctrl = 0;
+            end
+            else begin
+                ins_to_apctrl = ins_cache[arith_2];
+            end
+        end
+        default: ins_to_apctrl = ins_tmp;
+    endcase
+end
+
+always @(*) begin
+    case (st_cur)
         START: begin
             rd_en_ddr_to_ic_fifo = 0;
             ins_read_addr = 0;
             rst_cache = 0;
-            ins_to_apctrl = ins_tmp;
             ins_cache_rdy = ins_cache_init;
             case (ins_cache_init)
                 1'b1: ins_valid = 0;
@@ -217,33 +230,28 @@ always @(*) begin
             ins_read_addr = 0;
             case ({ic_exp_2, ic_exp_3})
                 2'b10: begin
-                    ins_to_apctrl = ins_cache[arith_2];
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 0;
                 end
                 2'b01: begin
-                    ins_to_apctrl = 0;//int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;
                 end
                 2'b11: begin
-                    ins_to_apctrl = 0;//int_serve;
                     ins_valid = {OPCODE_WIDTH{1'b1}};
                     rst_cache = 0;
                     ins_cache_rdy = 1;
                 end
                 default: begin
                     rst_cache = 1;
-                    ins_to_apctrl = 0;
                     ins_valid = 0;
                     ins_cache_rdy = 0;
                 end
             endcase
         end
         LOAD_INS: begin
-            ins_to_apctrl = ins_tmp;
             ins_valid = ins_valid_tmp;
             rst_cache = 0;
             ins_cache_rdy = 0;
@@ -255,7 +263,6 @@ always @(*) begin
             rst_cache = 0;
             rd_en_ddr_to_ic_fifo = 0;
             ins_read_addr = 0; /* maybe wrong here when load ISA */
-            ins_to_apctrl = 0;
             ins_valid = 0;
         end
     endcase
