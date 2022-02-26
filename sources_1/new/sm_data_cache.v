@@ -27,7 +27,7 @@ module sm_data_cache
 
 );
 /* states */
-localparam                                  START_PRE       = 4'd11;    
+localparam                                  START_PRE       = 4'd0;    
 localparam                                  START           = 4'd1;
 localparam                                  LOAD_DATA       = 4'd2;
 localparam                                  STORE_DATA      = 4'd3;

@@ -63,62 +63,62 @@ module DDR_cache_interface
 	input wire 								wr_burst_finish        /* write burst finish*/
 );
 
-localparam START 							= 5'd0;               /*START=000; MEM_READ_ISA=001;MEM_WRITE=010;BURST_LEN_ISA=128*/
-localparam MEM_WRITE_ISA 					= 5'd1;
-localparam MEM_WRITE_ISA_END 				= 5'd2;
-localparam MEM_WRITE_ISA_END_2 				= 5'd17;
-localparam MEM_WRITE_DATA  					= 5'd3;
-localparam MEM_WRITE_DATA_END 				= 5'd4;
-localparam MEM_WRITE_DATA_END_2 			= 5'd18;
-localparam MEM_READ_ISA	 					= 5'd5;
-localparam MEM_READ_ISA_END 				= 5'd6;
-localparam MEM_READ_DATA 					= 5'd7;
-localparam MEM_READ_DATA_END 				= 5'd8;
-localparam MEM_WRITE_DATA_STORE 			= 5'd9;
-localparam MEM_WRITE_DATA_STORE_END 		= 5'd10;
-localparam MEM_WRITE_INT_ADDR 				= 5'd11;
-localparam MEM_READ_INT_ADDR 				= 5'd12;
-localparam MEM_WRITE_INT_ADDR_END		 	= 5'd13;
-localparam MEM_WRITE_INT_ADDR_END_2	 		= 5'd19;
-localparam MEM_READ_INT_ADDR_END 			= 5'd14;
-localparam MEM_WRITE_INT_INS  				= 5'd15;
-localparam MEM_WRITE_INT_INS_END 			= 5'd16;
-localparam MEM_WRITE_INT_INS_END_2 			= 5'd20;
+localparam START = 5'd0;               /*START=000; MEM_READ_ISA=001;MEM_WRITE=010;BURST_LEN_ISA=128*/
+localparam MEM_WRITE_ISA = 5'd1;
+localparam MEM_WRITE_ISA_END = 5'd2;
+localparam MEM_WRITE_ISA_END_2 = 5'd3;
+localparam MEM_WRITE_DATA = 5'd4;
+localparam MEM_WRITE_DATA_END = 5'd5;
+localparam MEM_WRITE_DATA_END_2 = 5'd6;
+localparam MEM_WRITE_DATA_STORE = 5'd7;
+localparam MEM_WRITE_DATA_STORE_END = 5'd8;
+localparam MEM_WRITE_INT_ADDR = 5'd9;
+localparam MEM_WRITE_INT_ADDR_END = 5'd10;
+localparam MEM_WRITE_INT_ADDR_END_2 = 5'd11;
+localparam MEM_WRITE_INT_INS = 5'd12;
+localparam MEM_WRITE_INT_INS_END = 5'd13;
+localparam MEM_WRITE_INT_INS_END_2 = 5'd14;
+localparam MEM_READ_ISA = 5'd15;
+localparam MEM_READ_ISA_END = 5'd16;
+localparam MEM_READ_DATA = 5'd17;
+localparam MEM_READ_DATA_END = 5'd18;
+localparam MEM_READ_INT_ADDR = 5'd19;
+localparam MEM_READ_INT_ADDR_END = 5'd20;
 
-localparam W_ISA 							= 4'd1;
-localparam W_DATA 							= 4'd2;
-localparam R_ISA 							= 4'd3;
-localparam R_DATA 							= 4'd4;
-localparam W_DATA_STORE 					= 4'd5;
-localparam W_INT_ADDR						= 4'd6;
-localparam R_INT_ADDR 						= 4'd7;
-localparam W_INT_INS 						= 4'd8;
+localparam W_ISA = 4'd1;
+localparam W_DATA = 4'd2;
+localparam R_ISA = 4'd3;
+localparam R_DATA = 4'd4;
+localparam W_DATA_STORE = 4'd5;
+localparam W_INT_ADDR = 4'd6;
+localparam R_INT_ADDR = 4'd7;
+localparam W_INT_INS = 4'd8;
 
 reg [3 : 0] CMD;
 reg [4 : 0] state;
-reg			ddr_rdy;
+reg ddr_rdy;
 
 wire finish_flag_w_isa;
 wire finish_flag_w_data;
 wire finish_flag_w_int_addr;
 wire finish_flag_w_int_ins;
 
-assign finish_flag_w_isa				 	= ((state == MEM_WRITE_ISA_END) || (state == MEM_WRITE_ISA_END_2))? 1 : 0;
-assign finish_flag_w_data 					= ((state == MEM_WRITE_DATA_END) || (state == MEM_WRITE_DATA_END_2))? 1 : 0;
-assign finish_flag_w_int_addr				= ((state == MEM_WRITE_INT_ADDR_END) || (state == MEM_WRITE_INT_ADDR_END_2))? 1 : 0;
-assign finish_flag_w_int_ins				= ((state == MEM_WRITE_INT_INS_END) || (state == MEM_WRITE_INT_INS_END_2))? 1 : 0;
+assign finish_flag_w_isa = ((state == MEM_WRITE_ISA_END) || (state == MEM_WRITE_ISA_END_2))? 1 : 0;
+assign finish_flag_w_data = ((state == MEM_WRITE_DATA_END) || (state == MEM_WRITE_DATA_END_2))? 1 : 0;
+assign finish_flag_w_int_addr = ((state == MEM_WRITE_INT_ADDR_END) || (state == MEM_WRITE_INT_ADDR_END_2))? 1 : 0;
+assign finish_flag_w_int_ins = ((state == MEM_WRITE_INT_INS_END) || (state == MEM_WRITE_INT_INS_END_2))? 1 : 0;
 
-assign load_ins_ddr 						= (state == MEM_WRITE_ISA);
-assign load_data_ddr 						= (state == MEM_WRITE_DATA);
-assign load_int_ins_ddr 					= (state == MEM_WRITE_INT_INS);
+assign load_ins_ddr = (state == MEM_WRITE_ISA);
+assign load_data_ddr = (state == MEM_WRITE_DATA);
+assign load_int_ins_ddr = (state == MEM_WRITE_INT_INS);
 
-reg                      					ddr_to_ic_fifo_empty_delay;
-reg  										ddr_to_dc_fifo_empty_delay;
+reg ddr_to_ic_fifo_empty_delay;
+reg ddr_to_dc_fifo_empty_delay;
 
-wire [9 : 0]								arith_1;
-wire [7 : 0]								arith_2;
-wire                                        ddri_exp_2;
-wire                                        burst_finish;
+wire [9 : 0] arith_1;
+wire [7 : 0] arith_2;
+wire ddri_exp_2;
+wire burst_finish;
 
 assign arith_1 = rd_cnt_data + 1;
 assign arith_2 = rd_cnt_ins + 1;
@@ -144,25 +144,15 @@ always @(posedge mem_clk) begin
 end
 
 /* WRITE part */
-always@(*) begin //TODO
-	/*if(!rst) begin
-		wr_burst_data <= 0;
-	end
-	else begin*/
-        case ({state, wr_burst_data_req})
-            {MEM_WRITE_ISA, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{ins_input}};
-            {MEM_WRITE_ISA, 1'b0}: ;
-			{MEM_WRITE_DATA, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_input}};
-            {MEM_WRITE_DATA, 1'b0}: ;
-			{MEM_WRITE_INT_ADDR, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
-            {MEM_WRITE_INT_ADDR, 1'b0}: ;
-			{MEM_WRITE_INT_INS, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, {ins_input}};
-            {MEM_WRITE_INT_INS, 1'b0}: ;
-			{MEM_WRITE_DATA_STORE, 1'b1}: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_to_ddr}};
-            {MEM_WRITE_DATA_STORE, 1'b0}: ;
-			default: wr_burst_data = 0;
-        endcase
-    //end
+always@(*) begin 
+    case (state)
+        MEM_WRITE_ISA: wr_burst_data = {{(DDR_DATA_WIDTH - ISA_WIDTH){1'b0}},{ins_input}};
+		MEM_WRITE_DATA: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_input}};
+		MEM_WRITE_INT_ADDR: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, 28'h0060000};  // interruption service program
+		MEM_WRITE_INT_INS: wr_burst_data = {{(DDR_DATA_WIDTH - 28){1'b0}}, {ins_input}};
+		MEM_WRITE_DATA_STORE: wr_burst_data = {{(DDR_DATA_WIDTH - DATA_WIDTH){1'b0}},{data_to_ddr}};
+		default: wr_burst_data = 0;
+    endcase
 end
 
 /* READ part */
@@ -210,21 +200,29 @@ always @(posedge mem_clk or negedge rst) begin
 				rd_cnt_ins <= arith_2;
 				wr_en_ddr_to_ic_fifo <= 1;
 			end
+			{MEM_READ_ISA,1'b0}: ;
             {MEM_READ_DATA,1'b1}: begin
 				rd_cnt_data <= arith_1;
 				wr_en_ddr_to_dc_fifo <= 1;
 			end
+			{MEM_READ_DATA,1'b0}: ;
             {MEM_READ_INT_ADDR,1'b1}: begin
 				rd_cnt_data <= arith_1;
 				wr_en_ddr_to_dc_fifo <= 1;
 			end
-            default:;
+			{MEM_READ_INT_ADDR,1'b0}: ;
+            default:begin
+				rd_cnt_ins <= 0;
+				rd_cnt_data <= 0;
+				wr_en_ddr_to_ic_fifo <= 0;
+				wr_en_ddr_to_dc_fifo <= 0;
+			end
         endcase
     end
 end
 
 /* finish part */
-always @(posedge mem_clk or negedge rst)// or posedge finish_flag_w_isa or posedge finish_flag_w_data or posedge finish_flag_w_int_addr or posedge finish_flag_w_int_ins) 
+always @(posedge mem_clk or negedge rst)
 begin
 	if(!rst)
 	begin
