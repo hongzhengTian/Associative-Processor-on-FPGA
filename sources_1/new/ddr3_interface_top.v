@@ -154,7 +154,6 @@ module ddr3_interface_top
         .rd_burst_addr(rd_burst_addr),
         .wr_burst_addr(wr_burst_addr),
         .rd_burst_data_valid(rd_burst_data_valid),
-        .wr_burst_data_req(wr_burst_data_req),
         .jmp_addr_to_cache(jmp_addr_to_cache),
         .rd_burst_data(rd_burst_data),
         .wr_burst_data(wr_burst_data),
