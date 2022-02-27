@@ -56,7 +56,6 @@ module DDR_cache_interface
 	output reg [DDR_ADDR_WIDTH - 1 : 0] 	rd_burst_addr,        	/* starting addr of read burst*/
 	output reg [DDR_ADDR_WIDTH - 1 : 0] 	wr_burst_addr,        	/* starting addr of write burst*/
 	input wire 								rd_burst_data_valid,    /* data valid signal for readout*/
-	input wire 								wr_burst_data_req,      /* ready for write, app_wdf_rdy*/
 	(* DONT_TOUCH = "1" *)input wire [DDR_DATA_WIDTH - 1 : 0] 	rd_burst_data,   		/* readout data*/
 	output reg [DDR_DATA_WIDTH - 1 : 0] 	wr_burst_data,    		/* write input data*/
 	input wire 								rd_burst_finish,        /* read burst finish*/
