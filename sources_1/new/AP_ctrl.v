@@ -22,7 +22,7 @@ module AP_controller
     output wire                             finish_flag,
 
     /* the interface of instruction cache */
-    (*dont_touch = "true"*) input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
+    input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
     input wire [ISA_WIDTH - 1 : 0]          ins_to_apctrl,
 
     /* the interface of data cache */
@@ -62,7 +62,7 @@ module AP_controller
     output reg                              int_set,    
     output reg                              ret_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr,
-    (*dont_touch = "true"*) output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr,
+    output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr,
     output reg [DATA_WIDTH - 1 : 0]         tmp_bit_cnt,
     output reg [2 : 0]                      tmp_pass,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask,

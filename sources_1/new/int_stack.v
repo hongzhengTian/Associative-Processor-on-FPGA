@@ -26,7 +26,7 @@ module int_stack
     output reg                              ctxt_rdy,
 
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr_ret,
-    (*dont_touch = "true"*) output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_ret,
+    output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr_ret,
     output reg [DATA_WIDTH - 1 : 0]         tmp_bit_cnt_ret,
     output reg [2 : 0]                      tmp_pass_ret,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask_ret,

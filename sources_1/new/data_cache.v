@@ -27,10 +27,10 @@ module data_cache
     output reg [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr,
     output reg [DATA_WIDTH - 1 : 0]         data_in_rbr,
     output reg [DATA_DEPTH - 1 : 0]         data_in_cbc,
-    (*dont_touch = "true"*) output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ctxt,
+    output reg [ADDR_WIDTH_MEM - 1 : 0]     addr_cur_ctxt,
 
     /* the interface of DDR */
-    (*dont_touch = "true"*) output reg                              data_read_req,
+    output reg                              data_read_req,
     output reg                              data_store_req,
     (*dont_touch = "true"*) output reg                              jmp_addr_read_req,
     //input wire [DDR_ADDR_WIDTH - 1 : 0]		jmp_addr_to_cache,

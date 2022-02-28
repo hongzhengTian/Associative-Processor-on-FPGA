@@ -24,7 +24,7 @@ module ins_cache
 
     /* the interface of AP_ctrl */
     output reg [ISA_WIDTH - 1 : 0]      ins_to_apctrl,
-    (*dont_touch = "true"*) output reg [OPCODE_WIDTH - 1 : 0]   ins_valid,
+    output reg [OPCODE_WIDTH - 1 : 0]   ins_valid,
 
     /* the interface to DDR interface */
     output reg                          ins_read_req,
