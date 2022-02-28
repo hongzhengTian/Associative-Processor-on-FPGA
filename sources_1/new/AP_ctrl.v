@@ -15,15 +15,14 @@ module AP_controller
 (
     /* the interface of system signal */
     input wire                              clk,
-    input wire                              rst_STATE,
-    input wire                              rst_clk,
+    input wire                              rst,
     input wire                              int,
     output reg [DATA_WIDTH - 1 : 0]         data_print,
     output reg                              data_print_rdy,
     output wire                             finish_flag,
 
     /* the interface of instruction cache */
-    input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
+    (*dont_touch = "true"*) input wire [OPCODE_WIDTH - 1 : 0]       ins_valid,
     input wire [ISA_WIDTH - 1 : 0]          ins_to_apctrl,
 
     /* the interface of data cache */
@@ -63,7 +62,7 @@ module AP_controller
     output reg                              int_set,    
     output reg                              ret_valid,
     output reg [ADDR_WIDTH_MEM - 1 : 0]     ret_addr,
-    output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr,
+    (*dont_touch = "true"*) output reg [ADDR_WIDTH_MEM - 1 : 0]     ctxt_addr,
     output reg [DATA_WIDTH - 1 : 0]         tmp_bit_cnt,
     output reg [2 : 0]                      tmp_pass,
     output reg [DATA_WIDTH - 1 : 0]         tmp_mask,
@@ -129,7 +128,6 @@ module AP_controller
     output wire [DATA_WIDTH - 1 : 0]        mask_A,
     output reg [DATA_WIDTH - 1 : 0]         mask_B,
     output reg [DATA_WIDTH - 1 : 0]         mask_R,
-    output reg                              mask_C,
     output reg [2 : 0]                      pass
 );
 
@@ -352,8 +350,8 @@ module AP_controller
         endcase
     end
     
-    always @(posedge clk or negedge rst_clk) begin
-        if (!rst_clk) begin
+    always @(posedge clk or negedge rst) begin
+        if (!rst) begin
             cam_clk_cnt <= 0;
         end
         else begin
@@ -455,8 +453,8 @@ module AP_controller
     end 
     
     /* state machine */
-    always @(posedge clk or negedge rst_STATE or posedge int) begin
-        if (!rst_STATE) begin
+    always @(posedge clk or negedge rst or posedge int) begin
+        if (!rst) begin
             st_cur <= START;
         end
         else if (int) begin
@@ -467,9 +465,8 @@ module AP_controller
         end    
     end
 
-    always @(posedge clk or negedge rst_STATE) begin
+    always @(posedge clk or negedge rst) begin
         pass_tmp <= pass;
-        mask_C <= 1;
         key_A_tmp <= key_A;
         key_B_tmp <= key_B;
         key_C_tmp <= key_C;
@@ -477,7 +474,7 @@ module AP_controller
         store_ddr_delay <= store_ddr;
         store_ddr_en_delay <= store_ddr_en_1;
         addr_cam_tmp <= addr_cam;
-        if (!rst_STATE) begin
+        if (!rst) begin
             opt_cur <= 0;
             mask_reg <= 0;
             bit_cnt <= 0;
