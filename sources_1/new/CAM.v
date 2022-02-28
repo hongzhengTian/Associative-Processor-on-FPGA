@@ -47,7 +47,6 @@ module CAM
     input wire rst_InC,
     input wire [DATA_DEPTH - 1 : 0] input_C,
     input wire key_C,
-    input wire mask_C,
     
     input wire rst_InF,
     input wire [DATA_DEPTH - 1 : 0] input_F,
@@ -140,7 +139,6 @@ cell_C #(DATA_DEPTH) cell_C(
 .rst_In(rst_InC),
 .input_C(input_C), 
 .key(key_C), 
-.mask(mask_C), 
 .pass(pass),
 .clk(clk), 
 .tag(tag_out),

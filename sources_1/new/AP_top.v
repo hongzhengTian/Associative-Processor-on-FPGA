@@ -119,7 +119,6 @@ module AP_top
     wire [DATA_WIDTH - 1 : 0]           mask_A;
     wire [DATA_WIDTH - 1 : 0]           mask_B;
     wire [DATA_WIDTH - 1 : 0]           mask_R;
-    wire                                mask_C;
     wire [2 : 0]                        pass;
 
     wire [DATA_WIDTH - 1 : 0]           data_A_rbr;
@@ -195,8 +194,7 @@ module AP_top
     )AP_controller_u 
     (
     .clk                    (sys_clk_i_1),
-    .rst_STATE              (sys_rst),
-    .rst_clk                (sys_rst),
+    .rst                    (sys_rst),
     .int                    (int),
     .ins_valid              (ins_valid),
     .ins_to_apctrl          (ins_to_apctrl),
@@ -287,7 +285,6 @@ module AP_top
     .mask_A                 (mask_A),
     .mask_B                 (mask_B),
     .mask_R                 (mask_R),
-    .mask_C                 (mask_C),
     .pass                   (pass)
     );
 
@@ -321,7 +318,6 @@ module AP_top
     .rst_InC                (rst_InC),
     .input_C                (input_C),
     .key_C                  (key_C),
-    .mask_C                 (mask_C),
     .pass                   (pass),
     .rst_tag                (rst_tag),
     .rst_InF                (rst_InF),
