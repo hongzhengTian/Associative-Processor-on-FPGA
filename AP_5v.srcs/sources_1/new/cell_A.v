@@ -31,12 +31,12 @@ output reg [DATA_WIDTH * DATA_DEPTH - 1 : 0]    Q,
 output reg [DATA_DEPTH - 1 : 0]                 Q_S
 );
 
-reg [DATA_DEPTH - 1 : 0] Ie_R;
-reg [DATA_WIDTH - 1 : 0] Ie_C;
-reg [DATA_WIDTH - 1: 0] Ie [0 : DATA_DEPTH - 1];
-reg [DATA_DEPTH - 1 : 0] OutE_R;
-reg [DATA_WIDTH - 1 : 0] OutE_C;
-reg [DATA_WIDTH - 1: 0] OutE [0 : DATA_DEPTH - 1];
+reg [DATA_DEPTH - 1 : 0] Ie_R; // input enable signal for Row
+reg [DATA_WIDTH - 1 : 0] Ie_C; // input enable signal for Col
+reg [DATA_WIDTH - 1: 0] Ie [0 : DATA_DEPTH - 1]; // input enable signal
+reg [DATA_DEPTH - 1 : 0] OutE_R; // output enable signal for Row
+reg [DATA_WIDTH - 1 : 0] OutE_C; // output enable signal for Col
+reg [DATA_WIDTH - 1: 0] OutE [0 : DATA_DEPTH - 1]; // output enable signal
 reg [DATA_WIDTH * DATA_DEPTH - 1 : 0] tag_cell;
 
 reg [DATA_WIDTH - 1: 0] D [0 : DATA_DEPTH - 1]; 

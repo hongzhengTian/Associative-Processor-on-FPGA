@@ -252,6 +252,7 @@ module AP_controller
     reg [3 : 0]                             cam_clk_cnt;
     
     reg store_ddr_en_delay;
+    wire store_ddr_en_1;
     assign store_ddr_en_1 = store_ddr_delay & ~store_ddr;
     assign store_ddr_en = store_ddr_en_1 | store_ddr_en_delay;
     assign finish_flag = (st_cur == FINISH)? 1 : 0;
@@ -691,30 +692,16 @@ module AP_controller
                 endcase
             end
             LOAD_RBR: begin
-                case ({matrix_select_reg, data_cache_rdy})
-                    {M_A, 1'b1}: st_next = START; 
-                    {M_A, 1'b0}: st_next = LOAD_RBR; 
-                    {M_B, 1'b1}: st_next = START; 
-                    {M_B, 1'b0}: st_next = LOAD_RBR; 
-                    {M_R, 1'b1}: st_next = START; 
-                    {M_R, 1'b0}: st_next = LOAD_RBR; 
+                case (data_cache_rdy)
+                    1'b1: st_next = START; 
+                    1'b0: st_next = LOAD_RBR; 
                     default: st_next = LOAD_RBR;
                 endcase
             end
             LOAD_CBC:begin
-                case ({matrix_select_reg, data_cache_rdy, ret_valid})
-                    {M_A, 1'b1, 1'b0}: st_next = START;
-                    {M_A, 1'b1, 1'b1}: st_next = LOAD_CTXT;
-                    {M_A, 1'b0, 1'b1}: st_next = LOAD_CBC;
-                    {M_A, 1'b0, 1'b0}: st_next = LOAD_CBC;
-                    {M_B, 1'b1, 1'b0}: st_next = START;
-                    {M_B, 1'b1, 1'b1}: st_next = LOAD_CTXT;
-                    {M_B, 1'b0, 1'b0}: st_next = LOAD_CBC;
-                    {M_B, 1'b0, 1'b1}: st_next = LOAD_CBC;
-                    {M_R, 1'b1, 1'b0}: st_next = START;
-                    {M_R, 1'b1, 1'b1}: st_next = LOAD_CTXT;
-                    {M_R, 1'b0, 1'b0}: st_next = LOAD_CBC;
-                    {M_R, 1'b0, 1'b1}: st_next = LOAD_CBC;
+                case (data_cache_rdy)
+                    1'b1: st_next = START;
+                    1'b0: st_next = LOAD_CBC;
                     default:st_next = LOAD_CBC;
                 endcase
             end
@@ -730,24 +717,16 @@ module AP_controller
                 endcase
             end
             STORE_RBR: begin
-                case ({matrix_select_reg, ctrl_exp_3})
-                    {M_A, 1'b1}: st_next = STORE_END;
-                    {M_A, 1'b0}: st_next = STORE_RBR;
-                    {M_B, 1'b1}: st_next = STORE_END;
-                    {M_B, 1'b0}: st_next = STORE_RBR;
-                    {M_R, 1'b1}: st_next = STORE_END;
-                    {M_R, 1'b0}: st_next = STORE_RBR;
+                case (ctrl_exp_3)
+                    1'b1: st_next = STORE_END;
+                    1'b0: st_next = STORE_RBR;
                     default: st_next = STORE_RBR;
                 endcase
             end
             STORE_CBC: begin
-                case ({matrix_select_reg, ctrl_exp_3})
-                    {M_A, 1'b1}: st_next = STORE_END;
-                    {M_A, 1'b0}: st_next = STORE_CBC;
-                    {M_B, 1'b1}: st_next = STORE_END;
-                    {M_B, 1'b0}: st_next = STORE_CBC;
-                    {M_R, 1'b1}: st_next = STORE_END;
-                    {M_R, 1'b0}: st_next = STORE_CBC;
+                case (ctrl_exp_3)
+                    1'b1: st_next = STORE_END;
+                    1'b0: st_next = STORE_CBC;
                     default: st_next = STORE_CBC;
                 endcase
             end
@@ -1134,8 +1113,8 @@ module AP_controller
                 int_set = 0;
                 data_print_rdy = 0;
                 data_print = 0;
-                case ({matrix_select_reg, data_cache_rdy, ret_valid})
-                    {M_A, 1'b1, 1'b0}: begin
+                case ({matrix_select_reg, data_cache_rdy})
+                    {M_A, 1'b1}: begin
                         rst_InA = 0;
                         rst_InB = 1;
                         rst_InR = 1;
@@ -1147,19 +1126,7 @@ module AP_controller
                         input_R_cbc = 0;
                         ins_inp_valid = 1;
                     end
-                    {M_A, 1'b1, 1'b1}: begin
-                        rst_InA = 0;
-                        rst_InB = 1;
-                        rst_InR = 1;
-                        addr_input_cbc_A = addr_cam;
-                        addr_input_cbc_B = 0;
-                        addr_input_cbc_R = 0;
-                        input_A_cbc = data_in_cbc;
-                        input_B_cbc = 0;
-                        input_R_cbc = 0;
-                        ins_inp_valid = 0;
-                    end
-                    {M_A, 1'b0, 1'b1}: begin
+                    {M_A, 1'b0}: begin
                         rst_InA = 0;
                         rst_InB = 1;
                         rst_InR = 1;
@@ -1171,19 +1138,7 @@ module AP_controller
                         input_R_cbc = 0;
                         ins_inp_valid = 0;
                     end
-                    {M_A, 1'b0, 1'b0}: begin
-                        rst_InA = 0;
-                        rst_InB = 1;
-                        rst_InR = 1;
-                        addr_input_cbc_A = addr_cam;
-                        addr_input_cbc_B = 0;
-                        addr_input_cbc_R = 0;
-                        input_A_cbc = 0;
-                        input_B_cbc = 0;
-                        input_R_cbc = 0;
-                        ins_inp_valid = 0;
-                    end
-                    {M_B, 1'b1, 1'b0}: begin
+                    {M_B, 1'b1}: begin
                         rst_InA = 1;
                         rst_InB = 0;
                         rst_InR = 1;
@@ -1195,19 +1150,7 @@ module AP_controller
                         input_R_cbc = 0;
                         ins_inp_valid = 1;
                     end
-                    {M_B, 1'b1, 1'b1}: begin
-                        rst_InA = 1;
-                        rst_InB = 0;
-                        rst_InR = 1;
-                        addr_input_cbc_B = addr_cam;
-                        addr_input_cbc_A = 0;
-                        addr_input_cbc_R = 0;
-                        input_B_cbc = data_in_cbc;
-                        input_A_cbc = 0;
-                        input_R_cbc = 0;
-                        ins_inp_valid = 0;
-                    end
-                    {M_B, 1'b0, 1'b0}: begin
+                    {M_B, 1'b0}: begin
                         rst_InA = 1;
                         rst_InB = 0;
                         rst_InR = 1;
@@ -1219,19 +1162,7 @@ module AP_controller
                         input_B_cbc = 0;
                         input_R_cbc = 0;
                     end
-                    {M_B, 1'b0, 1'b1}: begin
-                        rst_InA = 1;
-                        rst_InB = 0;
-                        rst_InR = 1;
-                        addr_input_cbc_B = addr_cam;
-                        addr_input_cbc_A = 0;
-                        addr_input_cbc_R = 0;
-                        ins_inp_valid = 0;
-                        input_A_cbc = 0;
-                        input_B_cbc = 0;
-                        input_R_cbc = 0;
-                    end
-                    {M_R, 1'b1, 1'b0}:begin
+                    {M_R, 1'b1}:begin
                         rst_InA = 1;
                         rst_InB = 1;
                         rst_InR = 0;
@@ -1243,31 +1174,7 @@ module AP_controller
                         input_B_cbc = 0;
                         ins_inp_valid = 1;
                     end
-                    {M_R, 1'b1, 1'b1}:begin
-                        rst_InA = 1;
-                        rst_InB = 1;
-                        rst_InR = 0;
-                        addr_input_cbc_R = addr_cam;
-                        addr_input_cbc_A = 0;
-                        addr_input_cbc_B = 0;
-                        input_R_cbc = data_in_cbc;
-                        input_A_cbc = 0;
-                        input_B_cbc = 0;
-                        ins_inp_valid = 0;
-                    end
-                    {M_R, 1'b0, 1'b0}:begin
-                        rst_InA = 1;
-                        rst_InB = 1;
-                        rst_InR = 0;
-                        addr_input_cbc_R = addr_cam;
-                        addr_input_cbc_A = 0;
-                        addr_input_cbc_B = 0;
-                        ins_inp_valid = 0;
-                        input_A_cbc = 0;
-                        input_B_cbc = 0;
-                        input_R_cbc = 0;
-                    end
-                    {M_R, 1'b0, 1'b1}:begin
+                    {M_R, 1'b0}:begin
                         rst_InA = 1;
                         rst_InB = 1;
                         rst_InR = 0;
