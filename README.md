@@ -52,6 +52,7 @@ Synthesis with Yosys for UltraScale+ (pre-implementation estimates, see
 | target | LUT | LUTRAM | FF | CARRY | MUXF | BRAM | URAM | DSP |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | AP unit, 256 x 128 | 15440 | 1024 | 2175 | 1118 | 1333 | 0 | 0 | 0 |
+| SoC (PicoRV32 + AP unit 256 x 128 + 64 KiB RAM) | 17777 | 1030 | 3226 | 1288 | 1999 | 16 | 0 | 0 |
 
 ## Quick start
 
