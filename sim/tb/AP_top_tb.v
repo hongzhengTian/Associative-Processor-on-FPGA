@@ -146,7 +146,7 @@ module AP_top_tb;
     initial 
     begin
         $readmemb("ISA_Bin.txt", MEM_ISA);
-        $readmemb("DATA.txt", MEM_DATA);
+        $readmemb("data.txt", MEM_DATA);
         $readmemb("ISA_interrupt_Bin.txt", MEM_INT_INS);
         $readmemb("data_ref.txt", MEM_DATA_REF);
         outputfile = $fopen("AP_output.txt", "w");
