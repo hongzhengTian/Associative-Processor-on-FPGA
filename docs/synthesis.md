@@ -8,6 +8,9 @@ make -C syn unit_256x128            # one target
 make -C syn UNITS="512x64 2048x32"  # other array shapes
 ```
 
+CI synthesizes the 256 x 128 unit and the SoC. Larger shapes take much
+longer in Yosys: 1024 x 64 needed about 20 minutes and 10 GB of memory.
+
 `syn/Makefile` runs Yosys `synth_xilinx -family xcup` (UltraScale+, the
 family of the Alveo U280) on:
 
@@ -24,6 +27,7 @@ estimates before implementation, and there is no timing result yet.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | AP unit, 256 x 128 | 15440 | 1024 | 2175 | 1118 | 1333 | 0 | 0 | 0 |
 | SoC (PicoRV32 + AP unit 256 x 128 + 64 KiB RAM) | 17777 | 1030 | 3226 | 1288 | 1999 | 16 | 0 | 0 |
+| AP unit, 1024 x 64 | 31365 | 2048 | 4479 | 4190 | 3658 | 0 | 0 | 0 |
 
 Columns are cell counts: LUT1-LUT6, LUT-RAM primitives (each covers several
 LUTs), flip-flops, carry chains, wide multiplexers, block RAM, UltraRAM, DSP.
@@ -62,10 +66,11 @@ Each can be pipelined if needed (registered read data, a two-cycle step for
 MAX/MIN, a staged read multiplexer) at the cost of a cycle per bit step or
 per element access.
 
-**Scaling.** Resource use is roughly proportional to ROWS x (per-row logic +
-COLS / 64 LUT RAMs). The default build is small on purpose; for an Alveo-size
-device, thousands of rows fit. Measure with `make -C syn UNITS=...` before
-choosing a shape.
+**Scaling.** Resource use is roughly proportional to ROWS: per row about 30
+LUTs at 64 columns and 50 to 60 at 128 columns, plus the storage: two LUT RAM
+primitives per row at 64 columns, four at 128. By that estimate 4096 rows of 64 columns need about 125k
+LUTs, around a tenth of an Alveo U280. Measure with `make -C syn UNITS=...`
+before choosing a shape.
 
 ## Alveo U280 integration
 
