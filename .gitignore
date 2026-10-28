@@ -1,0 +1,9 @@
+# build output
+build/
+*.vcd
+*.fst
+
+# tool leftovers
+*.log
+*.jou
+.Xil/
