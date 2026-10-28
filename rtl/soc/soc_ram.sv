@@ -20,7 +20,7 @@ module soc_ram #(
 
     localparam int AW = $clog2(WORDS);
 
-    logic [31:0] mem [WORDS];
+    (* ram_style = "block" *) logic [31:0] mem [WORDS];
 
     initial begin
         if (INIT_FILE != "") $readmemh(INIT_FILE, mem);

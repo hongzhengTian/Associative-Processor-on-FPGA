@@ -29,15 +29,19 @@ summary: $(addprefix $(BUILD)/,$(addsuffix .log,$(TARGETS)))
 
 $(TARGETS): %: $(BUILD)/%.log
 
+# Each log keeps only the final cell statistics (the full Yosys log of a
+# large array runs into hundreds of megabytes).
 $(BUILD)/unit_%.log: $(AP_RTL) | $(BUILD)
-	$(YOSYS) -q -l $@ -p "read_verilog -sv -DSYNTHESIS $(AP_RTL); \
+	$(YOSYS) -q -p "read_verilog -sv -DSYNTHESIS $(AP_RTL); \
 	    chparam -set ROWS $(word 1,$(subst x, ,$*)) -set COLS $(word 2,$(subst x, ,$*)) ap_unit; \
-	    synth_xilinx -family $(FAMILY) -top ap_unit -flatten; stat"
+	    synth_xilinx -family $(FAMILY) -top ap_unit -flatten; tee -q -o $@.tmp stat"
+	mv $@.tmp $@
 
 $(BUILD)/soc.log: $(SOC_RTL) $(PICO) | $(BUILD)
-	$(YOSYS) -q -l $@ -p "read_verilog -DSYNTHESIS $(PICO); \
+	$(YOSYS) -q -p "read_verilog -DSYNTHESIS $(PICO); \
 	    read_verilog -sv -DSYNTHESIS $(SOC_RTL); \
-	    synth_xilinx -family $(FAMILY) -top ap_soc -flatten; stat"
+	    synth_xilinx -family $(FAMILY) -top ap_soc -flatten; tee -q -o $@.tmp stat"
+	mv $@.tmp $@
 
 $(BUILD):
 	mkdir -p $@
