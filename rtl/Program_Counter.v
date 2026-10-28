@@ -52,7 +52,7 @@ wire [ADDR_WIDTH_MEM - 1 : 0]           arith_4;
 
 assign arith_1 = addr_ins + 1;
 assign arith_2 = jmp_addr_pc >> 3;
-assign arith_3 = {{1'b1}, {{ADDR_WIDTH_MEM - 1}{1'b0}}};
+assign arith_3 = {1'b1, {(ADDR_WIDTH_MEM - 1){1'b0}}};
 assign arith_4 = ret_addr_pc - 1;
 
 /* state machine */
