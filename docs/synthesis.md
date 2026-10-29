@@ -25,9 +25,9 @@ estimates before implementation, and there is no timing result yet.
 
 | target | LUT | LUTRAM | FF | CARRY | MUXF | BRAM | URAM | DSP |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| AP unit, 256 x 128 | 15440 | 1024 | 2175 | 1118 | 1333 | 0 | 0 | 0 |
-| SoC (PicoRV32 + AP unit 256 x 128 + 64 KiB RAM) | 17777 | 1030 | 3226 | 1288 | 1999 | 16 | 0 | 0 |
-| AP unit, 1024 x 64 | 31365 | 2048 | 4479 | 4190 | 3658 | 0 | 0 | 0 |
+| AP unit, 256 x 128 | 14487 | 1024 | 2175 | 124 | 471 | 0 | 0 | 0 |
+| SoC (PicoRV32 + AP unit 256 x 128 + 64 KiB RAM) | 16082 | 1030 | 3226 | 294 | 548 | 16 | 0 | 0 |
+| AP unit, 1024 x 64 (before the 128-row tag scans) | 31365 | 2048 | 4479 | 4190 | 3658 | 0 | 0 | 0 |
 
 Columns are cell counts: LUT1-LUT6, LUT-RAM primitives (each covers several
 LUTs), flip-flops, carry chains, wide multiplexers, block RAM, UltraRAM, DSP.
@@ -40,7 +40,7 @@ Observations:
 * Logic grows linearly with ROWS: every row has its own ALU, carry, flag and
   tag, and the write-data and tag-update multiplexers. The rest (decoder,
   sequencer, transpose buffer, DMA) is a small constant.
-* The SoC adds about 2,300 LUTs for PicoRV32 and the bus logic. The 64 KiB
+* The SoC adds about 1,600 LUTs for PicoRV32 and the bus logic. The 64 KiB
   program RAM takes 16 RAMB36 block RAMs. PicoRV32's multiplier is the
   iterative one, so no DSP slices are used.
 
