@@ -40,15 +40,21 @@ module ap_core
 );
 
     localparam int AW     = (COLS > 1) ? $clog2(COLS) : 1;
-    localparam int CHUNKS = ROWS / 32;
+    localparam int CHUNKS = ROWS / 32;            // 32-row transpose segments
+    // COUNT, FIRST and TAG_RANGE visit the tag RC rows per cycle.
+    localparam int RC     = (ROWS % 128 == 0) ? 128 : (ROWS % 64 == 0) ? 64 : 32;
+    localparam int RCHUNK = ROWS / RC;
+    localparam int RCB    = $clog2(RC);
     localparam int RW     = $clog2(ROWS);
 
+`ifndef SYNTHESIS
     initial begin
         if (ROWS % 32 != 0 || ROWS < 32 || ROWS > ap_pkg::MAX_ROWS)
             $fatal(1, "ap_core: ROWS must be a multiple of 32 in 32..65536");
         if (COLS < 1 || COLS > ap_pkg::MAX_COLS)
             $fatal(1, "ap_core: COLS must be in 1..2048");
     end
+`endif
 
     // ================================================================ decode
     function automatic logic legal(input logic [2:0] f3, input logic [6:0] f7);
@@ -164,24 +170,20 @@ module ap_core
 
     // ============================================== row and chunk selection
     logic [CHUNKS-1:0] seg_sel;     // 32-row segment of row[15:5]
-    logic [CHUNKS-1:0] step_sel;    // 32-row chunk visited by COUNT/FIRST/TRANGE
+    logic [RCHUNK-1:0] step_sel;    // RC-row chunk visited by COUNT/FIRST/TRANGE
     logic [ROWS-1:0]   row_sel;     // one-hot row
     logic [31:0]       seg_a;       // a_vec bits of the selected segment
-    logic [31:0]       tag_chunk;   // tag bits of the visited chunk
+    logic [RC-1:0]     tag_chunk;   // tag bits of the visited chunk
     logic [31:0]       xcol;        // bit bit_i of every xbuf word
 
     always_comb begin
-        for (int j = 0; j < CHUNKS; j++) begin
-            seg_sel[j]  = (row[15:5] == 11'(j));
-            step_sel[j] = (step == 16'(j));
-        end
+        for (int j = 0; j < CHUNKS; j++) seg_sel[j]  = (row[15:5] == 11'(j));
+        for (int j = 0; j < RCHUNK; j++) step_sel[j] = (step == 16'(j));
         for (int r = 0; r < ROWS; r++) row_sel[r] = (row == 16'(r));
         seg_a     = '0;
         tag_chunk = '0;
-        for (int j = 0; j < CHUNKS; j++) begin
-            if (seg_sel[j])  seg_a     = a_vec[j*32 +: 32];
-            if (step_sel[j]) tag_chunk = tag[j*32 +: 32];
-        end
+        for (int j = 0; j < CHUNKS; j++) if (seg_sel[j])  seg_a     = a_vec[j*32 +: 32];
+        for (int j = 0; j < RCHUNK; j++) if (step_sel[j]) tag_chunk = tag[j*RC +: RC];
         for (int k = 0; k < 32; k++) xcol[k] = xbuf[k][bit_i];
     end
 
@@ -222,29 +224,31 @@ module ap_core
     end
 
     // ============================================================= helpers
-    function automatic logic [5:0] popcount32(input logic [31:0] v);
-        logic [5:0] n;
+    function automatic logic [RCB:0] popcount(input logic [RC-1:0] v);
+        logic [RCB:0] n;
         n = '0;
-        for (int k = 0; k < 32; k++) n = n + 6'(v[k]);
-        popcount32 = n;
+        for (int k = 0; k < RC; k++) n = n + (RCB+1)'(v[k]);
+        popcount = n;
     endfunction
 
-    function automatic logic [4:0] ctz32(input logic [31:0] v);
-        logic [4:0] n;
+    function automatic logic [RCB-1:0] ctz(input logic [RC-1:0] v);
+        logic [RCB-1:0] n;
         n = '0;
-        for (int k = 31; k >= 0; k--) if (v[k]) n = 5'(k);
-        ctz32 = n;
+        for (int k = RC - 1; k >= 0; k--) if (v[k]) n = RCB'(k);
+        ctz = n;
     endfunction
 
-    function automatic logic [31:0] trange_chunk(input logic [15:0] chunk,
-                                                 input logic [31:0] l,
-                                                 input logic [31:0] h);
-        logic [31:0] m;
-        logic [31:0] r;
-        for (int k = 0; k < 32; k++) begin
-            r    = {11'd0, chunk[15:0], 5'(k)};
-            m[k] = (r >= l) && (r < h);
-        end
+    // Rows base .. base+RC-1 that lie in [l, h). The bounds are made relative
+    // to the chunk and clamped to 0..RC once, so each row only compares its
+    // small index with them.
+    function automatic logic [RC-1:0] trange_chunk(input logic [31:0] base,
+                                                   input logic [31:0] l,
+                                                   input logic [31:0] h);
+        logic [RC-1:0] m;
+        logic [RCB:0]  lr, hr;
+        lr = (l <= base) ? '0 : (l - base >= 32'(RC)) ? (RCB+1)'(RC) : (RCB+1)'(l - base);
+        hr = (h <= base) ? '0 : (h - base >= 32'(RC)) ? (RCB+1)'(RC) : (RCB+1)'(h - base);
+        for (int k = 0; k < RC; k++) m[k] = ((RCB+1)'(k) >= lr) && ((RCB+1)'(k) < hr);
         trange_chunk = m;
     endfunction
 
@@ -344,18 +348,18 @@ module ap_core
                             ap_pkg::TAG_NOT:  begin tag <= ~tag; state <= S_DONE; end
                             ap_pkg::TAG_RANGE: begin
                                 kind   <= K_TRANGE;
-                                nsteps <= 16'(CHUNKS);
+                                nsteps <= 16'(RCHUNK);
                             end
                             ap_pkg::TAG_SAVE: begin kind <= K_TSAVE; nsteps <= 16'd1; end
                             ap_pkg::TAG_LOAD: begin kind <= K_TLOAD; nsteps <= 16'd1; end
                             ap_pkg::TAG_COUNT: begin
                                 kind   <= K_COUNT;
-                                nsteps <= 16'(CHUNKS);
+                                nsteps <= 16'(RCHUNK);
                                 has_rd <= 1'b1;
                             end
                             ap_pkg::TAG_FIRST: begin
                                 kind   <= K_FIRST;
-                                nsteps <= 16'(CHUNKS);
+                                nsteps <= 16'(RCHUNK);
                                 res    <= '1;
                                 has_rd <= 1'b1;
                             end
@@ -440,15 +444,15 @@ module ap_core
                 K_TLOAD: tag <= a_vec;
 
                 K_TRANGE: begin
-                    for (int j = 0; j < CHUNKS; j++)
-                        if (step_sel[j]) tag[j*32 +: 32] <= trange_chunk(16'(j), lo, scalar);
+                    for (int j = 0; j < RCHUNK; j++)
+                        if (step_sel[j]) tag[j*RC +: RC] <= trange_chunk(32'(j * RC), lo, scalar);
                 end
 
-                K_COUNT: res <= res + 32'(popcount32(tag_chunk));
+                K_COUNT: res <= res + 32'(popcount(tag_chunk));
 
                 K_FIRST: begin
                     if (tag_chunk != '0) begin
-                        res   <= 32'({step[10:0], 5'd0}) + 32'(ctz32(tag_chunk));
+                        res   <= 32'(step) * 32'(RC) + 32'(ctz(tag_chunk));
                         state <= S_DONE;
                     end
                 end

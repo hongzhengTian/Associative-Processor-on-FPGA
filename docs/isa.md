@@ -76,12 +76,13 @@ iterated over.
 | tag set/clear/invert, xbuf word access, info | 1 |
 | field operation, compare, MAX/MIN, element access, XPUT/XGET | L + 1 |
 | ABS | L + 2 |
-| TAG_RANGE, COUNT | ROWS/32 + 1 |
-| FIRST | 1 + number of 32-row chunks up to the first tagged row |
+| TAG_RANGE, COUNT | ROWS/RC + 1 |
+| FIRST | 1 + number of RC-row chunks up to the first tagged row |
 | DMA | about one cycle per word plus L + 1 per 32 rows, plus memory latency |
 
-The cost of a field operation does not depend on ROWS: one instruction
-processes every row.
+RC is the number of rows the tag scans visit per cycle: 128 if ROWS is a
+multiple of 128, otherwise 64 or 32. The cost of a field operation does not
+depend on ROWS: one instruction processes every row.
 
 ## funct3 = 0, 1: field arithmetic and logic
 
