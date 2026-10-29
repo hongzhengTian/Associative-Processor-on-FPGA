@@ -21,6 +21,10 @@ attached to the CPU:
 * A **DMA engine** inside the AP unit moves arrays between external memory
   and the array over AXI4. The CPU reaches the same memory through a window
   at 0x8000_0000.
+* On a Zynq-7000, `ap_zynq` adds a **host interface** for the ARM core:
+  control registers, a port to load the program RAM, a console FIFO, and the
+  translation of the external window to a DDR buffer with bounds checking
+  (see [zynq.md](zynq.md)).
 
 | Module | File | Role |
 |---|---|---|
@@ -33,6 +37,28 @@ attached to the CPU:
 | `ap_row_alu` | `rtl/ap/ap_row_alu.sv` | Per-row bit-serial datapath |
 | `ap_dma` | `rtl/ap/ap_dma.sv` | AXI4 DMA engine |
 | `ap_pkg` | `rtl/ap/ap_pkg.sv` | Encodings shared by all of the above |
+| `ap_zynq` | `rtl/zynq/ap_zynq.v` | Zynq top level (block design module) |
+| `ap_host_bridge` | `rtl/zynq/ap_host_bridge.sv` | Host registers, program loading, console, memory window |
+
+## The associative processing model
+
+The AP follows the classical associative processor: a CAM array of words
+("rows") with a tag bit per word, operated on by three kinds of operations.
+
+| Operation | What happens in every row at once | Instructions |
+|---|---|---|
+| **Search** | compare a field with a key or another field; the outcome sets, ANDs or ORs the tag | compares (`GRP_CMP`), `TAG_*` |
+| **Compute** | write a result into a field, only where the tag is set | arithmetic and logic (`GRP_VV`, `GRP_VS`) |
+| **Reduce** | turn the tags into a scalar: count, first match, maximum, minimum | `COUNT`, `FIRST`, `MAX*`, `MIN*` |
+
+All of them work **bit-serially and word-parallel**. In a CAM, an addition
+is a sequence of passes per bit position: each pass compares the bits of the
+operands and the carry of every word against one pattern of the truth table
+and writes the corresponding sum and carry into the matching words. This
+design keeps that structure but performs all passes of one bit position in a
+single cycle: each word has a one-bit ALU that evaluates the whole truth table
+at once (for addition, a full adder). Searches compare one bit position per
+cycle in the same way and accumulate the outcome per word.
 
 ## Bit-serial, word-parallel execution
 
@@ -111,7 +137,8 @@ stateDiagram-v2
   the per-row flags, which then select negation row by row.
 * **RUN** performs one step per cycle. Field operations visit bit positions
   LSB first; MAX/MIN visit them MSB first; COUNT, FIRST and TAG_RANGE visit
-  32-row chunks of the tag instead of bit positions.
+  chunks of the tag instead of bit positions: 128 rows per cycle when ROWS
+  is a multiple of 128 (otherwise 64 or 32).
 * **DONE** returns the result (if any) for one cycle.
 
 ### Row ALU
@@ -179,13 +206,13 @@ illegal-instruction trap after 16 cycles.
 
 ## Design decisions
 
-**Bit-serial ALU per row instead of compare/write passes.** A classical
-associative processor built from CAM cells can only compare and write, so an
-addition takes several masked compare/write passes per bit (the first version
-of this project worked that way). An FPGA has no such restriction: a full
-adder per row does the same in one cycle per bit and is simpler to control.
-The associative character stays where it matters to software: tags, searches
-and reductions.
+**One cycle per bit position.** CAM cells can only compare and write, so a
+CAM-based associative processor needs several compare/write passes per bit
+of an addition (the first version of this project, and our paper, work that
+way). FPGA logic is not limited to compare and write, so this version merges
+the passes of a bit position into one row ALU and one cycle. The programming
+model is unchanged: search sets tags, compute writes tagged words, reductions
+read the tags.
 
 **Scratchpad, not a cache.** The array is an explicit, software-managed
 memory rather than a data cache that computes. A cache would have to keep
@@ -199,15 +226,18 @@ at the cost of overlapping CPU and AP work. A queue with a scoreboard would
 lift it; see below.
 
 **Standard interfaces.** AXI4 for memory and PCPI for the CPU keep the AP
-unit usable with other memories (HBM on the Alveo U280) and portable to other
+unit usable with other memories (DDR on a Zynq, HBM on larger cards) and portable to other
 cores with a similar co-processor port.
 
 ## Limitations and next steps
 
 * Field length is limited to 32 bits and there is no multiply; bit-serial
   multiplication (L^2 steps) would be a natural addition.
-* AP instructions block the CPU. An instruction queue would let the CPU
-  prepare the next data while the array computes.
+* AP instructions block the CPU, and PicoRV32 needs roughly 10 to 15 cycles
+  to issue one. For short instructions (a 1-bit TAG_LOAD, a COUNT over a few
+  hundred rows) issuing costs more than executing. A command queue that lets
+  instructions without a result return at once, or a faster core, would
+  remove most of that overhead.
 * The DMA data path is 32 bits wide; wider AXI ports (256 bits for HBM)
   would move eight words per beat into the transpose buffer.
 * Rows do not communicate. Shifts across rows (for stencils or prefix sums)
