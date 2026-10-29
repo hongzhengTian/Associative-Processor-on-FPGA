@@ -2,7 +2,8 @@
 //
 // The bin of a sample is its top four bits. Those bits are a field of their
 // own (offset + 4, length 4), so each bin costs one 4-bit compare and one
-// COUNT, independent of the number of samples.
+// COUNT, independent of the number of samples. The rows in use are tagged
+// once and the mask saved, so each bin restores it with a one-step TAG_LOAD.
 #include "runtime.h"
 #include "ap.h"
 
@@ -17,6 +18,7 @@ int main(void)
 
     const ap_field_t fx   = AP_FIELD(0, 8);
     const ap_field_t fbin = AP_FIELD(4, 4);    // x >> 4
+    const ap_field_t fvalid = AP_FIELD(8, 1);  // rows in use
 
     // a smooth, uneven distribution
     uint32_t seed = 99;
@@ -34,8 +36,10 @@ int main(void)
     uint32_t t_cpu = rdcycle() - t0;
 
     t0 = rdcycle();
+    ap_tag_range(0, n);
+    ap_tag_save(fvalid);
     for (uint32_t b = 0; b < 16; b++) {
-        ap_tag_range(0, n);
+        ap_tag_load(fvalid);
         ap_cmps(AP_EQ, AP_TAND, fbin, b);
         h_ap[b] = ap_count();
     }
