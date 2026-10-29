@@ -10,3 +10,5 @@ lint_off -rule BLKSEQ -file "*tb_*.sv"
 lint_off -rule BLKSEQ -file "*axi_mem_model.sv"
 lint_off -rule UNUSEDSIGNAL -file "*tb_*.sv"
 lint_off -rule UNUSEDSIGNAL -file "*axi_mem_model.sv"
+// Testbenches leave unused outputs of the design open.
+lint_off -rule PINCONNECTEMPTY -file "*tb_*.sv"

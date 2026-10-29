@@ -8,6 +8,10 @@
 // The CPU issues AP instructions (custom-1) through PCPI and stalls until
 // each finishes. The AP DMA engine and the CPU's own external accesses share
 // m_axi; they never overlap because the CPU waits for DMA instructions.
+//
+// The host port (host_*) lets a host processor load the program RAM. It owns
+// the RAM while host_sel is high, which is only allowed while rst_n holds the
+// SoC in reset. Tie host_sel low when the RAM is loaded otherwise.
 module ap_soc #(
     parameter int    ROWS      = 256,
     parameter int    COLS      = 128,
@@ -17,6 +21,15 @@ module ap_soc #(
     input  logic        clk,
     input  logic        rst_n,
     output logic        trap,
+
+    // host access to the program RAM (same handshake as the CPU bus)
+    input  logic        host_sel,
+    input  logic        host_valid,
+    output logic        host_ready,
+    input  logic [31:0] host_addr,
+    input  logic [31:0] host_wdata,
+    input  logic [3:0]  host_wstrb,
+    output logic [31:0] host_rdata,
 
     // I/O port, one access at a time, valid held until ready
     output logic        io_valid,
@@ -119,15 +132,21 @@ module ap_soc #(
     logic        ram_ready, ext_ready, none_ready;
     logic [31:0] ram_rdata, ext_rdata;
 
+    logic ram_port_ready;
+
     soc_ram #(.WORDS(RAM_WORDS), .INIT_FILE(INIT_FILE)) u_ram (
         .clk   (clk),
-        .valid (mem_valid && sel_ram),
-        .ready (ram_ready),
-        .addr  (mem_addr),
-        .wdata (mem_wdata),
-        .wstrb (mem_wstrb),
+        .valid (host_sel ? host_valid : (mem_valid && sel_ram)),
+        .ready (ram_port_ready),
+        .addr  (host_sel ? host_addr  : mem_addr),
+        .wdata (host_sel ? host_wdata : mem_wdata),
+        .wstrb (host_sel ? host_wstrb : mem_wstrb),
         .rdata (ram_rdata)
     );
+
+    assign ram_ready  = ram_port_ready && !host_sel;
+    assign host_ready = ram_port_ready && host_sel;
+    assign host_rdata = ram_rdata;
 
     assign io_valid = mem_valid && sel_io;
     assign io_addr  = mem_addr;
