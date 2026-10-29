@@ -7,6 +7,8 @@ All tests run on Verilator and are self-checking: each prints `PASS` or
 make test           # everything below
 make -C sim ap_core # unit test of the AP core only
 make -C sim soc     # programs on the SoC only
+make -C sim zynq    # board programs through the Zynq top level
+make -C sim host    # Zynq host program: Cortex-A9 build and benchmark parsing
 make -C sim lint    # Verilator -Wall on the RTL
 ```
 
@@ -43,9 +45,10 @@ destination), random scalars with extreme values, row arguments past the end
 of the array, partial transpose transfers, and fully random encodings to
 check that illegal ones change nothing. A short directed sequence runs first.
 
-The test runs for several array shapes (32x8, 64x48, 96x40 and 128x128 by
-default, so ROWS > 32, COLS not a power of two and fields hitting the array
-edge all occur) and several seeds, 3000 commands each. With `+latency` it also
+The test runs for several array shapes (32x8, 64x48, 96x40, 128x128 and
+256x16 by default, so ROWS > 32, COLS not a power of two, fields hitting the
+array edge, and every width of the tag scans with one or several chunks all
+occur) and several seeds, 3000 commands each. With `+latency` it also
 prints the average cycle count per instruction.
 
 **Does the test find bugs?** It was checked by deliberately breaking the RTL
@@ -60,6 +63,7 @@ mismatches in a run of 500 to 2000 commands:
 | MAX/MIN ignore the sign bit | search |
 | XGET reads the wrong 32-row segment | transpose buffer |
 | TAG_RANGE includes the upper bound | tag range |
+| TAG_RANGE uses the wrong chunk base | tag scans of 128 rows per cycle |
 
 ## System level: `sim/soc/tb_soc.sv`
 
@@ -86,6 +90,26 @@ as violations, and any violation fails the run. Removing the 4 KiB burst
 split from the DMA engine, for example, is reported this way even though the
 data still arrives correctly in simulation.
 
+## Zynq top level: `sim/zynq/tb_ap_zynq.sv`
+
+The testbench plays the ARM host of the board build (docs/zynq.md) at the
+board's array shape (512 x 64): over AXI4-Lite it checks the ID and shape
+registers, loads a program into the program RAM and reads part of it back,
+checks that the RAM refuses writes while the SoC runs, places the external
+window 4 MiB into an 8 MiB memory model, starts the program, drains the
+console FIFO and checks the exit code. It fails the run if the SoC ever
+accesses memory outside the window; the DMA error case of the ISA test
+deliberately runs past the end of the window and must get an error back from
+the bridge instead. All seven programs the board host runs pass this way,
+with and without AXI back-pressure.
+
+The host program (`fpga/zynq/host/main.c`) cannot run without the board, so
+`make -C sim host` checks what can be checked without it: it compiles the
+program for the Cortex-A9 against stub BSP headers (`sim/zynq/bsp/`) with all
+warnings as errors, and runs its benchmark parsing and ARM-side workloads
+natively on the output of the scaling benchmark from the Zynq simulation;
+every result must match.
+
 ## Lint
 
 The RTL is clean under `verilator --lint-only -Wall`. Waivers in
@@ -101,8 +125,8 @@ push and pull request.
 
 ## What is not covered
 
-* Behaviour on hardware. Everything here is simulation; timing closure and
-  the integration with a specific board (the Alveo U280) are still to be done.
+* Behaviour on hardware. Everything here is simulation; the Zynq build
+  (docs/zynq.md) is the path to checking it on a board.
 * Clock-domain crossings: the design uses a single clock.
-* Very large arrays in simulation. The tests use up to 256 rows; larger
+* Very large arrays in simulation. The tests use up to 512 rows; larger
   shapes are only synthesized.

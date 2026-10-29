@@ -4,7 +4,10 @@
 
 The first version was a master's project: an associative processor built
 from scratch in Verilog for a Xilinx Virtex-7 (xc7vx690t) board with DDR3
-memory. It is preserved under the git tag **`v1-legacy`**, together with an
+memory, published as *FPGA Implementation of Associative Processors*, IEEE
+Transactions on Circuits and Systems II: Express Briefs, vol. 70, no. 5,
+pp. 1774-1778 ([IEEE Xplore](https://ieeexplore.ieee.org/document/10081044)).
+It is preserved under the git tag **`v1-legacy`**, together with an
 open-source simulation of it (Icarus Verilog, with behavioral models of the
 Xilinx memory controller and FIFOs).
 
@@ -37,8 +40,10 @@ Building v1 taught most of what v2 does differently:
 | Vendor project files and generated output in the repository | Plain sources, open-source simulation and synthesis, CI |
 | One directed test program, checked against expected output prepared in a spreadsheet | Self-checking random tests against a reference model, and C test programs |
 
-What carried over is the idea: a memory that computes on all of its words at
-once, with per-word tags to select, search and reduce.
+What carried over is the associative processing model of the paper: a CAM
+array of words that is searched, updated and reduced in parallel, bit-serially,
+with a tag per word. Version 2 changes how it is built and used, not what it
+computes.
 
 ## Version 2
 

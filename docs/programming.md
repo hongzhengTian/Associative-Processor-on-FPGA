@@ -134,9 +134,10 @@ the found row from a saved mask gives the K largest values, see
 | Program | Shows | Typical speed-up over the CPU loop (256 rows) |
 |---|---|---|
 | `examples/vector_add.c` | element-wise arithmetic, DMA | 360x for the add, 9x including DMA |
-| `examples/search.c` | associative search, chained compares, walking matches | 31x and 90x |
-| `examples/histogram.c` | field slicing, COUNT | 15x |
-| `examples/topk.c` | MAXU, FIRST, saved masks | 137x |
+| `examples/search.c` | associative search, chained compares, walking matches | 33x and 100x |
+| `examples/histogram.c` | field slicing, saved masks, COUNT | 19x |
+| `examples/topk.c` | MAXU, FIRST, saved masks | 142x |
+| `examples/scaling.c` | the benchmark of the Zynq build: AP cycles for growing n | |
 
 The CPU baselines run on PicoRV32, a small multi-cycle core, so the ratios
 overstate what a fast CPU would see; the absolute AP cycle counts are the

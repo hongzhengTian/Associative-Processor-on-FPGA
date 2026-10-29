@@ -72,27 +72,25 @@ primitives per row at 64 columns, four at 128. By that estimate 4096 rows of 64 
 LUTs, around a tenth of an Alveo U280. Measure with `make -C syn UNITS=...`
 before choosing a shape.
 
-## Alveo U280 integration
+## Boards
 
-The SoC has exactly the interfaces an Alveo design needs, but the board
-integration itself is not part of this repository yet. A suggested path:
+**Zynq-7000 (implemented).** `rtl/zynq/ap_zynq.v` wraps the SoC with a host
+interface (`ap_host_bridge`): AXI4-Lite control registers, a port to load the
+program RAM, a console FIFO, and an external-memory window with address
+translation and bounds checking. `fpga/zynq/build.tcl` builds it in a block
+design with the processing system; the ARM core runs the host program. See
+[zynq.md](zynq.md). `make -C syn zynq` gives a Yosys estimate for the
+XC7Z020 build:
 
-1. **Kernel wrapper.** Wrap `ap_soc` as an RTL kernel: an AXI4-Lite control
-   port for start/reset/status, a way to load the program RAM (either an
-   initialization file through the `INIT_FILE` parameter, or a second port
-   on `soc_ram` written by the host), and the console/exit I/O port mapped to
-   registers or a small FIFO.
-2. **Memory.** Connect `m_axi` (AXI4, 32-bit data, 31-bit address) to an HBM
-   pseudo-channel or DDR4 through an AXI SmartConnect, which handles width
-   (HBM ports are 256 bits wide) and clock-domain conversion. The DMA engine
-   splits bursts at 4 KiB boundaries and uses only INCR bursts with a single
-   ID, so any AXI4 slave works.
-3. **Clock and reset.** The design is a single synchronous clock domain with
-   an active-low reset; drive it from a kernel clock. Start with a moderate
-   clock and a small array, then scale.
-4. **Wider DMA.** For bandwidth, widen the DMA data path to the HBM port width
-   so one beat fills several transpose-buffer words.
+| target | LUT | LUTRAM | FF | CARRY | MUXF | BRAM | URAM | DSP |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Zynq top level, 512 x 64 array, XC7Z020 (53,200 LUTs) | 22923 | 1084 | 4288 | 385 | 752 | 16 | 0 | 0 |
 
-Simulation already covers the AXI behaviour (random back-pressure, protocol
-checks), so the remaining work is mostly the Vitis/XRT side and timing
-closure.
+**Larger devices (Alveo U280 and similar).** The same host interface is what
+a data-center card needs: wrap `ap_zynq` (or `ap_host_bridge` + `ap_soc`) as
+an RTL kernel, drive the AXI4-Lite port from the host through the shell, and
+connect the memory port to HBM or DDR4 through an AXI SmartConnect, which
+converts width (HBM ports are 256 bits) and clock domain. The DMA engine
+splits bursts at 4 KiB and uses only INCR bursts with one ID, so any AXI4
+memory works. To use HBM bandwidth, the DMA data path would need to grow to
+the port width so one beat fills several transpose-buffer words.
