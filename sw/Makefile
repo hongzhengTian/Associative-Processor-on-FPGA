@@ -2,6 +2,8 @@
 #
 #   make            build every program in tests/ and examples/
 #   make <name>     build build/<name>.{elf,hex,lst}
+#   make zynq       also pack the programs run by the Zynq host into
+#                   ../fpga/zynq/host/ap_programs.h
 
 CROSS   ?= riscv64-unknown-elf-
 CC      := $(CROSS)gcc
@@ -21,8 +23,17 @@ PROGS   := $(basename $(notdir $(wildcard tests/*.c examples/*.c)))
 
 vpath %.c tests examples
 
-.PHONY: all clean $(PROGS)
+.PHONY: all clean zynq $(PROGS)
 all: $(PROGS)
+
+# programs run on the board, in this order
+ZYNQ_PROGS  := hello ap_isa_test vector_add search histogram topk scaling
+ZYNQ_HEADER := ../fpga/zynq/host/ap_programs.h
+
+zynq: $(ZYNQ_HEADER)
+
+$(ZYNQ_HEADER): $(foreach p,$(ZYNQ_PROGS),$(BUILD)/$(p).hex) tools/bin2c.py
+	$(PYTHON) tools/bin2c.py $@ $(foreach p,$(ZYNQ_PROGS),$(p)=$(BUILD)/$(p).bin)
 
 $(PROGS): %: $(BUILD)/%.hex
 

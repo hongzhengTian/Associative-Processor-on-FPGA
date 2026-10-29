@@ -281,7 +281,7 @@ static void test_access(void)
     ap_tag_all();
     for (uint32_t i = 0; i < 40; i++) {
         uint32_t r = rand32(&seed) % rows, v = rand32(&seed);
-        ap_field_t f = AP_FIELD(64 + (i % 32), 1 + (i % 32));
+        ap_field_t f = AP_FIELD(i % 32, 1 + (i % 32));
         ap_write(f, r, v);
         uint32_t g = ap_read(f, r);
         check(g == (v & mask(AP_FIELD_LEN(f))), "element", r, g, v & mask(AP_FIELD_LEN(f)));
@@ -290,7 +290,7 @@ static void test_access(void)
     for (uint32_t i = 0; i < 32; i++) check(ap_xread(i) == i * 0x01010101u, "xbuf", i, ap_xread(i), i * 0x01010101u);
 
     // partial segment: only the first 5 rows of segment 1 change
-    ap_field_t f = AP_FIELD(64, 32);
+    ap_field_t f = AP_FIELD(0, 32);
     fill(vd);
     ap_put_array(f, 0, vd, rows);
     for (uint32_t i = 0; i < 32; i++) ap_xwrite(i, 0xabc00000u + i);
@@ -307,7 +307,7 @@ static void test_dma(void)
     volatile uint32_t *src = (volatile uint32_t *)(EXT_MEM_BASE + 0x2000 - 40);
     volatile uint32_t *dst = (volatile uint32_t *)(EXT_MEM_BASE + 0x10000);
     uint32_t n = rows - 3;
-    ap_field_t f = AP_FIELD(64, 24), g = AP_FIELD(96, 24);
+    ap_field_t f = AP_FIELD(0, 24), g = AP_FIELD(32, 24);
 
     fill(va);
     for (uint32_t r = 0; r < n; r++) src[r] = va[r] | 0xff000000u;   // high bits dropped
@@ -338,8 +338,8 @@ int main(void)
 {
     rows = ap_rows();
     printf_("AP ISA test: %u rows, %u columns\n", rows, ap_cols());
-    if (rows > MAX_ROWS || ap_cols() < 128) {
-        puts_("needs at most 1024 rows and at least 128 columns\n");
+    if (rows > MAX_ROWS || ap_cols() < 64) {
+        puts_("needs at most 1024 rows and at least 64 columns\n");
         return 1;
     }
     check(ap_version() == 0x00020000u, "version", 0, ap_version(), 0x00020000u);
