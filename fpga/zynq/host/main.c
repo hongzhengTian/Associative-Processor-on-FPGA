@@ -13,7 +13,37 @@
 #include "xil_io.h"
 #include "xil_mmu.h"
 #include "xil_cache.h"
+
+#define GTIMER_BASE  0xF8F00200u    // Cortex-A9 global timer
+
+#if __has_include("xtime_l.h")
 #include "xtime_l.h"
+#else
+// The BSP of the system-device-tree flow (Vitis 2023.2 and later) has no
+// xtime_l.h: read the global timer directly. It counts at half the CPU clock.
+#include "xparameters.h"
+#if defined(CPU_CLK_HZ)
+#elif defined(XPAR_CPU_CORE_CLOCK_FREQ_HZ)
+#define CPU_CLK_HZ XPAR_CPU_CORE_CLOCK_FREQ_HZ
+#elif defined(XPAR_CPU_CORTEXA9_CORE_CLOCK_FREQ_HZ)
+#define CPU_CLK_HZ XPAR_CPU_CORTEXA9_CORE_CLOCK_FREQ_HZ
+#elif defined(XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ)
+#define CPU_CLK_HZ XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ
+#else
+#error "CPU clock not found in xparameters.h: compile with -DCPU_CLK_HZ=<Hz>"
+#endif
+#define COUNTS_PER_SECOND ((uint64_t)(CPU_CLK_HZ) / 2)
+typedef uint64_t XTime;
+static void XTime_GetTime(XTime *t)
+{
+    uint32_t hi, lo;
+    do {
+        hi = Xil_In32(GTIMER_BASE + 4);
+        lo = Xil_In32(GTIMER_BASE);
+    } while (Xil_In32(GTIMER_BASE + 4) != hi);
+    *t = ((uint64_t)hi << 32) | lo;
+}
+#endif
 #include "ap_regs.h"
 #include "ap_programs.h"
 #include "bench.h"
@@ -191,6 +221,9 @@ static int compare_scaling(uint32_t clk_hz)
 
 int main(void)
 {
+    // Make sure the global timer runs (control register, enable bit).
+    Xil_Out32(GTIMER_BASE + 8, Xil_In32(GTIMER_BASE + 8) | 1u);
+
     // The ARM must not cache the SoC's external memory (see above).
     Xil_DCacheFlushRange((UINTPTR)ext_mem, EXT_SIZE);
     for (uint32_t off = 0; off < EXT_SIZE; off += 0x100000u)

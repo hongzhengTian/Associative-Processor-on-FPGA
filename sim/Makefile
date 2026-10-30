@@ -102,12 +102,15 @@ zynq: $(ZYNQ_BIN) firmware
 ARM_CC    ?= arm-none-eabi-gcc
 HOST_SRC  := $(ROOT)/fpga/zynq/host
 HOST_INC  := -Izynq/bsp -I$(HOST_SRC) -I$(ROOT)/sw/include
+A9_FLAGS  := -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -O2 -Wall -Wextra -Werror
 
+# The A9 build is checked against both BSP flows: with xtime_l.h (classic)
+# and without (system device tree, Vitis 2023.2 and later).
 host: $(ZYNQ_BIN) firmware
 	mkdir -p $(BUILD)/host
-	$(ARM_CC) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -O2 -Wall -Wextra -Werror \
-	    $(HOST_INC) -c $(HOST_SRC)/main.c -o $(BUILD)/host/main_a9.o
-	$(CC) -O2 -Wall -Wno-unused-function $(HOST_INC) zynq/host_check.c -o $(BUILD)/host/host_check
+	$(ARM_CC) $(A9_FLAGS) -Izynq/bsp_classic $(HOST_INC) -c $(HOST_SRC)/main.c -o $(BUILD)/host/main_a9.o
+	$(ARM_CC) $(A9_FLAGS) $(HOST_INC) -c $(HOST_SRC)/main.c -o $(BUILD)/host/main_a9_sdt.o
+	$(CC) -O2 -Wall -Wno-unused-function -Izynq/bsp_classic $(HOST_INC) zynq/host_check.c -o $(BUILD)/host/host_check
 	$(ZYNQ_BIN) +firmware=$(ROOT)/sw/build/scaling.hex > $(BUILD)/host/scaling.log
 	$(BUILD)/host/host_check $(BUILD)/host/scaling.log
 
