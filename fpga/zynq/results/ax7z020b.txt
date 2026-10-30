@@ -1,0 +1,134 @@
+AP SoC host
+array 512 rows x 64 columns, SoC clock 49999864 Hz, external memory at 0x00400000
+
+=== hello ===
+AP v2.0.0: 512 rows x 64 columns
+1200 + 34 = 1234
+[hello] exit code 0, 5439 cycles (108 us)
+
+=== ap_isa_test ===
+AP ISA test: 512 rows, 64 columns
+arithmetic and logic
+compares
+tag operations and reductions
+element and transpose buffer access
+DMA
+0 errors
+[ap_isa_test] exit code 0, 6931636 cycles (138633 us)
+
+=== vector_add ===
+vector add, 512 elements
+  CPU loop              24593 cycles
+  AP add                   34 cycles
+  AP with DMA in/out     3250 cycles
+  mismatches                0
+[vector_add] exit code 0, 198527 cycles (3970 us)
+
+=== search ===
+associative search, 512 records
+  key == 269: 1 matches
+    CPU scan            15429 cycles
+    AP                    163 cycles (search and fetch)
+  100 <= key < 200 and value > 32768: 85 matches
+    CPU scan            21153 cycles
+    AP                    109 cycles
+  mismatches                0
+[search] exit code 0, 191530 cycles (3830 us)
+
+=== histogram ===
+histogram of 512 8-bit samples
+    0.. 15    1
+   16.. 31   12 #
+   32.. 47   18 ##
+   48.. 63   42 #####
+   64.. 79   66 ########
+   80.. 95   77 #########
+   96..111   74 #########
+  112..127   86 ##########
+  128..143   61 #######
+  144..159   42 #####
+  160..175   18 ##
+  176..191   10 #
+  192..207    5
+  208..223    0
+  224..239    0
+  240..255    0
+  CPU loop              28685 cycles
+  AP                      788 cycles
+  mismatches                0
+[histogram] exit code 0, 173327 cycles (3466 us)
+
+=== topk ===
+top 8 of 512 20-bit values
+  #1  row  303  value 1044811
+  #2  row   86  value 1039956
+  #3  row  289  value 1038744
+  #4  row   35  value 1035166
+  #5  row  358  value 1033765
+  #6  row   66  value 1032278
+  #7  row   47  value 1027680
+  #8  row  461  value 1026721
+  CPU                  197309 cycles
+  AP                      705 cycles
+  mismatches                0
+[topk] exit code 0, 299635 cycles (5992 us)
+
+=== scaling ===
+scaling benchmark, 512 rows x 64 columns
+BENCH add 32 46 2256427
+BENCH add 64 46 4195654
+BENCH add 128 46 8060449
+BENCH add 256 46 16314759
+BENCH add 512 46 33124862
+BENCH range 32 88 8
+BENCH range 64 88 14
+BENCH range 128 88 36
+BENCH range 256 88 70
+BENCH range 512 88 127
+BENCH argmax 32 44 7262281
+BENCH argmax 64 44 41910966
+BENCH argmax 128 44 84918853
+BENCH argmax 256 45 166718044
+BENCH argmax 512 47 455080401
+BENCH top8 32 576 623
+BENCH top8 64 576 1350
+BENCH top8 128 576 2972
+BENCH top8 256 579 5104
+BENCH top8 512 586 7211
+BENCH hist16 32 764 300
+BENCH hist16 64 764 605
+BENCH hist16 128 764 1109
+BENCH hist16 256 764 2252
+BENCH hist16 512 764 4438
+0 mismatches
+[scaling] exit code 0, 790709 cycles (15814 us)
+
+AP (SoC at 49.9 MHz) vs Cortex-A9, same data, time per run
+workload     n  AP cycles      AP us      A9 us   A9/AP  result
+add         32         46       0.92       0.21    0.23  same
+add         64         46       0.92       0.41    0.45  same
+add        128         46       0.92       0.78    0.85  same
+add        256         46       0.92       1.56    1.69  same
+add        512         46       0.92       3.09    3.36  same
+range       32         88       1.76       0.41    0.23  same
+range       64         88       1.76       0.77    0.43  same
+range      128         88       1.76       1.59    0.90  same
+range      256         88       1.76       3.40    1.93  same
+range      512         88       1.76       7.68    4.36  same
+argmax      32         44       0.88       0.35    0.40  same
+argmax      64         44       0.88       0.56    0.64  same
+argmax     128         44       0.88       1.00    1.13  same
+argmax     256         45       0.90       1.86    2.07  same
+argmax     512         47       0.94       3.59    3.82  same
+top8        32        576      11.52       1.26    0.10  same
+top8        64        576      11.52       2.20    0.19  same
+top8       128        576      11.52       3.65    0.31  same
+top8       256        579      11.58       4.81    0.41  same
+top8       512        586      11.72       6.88    0.58  same
+hist16      32        764      15.28       0.56    0.03  same
+hist16      64        764      15.28       0.84    0.05  same
+hist16     128        764      15.28       1.40    0.09  same
+hist16     256        764      15.28       2.55    0.16  same
+hist16     512        764      15.28       4.82    0.31  same
+
+PASS: 0 of 7 programs failed

@@ -7,3 +7,8 @@ build/
 *.log
 *.jou
 .Xil/
+vivado_pid*.str
+
+# Zynq build output (fpga/zynq/build.tcl) and Vivado leftovers
+vivado_zynq/
+NA/

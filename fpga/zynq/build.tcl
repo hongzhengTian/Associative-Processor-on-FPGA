@@ -56,6 +56,10 @@ proc latest_ip {name} {
 
 # ------------------------------------------------------------------ project
 create_project ap_zynq $ap_dir -part $ap_opt(part) -force
+# Work in the project directory, so that files the tools drop into the
+# current directory (such as the PS7 summary) stay with the build output.
+set ap_cwd [pwd]
+cd $ap_dir
 set_property target_language Verilog [current_project]
 
 set rtl {
@@ -159,3 +163,4 @@ puts "  worst setup slack: $wns ns"
 if {$wns < 0} {
     puts "  WARNING: timing is not met; rebuild with a lower fclk=<MHz>"
 }
+cd $ap_cwd
