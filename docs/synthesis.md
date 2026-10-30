@@ -86,6 +86,10 @@ XC7Z020 build:
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Zynq top level, 512 x 64 array, XC7Z020 (53,200 LUTs) | 22923 | 1084 | 4288 | 385 | 752 | 16 | 0 | 0 |
 
+Vivado 2023.2 implements this build on the ALINX AX7Z020B (XA7Z020, speed
+grade -1) with timing met at 50 MHz and a worst setup slack of 0.42 ns, so
+50 MHz is close to the limit of this build at that speed grade.
+
 **Larger devices (Alveo U280 and similar).** The same host interface is what
 a data-center card needs: wrap `ap_zynq` (or `ap_host_bridge` + `ap_soc`) as
 an RTL kernel, drive the AXI4-Lite port from the host through the shell, and

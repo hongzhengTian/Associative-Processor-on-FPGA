@@ -127,8 +127,9 @@ push and pull request.
 
 ## What is not covered
 
-* Behaviour on hardware. Everything here is simulation; the Zynq build
-  (docs/zynq.md) is the path to checking it on a board.
+* Hardware in CI. The board run (docs/zynq.md) is done by hand; on the
+  ALINX AX7Z020B every program passed with the cycle counts of the
+  simulation, apart from DDR latency.
 * Clock-domain crossings: the design uses a single clock.
 * Very large arrays in simulation. The tests use up to 512 rows; larger
   shapes are only synthesized.

@@ -237,7 +237,8 @@ cores with a similar co-processor port.
   to issue one. For short instructions (a 1-bit TAG_LOAD, a COUNT over a few
   hundred rows) issuing costs more than executing. A command queue that lets
   instructions without a result return at once, or a faster core, would
-  remove most of that overhead.
+  remove most of that overhead. On the board this overhead is what keeps
+  top 8 and the histogram slower than the Cortex-A9 ([zynq.md](zynq.md)).
 * The DMA data path is 32 bits wide; wider AXI ports (256 bits for HBM)
   would move eight words per beat into the transpose buffer.
 * Rows do not communicate. Shifts across rows (for stencils or prefix sums)
