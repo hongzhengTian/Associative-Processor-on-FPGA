@@ -5,8 +5,9 @@
 #   vivado -mode batch -source fpga/zynq/build.tcl -tclargs preset=<ps7.tcl> [key=value ...]
 #
 # Options:
-#   preset=<file>  PS7 configuration of the board (DDR, clocks, MIO/UART),
-#                  saved from a working project of the board (docs/zynq.md).
+#   preset=<file>  PS7 configuration of the board (DDR, clocks, MIO/UART):
+#                  a preset saved from a working project of the board, or
+#                  the ps_config.tcl of an ALINX example (docs/zynq.md).
 #                  Required: it is the only board-specific input.
 #   part=<part>    FPGA part                        default xc7z020clg400-2
 #   rows=<n>       AP array rows                    default 512
@@ -78,7 +79,15 @@ create_bd_design system
 
 set ps7 [create_bd_cell -type ip -vlnv [latest_ip processing_system7] ps7]
 source $preset
-set_property -dict [apply_preset $ps7] $ps7
+if {[llength [info procs apply_preset]]} {
+    # Saved with Presets > Save Configuration in the PS7 dialog.
+    set_property -dict [apply_preset $ps7] $ps7
+} elseif {[llength [info procs set_ps_config]]} {
+    # ps_config.tcl of an ALINX example project (auto_create_project).
+    set_ps_config $ps7
+} else {
+    error "$preset defines neither apply_preset nor set_ps_config (see docs/zynq.md)"
+}
 set_property -dict [list \
     CONFIG.PCW_USE_M_AXI_GP0            {1} \
     CONFIG.PCW_USE_S_AXI_HP0            {1} \

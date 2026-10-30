@@ -50,8 +50,16 @@ If the vendor provides Vivado board files instead, create a project for the
 board, add a ZYNQ7 Processing System, run the block automation with "apply
 board preset", and save the configuration the same way.
 
-Also check the speed grade printed on the FPGA (for example `XC7Z020
-CLG400-2` means part `xc7z020clg400-2`; `-1` means `xc7z020clg400-1`).
+ALINX boards: the example projects ALINX publishes for each board (on Gitee,
+for example `alinxalinx_0/AX7Z020B_2023.1`) recreate their PS from a script,
+`course_s2_vitis/01_ps_uart/Vivado/auto_create_project/ps_config.tcl`. The
+build script accepts that file as it is (`preset=path/to/ps_config.tcl`), so
+there is no need to open the project.
+
+Also check the part printed on the FPGA (for example `XC7Z020 CLG400-2`
+means part `xc7z020clg400-2`; `-1` means `xc7z020clg400-1`). Some boards
+carry the automotive `XA7Z020`, which comes only in speed grade -1: use
+`xa7z020clg400-1I` (or `-1Q`).
 
 ## 2. Build the hardware
 
