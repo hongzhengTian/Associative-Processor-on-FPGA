@@ -9,6 +9,7 @@ build/
 .Xil/
 vivado_pid*.str
 
-# Zynq build output (fpga/zynq/build.tcl) and Vivado leftovers
+# Zynq build output (fpga/zynq/build.tcl); NA/ holds the PS7 summary report
+# (ps7_summary.html) of presets that set its directory to NA
 vivado_zynq/
 NA/

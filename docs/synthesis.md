@@ -48,18 +48,20 @@ Observations:
 
 **Mapping of the plane memory.** With COLS up to 64, a row fits in one
 64-deep LUT RAM per read port; up to 256 it needs RAM128/RAM256 primitives.
-Vivado normally packs the two read ports of a row into one multi-port LUT RAM
-(RAM64M or RAM64M8); Yosys duplicates them, so its LUT RAM count is an upper
-bound.
+The write port and the two read ports use three different addresses, so both
+Yosys and Vivado build a row from two dual-port LUT RAMs (RAM64X1D at 64
+columns, two LUTs each), one per read port. In the Vivado build of the Zynq
+top level these are 1,024 RAM64X1D for 512 rows.
 
-**Expected critical paths.** A bit step is single-cycle: asynchronous LUT RAM
-read, row ALU, write back. Three paths are likely to set the clock frequency
-in large arrays:
+**Critical paths.** A bit step is single-cycle: asynchronous LUT RAM read,
+row ALU, write back. Three paths are likely to set the clock frequency in
+large arrays:
 
 * the control signals that fan out to every row (bit index, operation,
   scalar bit), which the tools replicate;
 * the OR over all rows in MAX/MIN (`mm_any`), which feeds back into every
-  row's tag in the same cycle;
+  row's tag in the same cycle; this is the critical path of the Zynq build
+  (below);
 * the row multiplexer of element reads (ROWS : 1).
 
 Each can be pipelined if needed (registered read data, a two-cycle step for
@@ -86,9 +88,32 @@ XC7Z020 build:
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Zynq top level, 512 x 64 array, XC7Z020 (53,200 LUTs) | 22923 | 1084 | 4288 | 385 | 752 | 16 | 0 | 0 |
 
-Vivado 2023.2 implements this build on the ALINX AX7Z020B (XA7Z020, speed
-grade -1) with timing met at 50 MHz and a worst setup slack of 0.42 ns, so
-50 MHz is close to the limit of this build at that speed grade.
+Vivado 2023.2 after place and route, on the ALINX AX7Z020B (XA7Z020, speed
+grade -1), for the whole block design (SoC, host interface, PS7, AXI
+interconnect):
+
+| Resource | Used | Available | Utilization |
+|---|---:|---:|---:|
+| Slice LUTs | 27,500 | 53,200 | 51.7% |
+| of which LUT as memory | 2,355 | 17,400 | 13.5% |
+| Slice registers | 5,319 | 106,400 | 5.0% |
+| Slices | 7,689 | 13,300 | 57.8% |
+| Block RAM (RAMB36) | 16 | 140 | 11.4% |
+| DSP | 0 | 220 | 0% |
+
+The Yosys estimate above is about 17% below Vivado in LUTs; part of the
+difference is the AXI interconnect and protocol converters of the block
+design, which Yosys does not see.
+
+Timing is met at 50 MHz with a worst setup slack of 0.42 ns, so 50 MHz is
+close to the limit of this build at speed grade -1. The critical path
+(19.2 ns, 23 logic levels, three quarters of it routing) is one step of
+MAX/MIN: from the bit counter through the operand address adder and its
+range check (`a_ok`), which gates the operand bit of all 512 rows, then the
+OR over the rows (`mm_any`) into the result register. A two-cycle MAX/MIN step or a registered
+`mm_any` would be the first change toward a higher clock. Vivado's
+methodology check also flags three asynchronous resets driven by LUTs
+(LUTAR-1): the SoC reset combines the bus reset with the host's run control.
 
 **Larger devices (Alveo U280 and similar).** The same host interface is what
 a data-center card needs: wrap `ap_zynq` (or `ap_host_bridge` + `ap_soc`) as
