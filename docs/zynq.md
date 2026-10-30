@@ -41,6 +41,25 @@ flowchart LR
 Nothing in the programmable logic uses package pins, so the design needs no
 constraints file; everything board-specific is in the PS configuration.
 
+## Connect and check the board
+
+1. With the power off, connect the JTAG cable to the board's JTAG header
+   (use the ribbon that matches it, 10 or 14 pins), the board's USB-UART
+   port to the PC, and the power supply. Plug and unplug the JTAG ribbon only
+   while the board is off.
+2. Drivers: the JTAG cable uses the cable drivers of Vivado (on Windows, run
+   `data/xicom/cable_drivers/nt64/install_drivers_wrapper.bat` of the Vivado
+   installation as administrator if the cable is not recognized). The
+   USB-UART bridge needs its vendor's driver (for example Silicon Labs
+   CP210x) and then appears as a serial port (COM port on Windows).
+3. Power on. In Vivado, **Open Hardware Manager > Open Target > Auto
+   Connect** must list `arm_dap_0` and the FPGA (an XA7Z020 is listed as
+   `xc7z020`).
+4. Open a serial terminal on that port: 115200 baud, 8N1, no flow control.
+   In PuTTY, also enable **Terminal > Implicit CR in every LF**.
+5. If the terminal shows an operating system booting after power-on, take
+   out the SD card or set the boot mode to JTAG (see above).
+
 ## 1. Get the PS configuration of the board
 
 The processing system needs the board's DDR parameters, clocks and MIO
@@ -80,8 +99,8 @@ vivado -mode batch -source fpga/zynq/build.tcl -tclargs preset=path/to/ax7z020b_
 Or in the Tcl Console of the Vivado GUI, with the options in `argv`:
 
 ```tcl
-cd D:/path/to/repository
-set argv {preset=C:/work/ps_config.tcl part=xa7z020clg400-1I}
+cd path/to/repository
+set argv {preset=path/to/ps_config.tcl part=xa7z020clg400-1I}
 source -notrace fpga/zynq/build.tcl
 ```
 
@@ -165,6 +184,8 @@ BENCH hist16 512 764 4438
 [scaling] exit code 0, 790709 cycles (15814 us)
 ```
 
+The complete output is in
+[fpga/zynq/results/ax7z020b.txt](../fpga/zynq/results/ax7z020b.txt).
 Each `BENCH` line is: workload, n, AP cycles, result. The cycle counts are
 the same as in simulation (`make -C sim zynq`) except for the transfers to
 and from DDR, which take longer on the board (the DMA round trip of
