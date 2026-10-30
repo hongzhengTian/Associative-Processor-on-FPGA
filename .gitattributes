@@ -1,0 +1,4 @@
+# GitHub language statistics: the generated program images and third-party
+# code do not count.
+fpga/zynq/host/ap_programs.h linguist-generated
+third_party/** linguist-vendored
