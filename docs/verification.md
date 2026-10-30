@@ -106,7 +106,9 @@ with and without AXI back-pressure.
 The host program (`fpga/zynq/host/main.c`) cannot run without the board, so
 `make -C sim host` checks what can be checked without it: it compiles the
 program for the Cortex-A9 against stub BSP headers (`sim/zynq/bsp/`) with all
-warnings as errors, and runs its benchmark parsing and ARM-side workloads
+warnings as errors, once as for a classic BSP with `xtime_l.h` and once as for
+a system-device-tree BSP without it (Vitis 2023.2 and later), and runs its
+benchmark parsing and ARM-side workloads
 natively on the output of the scaling benchmark from the Zynq simulation;
 every result must match.
 
