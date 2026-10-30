@@ -1,0 +1,14 @@
+`verilator_config
+// Third-party core: not our lint policy.
+lint_off -file "*picorv32.v"
+// Testbenches set a timescale, the RTL does not need one.
+lint_off -rule TIMESCALEMOD
+// Not every definition in the package is used by every module.
+lint_off -rule UNUSEDPARAM -file "*ap_pkg.sv"
+// Testbenches and models: blocking writes and partly used values are fine.
+lint_off -rule BLKSEQ -file "*tb_*.sv"
+lint_off -rule BLKSEQ -file "*axi_mem_model.sv"
+lint_off -rule UNUSEDSIGNAL -file "*tb_*.sv"
+lint_off -rule UNUSEDSIGNAL -file "*axi_mem_model.sv"
+// Testbenches leave unused outputs of the design open.
+lint_off -rule PINCONNECTEMPTY -file "*tb_*.sv"
