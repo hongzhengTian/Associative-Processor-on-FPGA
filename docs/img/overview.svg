@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 430" width="980" height="430" font-family="Helvetica, Arial, sans-serif">
+<defs>
+<marker id="a_333333" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker>
+<marker id="a_2a5d9f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a5d9f"/></marker>
+<marker id="a_b36b00" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b36b00"/></marker>
+<marker id="a_2e7d32" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e7d32"/></marker>
+</defs>
+<rect x="0" y="0" width="980" height="430" rx="0" fill="#ffffff" stroke="none" stroke-width="1.2"/>
+<rect x="24" y="110" width="236" height="200" rx="6" fill="#f4f4f4" stroke="#555" stroke-width="1.2"/>
+<text x="142.0" y="140" font-size="15" font-weight="bold" fill="#222" text-anchor="middle">RISC-V core</text>
+<text x="142.0" y="160" font-size="12" font-weight="normal" fill="#555" text-anchor="middle">control flow and scalar code</text>
+<circle cx="46" cy="194" r="9" fill="#2a5d9f"/>
+<text x="46" y="198" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+<text x="64" y="198" font-size="12.5" font-weight="normal" fill="#222" text-anchor="start" font-family="Menlo, Consolas, monospace">ap_cmps(AP_EQ, key, 42);</text>
+<circle cx="46" cy="228" r="9" fill="#b36b00"/>
+<text x="46" y="232" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">2</text>
+<text x="64" y="232" font-size="12.5" font-weight="normal" fill="#222" text-anchor="start" font-family="Menlo, Consolas, monospace">ap_add(sum, a, b);</text>
+<circle cx="46" cy="262" r="9" fill="#2e7d32"/>
+<text x="46" y="266" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">3</text>
+<text x="64" y="266" font-size="12.5" font-weight="normal" fill="#222" text-anchor="start" font-family="Menlo, Consolas, monospace">n = ap_count();</text>
+<text x="142.0" y="298" font-size="11" font-weight="normal" fill="#555" text-anchor="middle">AP instructions: custom RISC-V opcodes</text>
+<rect x="320" y="36" width="392" height="312" rx="8" fill="#eaf2fb" stroke="#2a5d9f" stroke-width="1.5"/>
+<text x="516.0" y="24" font-size="15" font-weight="bold" fill="#2a5d9f" text-anchor="middle">Associative processor (AP): a CAM array of words</text>
+<rect x="340" y="104" width="46" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="363.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">row</text>
+<rect x="386" y="104" width="70" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="421.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">key</text>
+<rect x="456" y="104" width="58" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="485.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">a</text>
+<rect x="514" y="104" width="58" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="543.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">b</text>
+<rect x="572" y="104" width="70" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="607.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">sum</text>
+<rect x="642" y="104" width="50" height="30" rx="0" fill="#d4e5f7" stroke="#9bb8d8" stroke-width="1"/>
+<text x="667.0" y="124" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">tag</text>
+<rect x="340" y="134" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="154" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">0</text>
+<rect x="386" y="134" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="154" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">17</text>
+<rect x="456" y="134" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="154" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">3</text>
+<rect x="514" y="134" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="154" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">5</text>
+<rect x="572" y="134" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="154" font-size="13" font-weight="normal" fill="#222" text-anchor="middle"></text>
+<rect x="642" y="134" width="50" height="30" rx="0" fill="#f4f4f4" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="154" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">0</text>
+<rect x="340" y="164" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="184" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">1</text>
+<rect x="386" y="164" width="70" height="30" rx="0" fill="#dce9f8" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="184" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">42</text>
+<rect x="456" y="164" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="184" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">8</text>
+<rect x="514" y="164" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="184" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">1</text>
+<rect x="572" y="164" width="70" height="30" rx="0" fill="#fde7c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="184" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">9</text>
+<rect x="642" y="164" width="50" height="30" rx="0" fill="#c8e6c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="184" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">1</text>
+<rect x="340" y="194" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="214" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">2</text>
+<rect x="386" y="194" width="70" height="30" rx="0" fill="#dce9f8" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="214" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">42</text>
+<rect x="456" y="194" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="214" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">2</text>
+<rect x="514" y="194" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="214" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">7</text>
+<rect x="572" y="194" width="70" height="30" rx="0" fill="#fde7c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="214" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">9</text>
+<rect x="642" y="194" width="50" height="30" rx="0" fill="#c8e6c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="214" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">1</text>
+<rect x="340" y="224" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="244" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">3</text>
+<rect x="386" y="224" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="244" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">5</text>
+<rect x="456" y="224" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="244" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">4</text>
+<rect x="514" y="224" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="244" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">4</text>
+<rect x="572" y="224" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="244" font-size="13" font-weight="normal" fill="#222" text-anchor="middle"></text>
+<rect x="642" y="224" width="50" height="30" rx="0" fill="#f4f4f4" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="244" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">0</text>
+<rect x="340" y="254" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="274" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">4</text>
+<rect x="386" y="254" width="70" height="30" rx="0" fill="#dce9f8" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="274" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">42</text>
+<rect x="456" y="254" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="274" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">6</text>
+<rect x="514" y="254" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="274" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">0</text>
+<rect x="572" y="254" width="70" height="30" rx="0" fill="#fde7c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="274" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">6</text>
+<rect x="642" y="254" width="50" height="30" rx="0" fill="#c8e6c9" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="274" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">1</text>
+<rect x="340" y="284" width="46" height="30" rx="0" fill="#f7f7f7" stroke="#c9c9c9" stroke-width="1"/>
+<text x="363.0" y="304" font-size="13" font-weight="normal" fill="#999" text-anchor="middle">5</text>
+<rect x="386" y="284" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="421.0" y="304" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">99</text>
+<rect x="456" y="284" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="485.0" y="304" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">1</text>
+<rect x="514" y="284" width="58" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="543.0" y="304" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">2</text>
+<rect x="572" y="284" width="70" height="30" rx="0" fill="#ffffff" stroke="#c9c9c9" stroke-width="1"/>
+<text x="607.0" y="304" font-size="13" font-weight="normal" fill="#222" text-anchor="middle"></text>
+<rect x="642" y="284" width="50" height="30" rx="0" fill="#f4f4f4" stroke="#c9c9c9" stroke-width="1"/>
+<text x="667.0" y="304" font-size="13" font-weight="normal" fill="#222" text-anchor="middle">0</text>
+<text x="491.0" y="336" font-size="11.5" font-weight="normal" fill="#555" text-anchor="middle">all rows work in the same cycle, bit by bit</text>
+<rect x="365.0" y="48" width="112" height="24" rx="12" fill="#2a5d9f" stroke="#2a5d9f" stroke-width="1.2"/>
+<text x="421.0" y="64" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">search key = 42</text>
+<path d="M421.0,72 V102" fill="none" stroke="#2a5d9f" stroke-width="1.8" marker-end="url(#a_2a5d9f)"/>
+<rect x="523.0" y="48" width="168" height="24" rx="12" fill="#b36b00" stroke="#b36b00" stroke-width="1.2"/>
+<text x="607.0" y="64" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">sum = a + b where tagged</text>
+<path d="M607.0,72 V102" fill="none" stroke="#b36b00" stroke-width="1.8" marker-end="url(#a_b36b00)"/>
+<path d="M260,160 H318" fill="none" stroke="#333333" stroke-width="1.8" marker-end="url(#a_333333)"/>
+<text x="290.0" y="152" font-size="12" font-weight="normal" fill="#555" text-anchor="middle">issue</text>
+<path d="M667.0,314 V374 H142.0 V312" fill="none" stroke="#2e7d32" stroke-width="1.8" marker-end="url(#a_2e7d32)"/>
+<text x="404.5" y="394" font-size="12.5" font-weight="bold" fill="#2e7d32" text-anchor="middle">reduce the tags: count = 3, first = row 1</text>
+<rect x="742" y="50" width="6" height="56" fill="#2a5d9f"/>
+<text x="758" y="66" font-size="14" font-weight="bold" fill="#2a5d9f" text-anchor="start">1  Search</text>
+<text x="758" y="85" font-size="12" font-weight="normal" fill="#333" text-anchor="start">compare a field of every row</text>
+<text x="758" y="101" font-size="12" font-weight="normal" fill="#333" text-anchor="start">with a key; matches set the tag</text>
+<rect x="742" y="126" width="6" height="56" fill="#b36b00"/>
+<text x="758" y="142" font-size="14" font-weight="bold" fill="#b36b00" text-anchor="start">2  Compute</text>
+<text x="758" y="161" font-size="12" font-weight="normal" fill="#333" text-anchor="start">arithmetic and logic on fields,</text>
+<text x="758" y="177" font-size="12" font-weight="normal" fill="#333" text-anchor="start">written only to tagged rows</text>
+<rect x="742" y="202" width="6" height="56" fill="#2e7d32"/>
+<text x="758" y="218" font-size="14" font-weight="bold" fill="#2e7d32" text-anchor="start">3  Reduce</text>
+<text x="758" y="237" font-size="12" font-weight="normal" fill="#333" text-anchor="start">count, first match, max / min</text>
+<text x="758" y="253" font-size="12" font-weight="normal" fill="#333" text-anchor="start">of the tagged rows, to the CPU</text>
+<rect x="742" y="290" width="218" height="56" rx="6" fill="#fff3e0" stroke="#b36b00" stroke-width="1.2"/>
+<text x="851.0" y="313" font-size="13" font-weight="bold" fill="#222" text-anchor="middle">Memory (DDR)</text>
+<text x="851.0" y="332" font-size="12" font-weight="normal" fill="#333" text-anchor="middle">DMA moves arrays in and out</text>
+<path d="M713,318.0 H741" fill="none" stroke="#b36b00" stroke-width="1.6" marker-start="url(#a_b36b00)" marker-end="url(#a_b36b00)"/>
+</svg>
