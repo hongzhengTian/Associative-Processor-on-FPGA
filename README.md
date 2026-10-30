@@ -41,14 +41,32 @@ a DMA engine moves arrays between memory and the array.
 * C interface `ap.h`; the stock RISC-V GCC builds the programs.
 * Verified by random testing against a reference model and by C programs on
   the full system; open-source flow (Verilator, Yosys) in CI.
-* Runs on a Zynq-7000 board with the ARM core as host, which also provides a
-  CPU baseline for the benchmark.
+* Tested on a Zynq-7000 board (ALINX AX7Z020B) with the ARM core as host,
+  which also provides the CPU baseline for the benchmark.
 
 ## Results
 
-AP cycles stay flat as the number of elements grows (simulation, 512 x 64
-array as built for the Zynq board, cycles including issuing the instructions
-from the RISC-V core):
+On the board (ALINX AX7Z020B): a 512 x 64 array at 50 MHz against the
+Cortex-A9 of the same chip at 666 MHz, on the same data, with the C version
+built with `-O3`. Time on the Cortex-A9 divided by time on the AP; above 1
+the AP is faster:
+
+| Workload | n = 128 | 256 | 512 |
+|---|---:|---:|---:|
+| add, 16-bit | 0.85 | 1.69 | 3.36 |
+| range query (3 conditions) and count | 0.90 | 1.93 | 4.36 |
+| arg-max, 20-bit | 1.13 | 2.07 | 3.82 |
+| top 8 | 0.31 | 0.41 | 0.58 |
+| 16-bin histogram | 0.09 | 0.16 | 0.31 |
+
+Workloads made of a few AP instructions overtake the ARM once the data has a
+few hundred elements. Those made of many short instructions (top 8,
+histogram) are limited by issuing each instruction from PicoRV32; see
+[docs/zynq.md](docs/zynq.md) for the full table and its interpretation.
+
+AP cycles stay flat as the number of elements grows (same 512 x 64 array, in
+simulation and on the board, cycles including issuing the instructions from
+the RISC-V core):
 
 | Workload | n = 32 | 64 | 128 | 256 | 512 |
 |---|---:|---:|---:|---:|---:|
@@ -69,9 +87,8 @@ plain C on the PicoRV32 (`make test`):
 | 16-bin histogram of 256 bytes | 14,349 | 754 |
 | top 8 of 256 values | 98,957 | 697 |
 
-PicoRV32 is a small multi-cycle core, so these ratios flatter the AP. The board
-build compares against the Cortex-A9 of the Zynq instead (see
-[docs/zynq.md](docs/zynq.md)).
+PicoRV32 is a small multi-cycle core, so these ratios flatter the AP; the
+board comparison above uses the Cortex-A9 instead.
 
 ## Quick start
 
@@ -107,7 +124,7 @@ uint32_t best = ap_maxu(value);      // largest value among the hits
 
 ## On a board
 
-On a Zynq-7000 (for example an XC7Z020 board) the SoC runs in the programmable
+On a Zynq-7000 (tested on an ALINX AX7Z020B) the SoC runs in the programmable
 logic and the ARM core is the host: it loads and runs the RISC-V programs and
 runs the same benchmark workloads itself for comparison.
 `fpga/zynq/build.tcl` builds the Vivado project; [docs/zynq.md](docs/zynq.md)

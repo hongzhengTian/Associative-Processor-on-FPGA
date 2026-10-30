@@ -5,8 +5,9 @@
 #   vivado -mode batch -source fpga/zynq/build.tcl -tclargs preset=<ps7.tcl> [key=value ...]
 #
 # Options:
-#   preset=<file>  PS7 configuration of the board (DDR, clocks, MIO/UART),
-#                  saved from a working project of the board (docs/zynq.md).
+#   preset=<file>  PS7 configuration of the board (DDR, clocks, MIO/UART):
+#                  a preset saved from a working project of the board, or
+#                  the ps_config.tcl of an ALINX example (docs/zynq.md).
 #                  Required: it is the only board-specific input.
 #   part=<part>    FPGA part                        default xc7z020clg400-2
 #   rows=<n>       AP array rows                    default 512
@@ -21,9 +22,11 @@
 #   FCLK_CLK0 clocks everything; a Processor System Reset drives aresetn.
 # No PL pins are used, so no constraints file is needed.
 
-set root [file normalize [file join [file dirname [info script]] .. ..]]
+# Globals carry an ap_ prefix: while runs are in progress, the Vivado GUI runs
+# its own scripts at global level, and they overwrite common names like dir.
+set ap_root [file normalize [file join [file dirname [info script]] .. ..]]
 
-array set opt {
+array set ap_opt {
     preset ""
     part   xc7z020clg400-2
     rows   512
@@ -33,16 +36,16 @@ array set opt {
     dir    vivado_zynq
 }
 foreach arg $argv {
-    if {![regexp {^([a-z]+)=(.*)$} $arg -> key value] || ![info exists opt($key)]} {
+    if {![regexp {^([a-z]+)=(.*)$} $arg -> key value] || ![info exists ap_opt($key)]} {
         error "unknown argument '$arg' (see the header of [info script])"
     }
-    set opt($key) $value
+    set ap_opt($key) $value
 }
-if {$opt(preset) eq ""} {
+if {$ap_opt(preset) eq ""} {
     error "preset=<file> is required: the PS7 configuration of the board (see docs/zynq.md)"
 }
-set preset [file normalize $opt(preset)]
-set dir    [file normalize $opt(dir)]
+set ap_preset [file normalize $ap_opt(preset)]
+set ap_dir [file normalize $ap_opt(dir)]
 
 # Newest installed version of a Xilinx IP.
 proc latest_ip {name} {
@@ -52,7 +55,11 @@ proc latest_ip {name} {
 }
 
 # ------------------------------------------------------------------ project
-create_project ap_zynq $dir -part $opt(part) -force
+create_project ap_zynq $ap_dir -part $ap_opt(part) -force
+# Work in the project directory, so that files the tools drop into the
+# current directory (such as the PS7 summary) stay with the build output.
+set ap_cwd [pwd]
+cd $ap_dir
 set_property target_language Verilog [current_project]
 
 set rtl {
@@ -69,7 +76,7 @@ set rtl {
     rtl/zynq/ap_zynq.v
     third_party/picorv32/picorv32.v
 }
-foreach f $rtl { add_files -norecurse [file join $root $f] }
+foreach f $rtl { add_files -norecurse [file join $ap_root $f] }
 set_property file_type SystemVerilog [get_files -filter {NAME =~ "*.sv"}]
 update_compile_order -fileset sources_1
 
@@ -77,21 +84,29 @@ update_compile_order -fileset sources_1
 create_bd_design system
 
 set ps7 [create_bd_cell -type ip -vlnv [latest_ip processing_system7] ps7]
-source $preset
-set_property -dict [apply_preset $ps7] $ps7
+source $ap_preset
+if {[llength [info procs apply_preset]]} {
+    # Saved with Presets > Save Configuration in the PS7 dialog.
+    set_property -dict [apply_preset $ps7] $ps7
+} elseif {[llength [info procs set_ps_config]]} {
+    # ps_config.tcl of an ALINX example project (auto_create_project).
+    set_ps_config $ps7
+} else {
+    error "$ap_preset defines neither apply_preset nor set_ps_config (see docs/zynq.md)"
+}
 set_property -dict [list \
     CONFIG.PCW_USE_M_AXI_GP0            {1} \
     CONFIG.PCW_USE_S_AXI_HP0            {1} \
     CONFIG.PCW_S_AXI_HP0_DATA_WIDTH     {32} \
     CONFIG.PCW_EN_CLK0_PORT             {1} \
     CONFIG.PCW_EN_RST0_PORT             {1} \
-    CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ $opt(fclk) \
+    CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ $ap_opt(fclk) \
 ] $ps7
 apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \
     -config {make_external "FIXED_IO, DDR" apply_board_preset "0" Master "Disable" Slave "Disable"} $ps7
 
 set ap [create_bd_cell -type module -reference ap_zynq ap_0]
-set_property -dict [list CONFIG.ROWS $opt(rows) CONFIG.COLS $opt(cols)] $ap
+set_property -dict [list CONFIG.ROWS $ap_opt(rows) CONFIG.COLS $ap_opt(cols)] $ap
 
 # control: PS master -> AP SoC registers and program RAM
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
@@ -125,26 +140,27 @@ set_property top system_wrapper [current_fileset]
 update_compile_order -fileset sources_1
 
 # -------------------------------------------------------- implementation
-launch_runs synth_1 -jobs $opt(jobs)
+launch_runs synth_1 -jobs $ap_opt(jobs)
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} { error "synthesis failed" }
 
-launch_runs impl_1 -to_step write_bitstream -jobs $opt(jobs)
+launch_runs impl_1 -to_step write_bitstream -jobs $ap_opt(jobs)
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] ne "100%"} { error "implementation failed" }
 
 open_run impl_1
-report_utilization    -file [file join $dir utilization.txt]
-report_timing_summary -file [file join $dir timing.txt]
+report_utilization    -file [file join $ap_dir utilization.txt]
+report_timing_summary -file [file join $ap_dir timing.txt]
 set wns [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 
-write_hw_platform -fixed -include_bit -force -file [file join $dir ap_zynq.xsa]
+write_hw_platform -fixed -include_bit -force -file [file join $ap_dir ap_zynq.xsa]
 
 puts ""
-puts "AP SoC for Zynq: $opt(rows) x $opt(cols) array, FCLK_CLK0 $opt(fclk) MHz, part $opt(part)"
-puts "  hardware platform: [file join $dir ap_zynq.xsa]"
-puts "  reports:           [file join $dir utilization.txt], [file join $dir timing.txt]"
+puts "AP SoC for Zynq: $ap_opt(rows) x $ap_opt(cols) array, FCLK_CLK0 $ap_opt(fclk) MHz, part $ap_opt(part)"
+puts "  hardware platform: [file join $ap_dir ap_zynq.xsa]"
+puts "  reports:           [file join $ap_dir utilization.txt], [file join $ap_dir timing.txt]"
 puts "  worst setup slack: $wns ns"
 if {$wns < 0} {
     puts "  WARNING: timing is not met; rebuild with a lower fclk=<MHz>"
 }
+cd $ap_cwd
