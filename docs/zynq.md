@@ -111,6 +111,9 @@ Options (`key=value`): `part=` (default `xc7z020clg400-2`), `rows=` and
 `cols=` (array shape, default 512 x 64), `fclk=` (SoC clock in MHz, default
 50), `jobs=`, `dir=` (default `vivado_zynq`).
 
+On the XA7Z020 the build uses 27,500 LUTs (52%) and 16 block RAMs and meets
+timing at 50 MHz with 0.42 ns of slack ([synthesis.md](synthesis.md#boards)).
+
 The script creates the block design, runs synthesis and implementation,
 writes the bitstream and `vivado_zynq/ap_zynq.xsa`, and prints the worst
 setup slack. A negative slack means the clock is too fast for this build:
