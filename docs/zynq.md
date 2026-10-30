@@ -1,14 +1,14 @@
 # Running on a Zynq-7000 board
 
-This guide brings the AP SoC up on a Zynq-7000 board, for example an ALINX
-AX7Z020B (XC7Z020). The ARM Cortex-A9 of the Zynq acts as the host: it loads
-the RISC-V programs into the SoC, starts them, prints their output, and runs
-the same benchmark workloads itself for comparison.
+This guide brings the AP SoC up on a Zynq-7000 board. The ARM Cortex-A9 of
+the Zynq acts as the host: it loads the RISC-V programs into the SoC, starts
+them, prints their output, and runs the same benchmark workloads itself for
+comparison.
 
-Status: the Zynq top level, its host interface and all programs are verified
-in simulation at the board's array shape (`make -C sim zynq`), and the host
-program is checked as far as possible without the board (`make -C sim
-host`). The Vivado build and the run on hardware are the steps below.
+Status: tested on an ALINX AX7Z020B (XA7Z020-1CLG400I) with Vivado and Vitis
+2023.2. All seven programs pass with the cycle counts of the simulation
+(`make -C sim zynq`), except where DDR latency enters, and timing is met at
+50 MHz. The results are in [section 4](#4-results-on-the-board).
 
 ```mermaid
 flowchart LR
@@ -28,9 +28,14 @@ flowchart LR
 
 ## What you need
 
-* The board, its USB JTAG and UART connection, power. Boot mode set to JTAG.
-* Vivado and Vitis of the same version (the hardware build has been run
-  with 2023.2; the steps also apply to later versions).
+* The board, its USB JTAG and UART connection, power.
+* The board must not start an operating system on its own, or the debugger
+  cannot take over the ARM reliably: set the boot mode to JTAG, or take out
+  the SD card if the board boots Linux from it.
+* Vivado and Vitis of the same version (tested with 2023.2), with the
+  embedded part of Vitis: if **File > New Component** in Vitis offers only
+  HLS, add *Vitis Embedded Development* with the installer (for Vivado ML
+  Standard: *Add Design Tools or Devices*).
 * The PS configuration of the board (next section).
 
 Nothing in the programmable logic uses package pins, so the design needs no
@@ -99,22 +104,26 @@ the block design.
 
 ## 3. Build and run the host program
 
-In Vitis (the unified IDE; menu names can differ slightly between versions):
+In the Vitis unified IDE (menu names as in 2023.2):
 
-1. Open an empty folder as workspace.
-2. **File > New Component > Platform**: hardware design
+1. **Set Workspace** to an empty folder outside the repository.
+2. **File > New Component > Platform**: flow *Hardware Design* with
    `vivado_zynq/ap_zynq.xsa`, operating system *standalone*, processor
    *ps7_cortexa9_0*. Build the platform.
-3. **File > New Component > Application**: an empty C application on that
-   platform.
-4. Copy into the application's `src` folder:
+3. Optional but useful the first time: **File > New Component > From
+   Examples**, *Hello World* on that platform. If it prints on the UART,
+   JTAG, the PS configuration (DDR, clocks) and the UART all work.
+4. **File > New Component > Application**: an empty application on the
+   platform and its *standalone* domain.
+5. Copy into the application's `src` folder:
    * `fpga/zynq/host/main.c`, `ap_regs.h`, `ap_programs.h`
    * `sw/include/bench.h`
-5. Set the compiler optimization to `-O2` or `-O3` (application settings).
-   The ARM side of the benchmark is only as fast as this setting allows.
-6. Build, connect a serial terminal to the board's UART (115200 baud, 8N1),
-   and **Run** the application. Vitis programs the bitstream and starts the
-   program.
+6. In the application's `UserConfig.cmake`, set **Optimization level** to
+   `-O3`. The ARM side of the benchmark is only as fast as this setting
+   allows.
+7. Build, connect a serial terminal to the board's UART (115200 baud, 8N1, no
+   flow control), and **Run** the application. Vitis programs the bitstream,
+   initializes the PS and starts the program.
 
 The host program needs the RISC-V programs as `ap_programs.h`, which is
 generated from `sw/` and kept in the repository. After changing anything in
@@ -124,17 +133,15 @@ generated from `sw/` and kept in the repository. After changing anything in
 make -C sw zynq
 ```
 
-## 4. What you see
+## 4. Results on the board
 
 The program first checks that the SoC answers and measures its clock, then
-runs each RISC-V program and prints its console output and result. The same
-programs, at the same array shape, also run in simulation (`make -C sim
-zynq`), so the output below is what the board should print. Cycle counts of
-programs that use external memory vary a little with the DDR latency.
+runs each RISC-V program and prints its console output and result. Output of
+the ALINX AX7Z020B (shortened):
 
 ```
 AP SoC host
-array 512 rows x 64 columns, SoC clock 50000000 Hz, external memory at 0x...
+array 512 rows x 64 columns, SoC clock 49999864 Hz, external memory at 0x00400000
 
 === hello ===
 AP v2.0.0: 512 rows x 64 columns
@@ -142,68 +149,97 @@ AP v2.0.0: 512 rows x 64 columns
 [hello] exit code 0, 5439 cycles (108 us)
 
 === ap_isa_test ===
+AP ISA test: 512 rows, 64 columns
 ...
 0 errors
-[ap_isa_test] exit code 0, ...
+[ap_isa_test] exit code 0, 6931636 cycles (138633 us)
 
+=== vector_add ===
+...
 === scaling ===
 scaling benchmark, 512 rows x 64 columns
 BENCH add 32 46 2256427
-BENCH add 64 46 4195654
 ...
 BENCH hist16 512 764 4438
 0 mismatches
+[scaling] exit code 0, 790709 cycles (15814 us)
 ```
 
-Each `BENCH` line is: workload, n, AP cycles, result.
-
-After the scaling benchmark the host runs the same workloads on the
-Cortex-A9, on the same data, and prints a table:
+Each `BENCH` line is: workload, n, AP cycles, result. The cycle counts are
+the same as in simulation (`make -C sim zynq`) except for the transfers to
+and from DDR, which take longer on the board (the DMA round trip of
+`vector_add`: 3250 cycles against 2700). After the scaling benchmark
+the host runs the same workloads on the Cortex-A9 (666 MHz), on the same
+data:
 
 ```
-AP (SoC at 50.0 MHz) vs Cortex-A9, same data, time per run
+AP (SoC at 49.9 MHz) vs Cortex-A9, same data, time per run
 workload     n  AP cycles      AP us      A9 us   A9/AP  result
-add         32         46       0.92       ....    ....  same
-...
-hist16     512        764      15.28       ....    ....  same
-```
+add         32         46       0.92       0.21    0.23  same
+add         64         46       0.92       0.41    0.45  same
+add        128         46       0.92       0.78    0.85  same
+add        256         46       0.92       1.56    1.69  same
+add        512         46       0.92       3.09    3.36  same
+range       32         88       1.76       0.41    0.23  same
+range       64         88       1.76       0.77    0.43  same
+range      128         88       1.76       1.59    0.90  same
+range      256         88       1.76       3.40    1.93  same
+range      512         88       1.76       7.68    4.36  same
+argmax      32         44       0.88       0.35    0.40  same
+argmax      64         44       0.88       0.56    0.64  same
+argmax     128         44       0.88       1.00    1.13  same
+argmax     256         45       0.90       1.86    2.07  same
+argmax     512         47       0.94       3.59    3.82  same
+top8        32        576      11.52       1.26    0.10  same
+top8        64        576      11.52       2.20    0.19  same
+top8       128        576      11.52       3.65    0.31  same
+top8       256        579      11.58       4.81    0.41  same
+top8       512        586      11.72       6.88    0.58  same
+hist16      32        764      15.28       0.56    0.03  same
+hist16      64        764      15.28       0.84    0.05  same
+hist16     128        764      15.28       1.40    0.09  same
+hist16     256        764      15.28       2.55    0.16  same
+hist16     512        764      15.28       4.82    0.31  same
 
-(The A9 columns come from the board.)
+PASS: 0 of 7 programs failed
+```
 
 * **AP us** is the time measured by the RISC-V program around the AP
   instructions, including the cost of issuing them; it is almost the same
   for every n, because all rows work at once.
 * **A9 us** is the time of the C version (`sw/include/bench.h`) on the
-  Cortex-A9; it grows with n.
+  Cortex-A9, built with `-O3`; it grows with n.
 * **A9/AP** above 1 means the AP is faster. **result** compares the result of
   both sides; it must read `same`.
-
-The program ends with `PASS` when every RISC-V program exited with 0 and
-every benchmark result matched.
 
 ## Interpreting the numbers
 
 The AP's time per instruction depends on the field width, not on the number
-of rows, while the ARM's time grows with the number of elements. On an
-XC7Z020 the array is small (hundreds of rows) and runs at tens of MHz, while
-the Cortex-A9 runs at several hundred MHz with caches. Expect:
+of rows, while the ARM's time grows with the number of elements. On the
+board, a 512-row array at 50 MHz against a 666 MHz Cortex-A9 with caches:
 
-* searches over several conditions (`range`) to favour the AP,
-* simple element-wise arithmetic (`add`) to be close,
-* workloads made of many small AP instructions (`hist16`, `top8`) to favour
-  the ARM at this size: each AP instruction does only a few cycles of work
-  there, and issuing it from PicoRV32 (a small multi-cycle core) costs more
-  than that.
+* Element-wise arithmetic (`add`), a search over three conditions with a
+  count (`range`) and `argmax` break even between 128 and 256 elements; at
+  512 elements the AP is 3.4 to 4.4 times faster.
+* Workloads made of many small AP instructions (`hist16`, `top8`) stay
+  faster on the ARM at this size (0.3 and 0.6 at 512 elements): each AP
+  instruction does only a few cycles of work there, and issuing it from
+  PicoRV32, a small multi-cycle core, costs more than that.
 
-The crossover moves toward the AP as the array grows or the SoC clock rises,
-which is what the table across n shows. See
-[architecture.md](architecture.md#limitations-and-next-steps) for the
+The ARM baseline is plain C compiled for the default floating-point unit of
+the Vitis BSP (VFPv3, no NEON auto-vectorization); hand-written NEON code
+would be faster on `add` and `range`.
+
+The crossover moves toward the AP as the array grows or the SoC clock rises.
+See [architecture.md](architecture.md#limitations-and-next-steps) for the
 changes that would shift it further.
 
 ## Troubleshooting
 
 | Symptom | Cause |
 |---|---|
+| Linux boot messages on the UART; Vitis reports `Memory write error at 0xF8F00208` | The board boots its own operating system. Take out the SD card or set the boot mode to JTAG. |
+| **File > New Component** offers only HLS | The embedded part of Vitis is not installed (see "What you need"). |
 | `no AP SoC at 0x43c00000` | Bitstream not loaded, or the address in `ap_regs.h` differs from the block design. |
 | No UART output at all | PS configuration does not match the board (DDR or UART MIO), or wrong serial port / baud rate. |
 | A program times out or traps | Timing not met (check the slack, lower `fclk=`), or the program image is stale (`make -C sw zynq`). |
