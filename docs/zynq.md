@@ -29,7 +29,8 @@ flowchart LR
 ## What you need
 
 * The board, its USB JTAG and UART connection, power. Boot mode set to JTAG.
-* Vivado and Vitis (the script and steps are written for 2025.1).
+* Vivado and Vitis of the same version (the hardware build has been run
+  with 2023.2; the steps also apply to later versions).
 * The PS configuration of the board (next section).
 
 Nothing in the programmable logic uses package pins, so the design needs no
@@ -64,14 +65,23 @@ carry the automotive `XA7Z020`, which comes only in speed grade -1: use
 ## 2. Build the hardware
 
 From the repository root, in a terminal where `vivado` is on the PATH (on
-Windows, the "Vivado 2025.1 Tcl Shell" or a command prompt after running
-`settings64.bat` of the Vivado installation):
+Linux after sourcing `settings64.sh`, on Windows in a command prompt after
+running `settings64.bat` of the Vivado installation):
 
 ```bash
 vivado -mode batch -source fpga/zynq/build.tcl -tclargs preset=path/to/ax7z020b_ps7.tcl
 ```
 
-Use forward slashes in paths, also on Windows.
+Or in the Tcl Console of the Vivado GUI, with the options in `argv`:
+
+```tcl
+cd D:/path/to/repository
+set argv {preset=C:/work/ps_config.tcl part=xa7z020clg400-1I}
+source -notrace fpga/zynq/build.tcl
+```
+
+Use forward slashes in paths, also on Windows, and keep the repository in a
+short path without spaces.
 
 Options (`key=value`): `part=` (default `xc7z020clg400-2`), `rows=` and
 `cols=` (array shape, default 512 x 64), `fclk=` (SoC clock in MHz, default
